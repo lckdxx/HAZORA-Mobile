@@ -2,8 +2,45 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="navy_900">#071A2C</color>
-    <color name="hazora_orange">#F7941D</color>
-    <color name="hazora_text_primary">#FFFFFFFF</color>
-    <color name="hazora_text_secondary">#B8C4D0</color>
+    <color name="primary_blue">#1769AA</color>
+    <color name="primary_blue_dark">#0D4774</color>
+    <color name="primary_blue_light">#65A8DC</color>
+    <color name="accent_orange">#F7941D</color>
+    <color name="background_navy">#071A2C</color>
+    <color name="card_gray">#173047</color>
+    <color name="glass_card_background">#1F2A4760</color>
+    <color name="text_primary">#FFFFFFFF</color>
+    <color name="text_secondary">#B8C4D0</color>
+    <color name="success">#35B66F</color>
+    <color name="warning">#F7B731</color>
+    <color name="danger">#E55353</color>
+    <color name="input_stroke">#6D8294</color>
+    <color name="login_hero_overlay">#B4071A2C</color>
+    <color name="login_input_background">#F4F6F8</color>
+    <color name="login_text_primary">#17212B</color>
+    <color name="login_text_secondary">#667684</color>
+    <color name="login_divider">#D9E1E8</color>
+    <color name="login_button_gradient_start">#2F62C6</color>
+    <color name="login_button_gradient_end">#214A97</color>
+    <color name="login_ripple">#33FFFFFF</color>
+    <color name="welcome_gradient_top">#214F93</color>
+    <color name="welcome_gradient_bottom">#12376A</color>
+    <color name="welcome_accent_orange">#F59E0B</color>
+    <color name="welcome_button_pressed">#E38B00</color>
+    <color name="welcome_glass_background">#332D6AAC</color>
+    <color name="welcome_logo_glass_background">#14FFFFFF</color>
+    <color name="welcome_logo_glass_stroke">#59FFFFFF</color>
+    <color name="welcome_logo_glow">#33FFFFFF</color>
+    <color name="welcome_logo_halo_center">#0FFFFFFF</color>
+    <color name="welcome_logo_halo_edge">#00FFFFFF</color>
+    <color name="splash_gradient_top">#0B1E38</color>
+    <color name="splash_gradient_bottom">#09182F</color>
+
+    <!-- Backward-compatible aliases used by existing screens. -->
+    <color name="navy_900">@color/background_navy</color>
+    <color name="navy_800">@color/card_gray</color>
+    <color name="hazora_orange">@color/accent_orange</color>
+    <color name="hazora_text_primary">@color/text_primary</color>
+    <color name="hazora_text_secondary">@color/text_secondary</color>
+    <color name="hazora_input_stroke">@color/input_stroke</color>
 </resources>

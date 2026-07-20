@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Widget.HAZORA.Button.Primary" parent="Widget.Material3.Button">
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:textColor">@color/background_navy</item>
+        <item name="backgroundTint">@color/accent_orange</item>
+        <item name="cornerRadius">@dimen/corner_radius_16</item>
+    </style>
+
+    <style name="Widget.HAZORA.Button.Secondary" parent="Widget.Material3.Button">
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="backgroundTint">@color/primary_blue</item>
+        <item name="cornerRadius">@dimen/corner_radius_16</item>
+    </style>
+
+    <style name="Widget.HAZORA.Button.Outlined" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:textColor">@color/accent_orange</item>
+        <item name="cornerRadius">@dimen/corner_radius_16</item>
+        <item name="strokeColor">@color/accent_orange</item>
+    </style>
+
+    <style name="TextAppearance.HAZORA.Title" parent="TextAppearance.Material3.DisplaySmall">
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
+    <style name="TextAppearance.HAZORA.Heading" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
+    <style name="TextAppearance.HAZORA.Body" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
+    <style name="TextAppearance.HAZORA.Caption" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+
+    <style name="Widget.HAZORA.Card" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardBackgroundColor">@color/card_gray</item>
+        <item name="cardCornerRadius">@dimen/corner_radius_16</item>
+    </style>
+
+    <style name="Widget.HAZORA.Card.Glass" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardBackgroundColor">@color/glass_card_background</item>
+        <item name="cardCornerRadius">@dimen/corner_radius_24</item>
+        <item name="strokeColor">@color/primary_blue_light</item>
+        <item name="strokeWidth">1dp</item>
+    </style>
+
+    <style name="Widget.HAZORA.TextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxBackgroundColor">@color/card_gray</item>
+        <item name="boxCornerRadiusBottomEnd">@dimen/corner_radius_16</item>
+        <item name="boxCornerRadiusBottomStart">@dimen/corner_radius_16</item>
+        <item name="boxCornerRadiusTopEnd">@dimen/corner_radius_16</item>
+        <item name="boxCornerRadiusTopStart">@dimen/corner_radius_16</item>
+        <item name="boxStrokeColor">@color/input_stroke</item>
+        <item name="hintTextColor">@color/text_secondary</item>
+    </style>
+
+</resources>

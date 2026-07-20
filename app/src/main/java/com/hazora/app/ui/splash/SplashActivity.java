@@ -11,6 +11,8 @@ import android.widget.ImageView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.hazora.app.R;
+import com.hazora.app.auth.SessionManager;
+import com.hazora.app.ui.dashboard.DashboardActivity;
 import com.hazora.app.ui.welcome.WelcomeActivity;
 
 /** Displays the branded launch experience before handing off to authentication. */
@@ -37,7 +39,11 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void navigateToWelcome() {
-        startActivity(new Intent(this, WelcomeActivity.class));
+        SessionManager sessionManager = new SessionManager(this);
+        Intent destinationIntent = sessionManager.isLoggedIn()
+                ? new Intent(this, DashboardActivity.class)
+                : new Intent(this, WelcomeActivity.class);
+        startActivity(destinationIntent);
         finish();
     }
 

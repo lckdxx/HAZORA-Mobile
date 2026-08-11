@@ -22,11 +22,6 @@
         <activity
             android:name=".ui.dashboard.DashboardActivity"
             android:exported="false" />
-
-        <activity
-            android:name=".ui.register.RegisterActivity"
-            android:exported="false" />
-
         <activity
             android:name=".ui.welcome.WelcomeActivity"
             android:exported="false" />

@@ -26,6 +26,9 @@
     <color name="welcome_gradient_top">#214F93</color>
     <color name="welcome_gradient_bottom">#12376A</color>
     <color name="welcome_accent_orange">#F59E0B</color>
+    <color name="dashboard_header_top">#214F93</color>
+    <color name="dashboard_header_bottom">#2459A8</color>
+    <color name="background_light">#F7F9FC</color>
     <color name="welcome_button_pressed">#E38B00</color>
     <color name="welcome_glass_background">#332D6AAC</color>
     <color name="welcome_logo_glass_background">#14FFFFFF</color>
@@ -35,6 +38,10 @@
     <color name="welcome_logo_halo_edge">#00FFFFFF</color>
     <color name="splash_gradient_top">#0B1E38</color>
     <color name="splash_gradient_bottom">#09182F</color>
+
+    <!-- Dark text colors for dashboard content -->
+    <color name="primary_text_dark">#1A1A1A</color>
+    <color name="secondary_text_dark">#6B7280</color>
 
     <!-- Backward-compatible aliases used by existing screens. -->
     <color name="navy_900">@color/background_navy</color>

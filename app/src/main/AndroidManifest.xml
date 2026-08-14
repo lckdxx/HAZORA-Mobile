@@ -27,6 +27,22 @@
             android:exported="false" />
 
         <activity
+            android:name=".ui.incidents.IncidentsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.hazardscan.HazardScanActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.messages.MessagesActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.profile.ProfileActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ui.splash.SplashActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">

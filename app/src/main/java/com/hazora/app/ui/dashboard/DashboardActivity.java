@@ -1,5 +1,6 @@
 package com.hazora.app.ui.dashboard;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -39,13 +40,17 @@ public class DashboardActivity extends AppCompatActivity {
                     // stay on dashboard
                     return true;
                 } else if (id == R.id.nav_incidents) {
-                    Toast.makeText(this, "Incidents coming soon", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(DashboardActivity.this, com.hazora.app.ui.incidents.IncidentsActivity.class);
+                    startActivity(intent);
                 } else if (id == R.id.nav_camera) {
-                    Toast.makeText(this, "AI Hazard Scan coming soon", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(DashboardActivity.this, com.hazora.app.ui.hazardscan.HazardScanActivity.class);
+                    startActivity(intent);
                 } else if (id == R.id.nav_messages) {
-                    Toast.makeText(this, "Messages coming soon", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(DashboardActivity.this, com.hazora.app.ui.messages.MessagesActivity.class);
+                    startActivity(intent);
                 } else if (id == R.id.nav_profile) {
-                    Toast.makeText(this, "Profile coming soon", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(DashboardActivity.this, com.hazora.app.ui.profile.ProfileActivity.class);
+                    startActivity(intent);
                 }
                 return true;
             });

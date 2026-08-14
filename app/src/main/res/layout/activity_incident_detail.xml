@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_light">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp">
+
+        <!-- Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tv_back"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="&lt; Back"
+                android:textColor="@color/primary_text_dark"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tv_header_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="Incident Title"
+                android:textColor="@color/primary_text_dark"
+                android:textStyle="bold"
+                android:textSize="20sp" />
+
+        </LinearLayout>
+
+        <!-- Detail card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@color/white"
+            android:layout_marginTop="12dp"
+            android:padding="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Card Title -->
+                <TextView
+                    android:id="@+id/tv_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Missing Hard Hat Detected"
+                    android:textColor="@color/primary_text_dark"
+                    android:textStyle="bold"
+                    android:textSize="20sp" />
+
+                <!-- Status pill -->
+                <TextView
+                    android:id="@+id/tv_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:paddingLeft="12dp"
+                    android:paddingRight="12dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp"
+                    android:text="NEW"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <!-- Sections -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Severity"
+                        android:textColor="@color/secondary_text_dark"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/tv_severity"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="High"
+                        android:textColor="@color/primary_text_dark"
+                        android:textSize="15sp"
+                        android:layout_marginTop="4dp" />
+
+                    <View android:layout_width="match_parent" android:layout_height="12dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Camera"
+                        android:textColor="@color/secondary_text_dark"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/tv_camera"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="CAM-04"
+                        android:textColor="@color/primary_text_dark"
+                        android:textSize="15sp"
+                        android:layout_marginTop="4dp" />
+
+                    <View android:layout_width="match_parent" android:layout_height="12dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Detected"
+                        android:textColor="@color/secondary_text_dark"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/tv_time"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="09:14 AM"
+                        android:textColor="@color/primary_text_dark"
+                        android:textSize="15sp"
+                        android:layout_marginTop="4dp" />
+
+                    <View android:layout_width="match_parent" android:layout_height="12dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Location"
+                        android:textColor="@color/secondary_text_dark"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/tv_site"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Construction Site A — Zone B"
+                        android:textColor="@color/primary_text_dark"
+                        android:textSize="15sp"
+                        android:layout_marginTop="4dp" />
+
+                    <View android:layout_width="match_parent" android:layout_height="12dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Description"
+                        android:textColor="@color/secondary_text_dark"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/tv_description"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Description"
+                        android:textColor="@color/primary_text_dark"
+                        android:textSize="15sp"
+                        android:layout_marginTop="4dp" />
+
+                </LinearLayout>
+
+                <!-- Acknowledge button -->
+                <Button
+                    android:id="@+id/btn_acknowledge"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="16dp"
+                    android:text="Acknowledge Incident"
+                    android:textColor="@color/white"
+                    android:backgroundTint="@color/primary_blue" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+
+</ScrollView>

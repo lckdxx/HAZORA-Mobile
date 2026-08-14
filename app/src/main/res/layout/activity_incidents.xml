@@ -6,82 +6,221 @@
     android:orientation="vertical"
     android:background="@color/background_light">
 
+    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:orientation="horizontal"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="24dp"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
-        android:gravity="center_vertical">
-
-        <TextView
-            android:id="@+id/tv_back"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="&lt; Back"
-            android:textColor="@color/primary_text_dark"
-            android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/tv_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:text="Incidents"
-            android:textColor="@color/primary_text_dark"
-            android:textStyle="bold"
-            android:textSize="18sp" />
-    </LinearLayout>
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:paddingBottom="12dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
             <TextView
-                android:layout_width="match_parent"
+                android:id="@+id/tv_back"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Monitor and review detected workplace hazards."
-                android:textColor="@color/secondary_text_dark"
-                android:layout_marginBottom="12dp" />
+                android:text="&lt; Back"
+                android:textColor="@color/primary_text_dark"
+                android:textSize="16sp" />
 
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp"
-                android:padding="16dp"
-                android:background="@color/white">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Incident Management"
-                        android:textColor="@color/primary_text_dark"
-                        android:textStyle="bold"
-                        android:textSize="16sp" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Incident records will appear here."
-                        android:textColor="@color/secondary_text_dark"
-                        android:layout_marginTop="8dp" />
-
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                android:layout_marginStart="12dp"
+                android:text="Incidents"
+                android:textColor="@color/primary_text_dark"
+                android:textStyle="bold"
+                android:textSize="22sp" />
 
         </LinearLayout>
-    </ScrollView>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Monitor and review detected workplace hazards."
+            android:textColor="@color/secondary_text_dark"
+            android:textSize="13sp"
+            android:layout_marginTop="8dp" />
+
+    </LinearLayout>
+
+    <!-- Summary card -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="@color/white"
+        android:padding="12dp"
+        android:layout_marginBottom="12dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_alert"
+                android:background="@drawable/bg_icon_red"
+                android:tint="#EF4444"
+                android:padding="8dp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:paddingStart="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Today's Incidents"
+                    android:textColor="@color/secondary_text_dark"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/tv_today_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="5"
+                    android:textColor="@color/primary_text_dark"
+                    android:textStyle="bold"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Detected workplace safety incidents"
+                    android:textColor="@color/secondary_text_dark"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Filters -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:overScrollMode="never">
+
+        <LinearLayout
+            android:id="@+id/filters_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp">
+
+            <TextView
+                android:id="@+id/filter_all"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:gravity="center"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:text="All"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_primary_button"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:id="@+id/filter_new"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:gravity="center"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:text="New"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_welcome_logo_glass"
+                android:textColor="@color/primary_blue" />
+
+            <TextView
+                android:id="@+id/filter_ack"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:gravity="center"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:text="Acknowledged"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_welcome_logo_glass"
+                android:textColor="@color/primary_blue" />
+
+            <TextView
+                android:id="@+id/filter_resolved"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:gravity="center"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:text="Resolved"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_welcome_logo_glass"
+                android:textColor="@color/primary_blue" />
+
+        </LinearLayout>
+
+    </HorizontalScrollView>
+
+    <!-- RecyclerView / Empty state -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="8dp">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_incidents"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <LinearLayout
+            android:id="@+id/empty_state"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No incidents found"
+                android:textColor="@color/primary_text_dark"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="There are no incidents in this category."
+                android:textColor="@color/secondary_text_dark"
+                android:layout_marginTop="8dp" />
+
+        </LinearLayout>
+
+    </FrameLayout>
 
 </LinearLayout>

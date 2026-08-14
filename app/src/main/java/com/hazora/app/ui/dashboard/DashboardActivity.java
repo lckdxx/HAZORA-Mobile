@@ -56,5 +56,13 @@ public class DashboardActivity extends AppCompatActivity {
             });
             bottomNav.setSelectedItemId(R.id.nav_home);
         }
+
+        View seeAll = findViewById(R.id.tv_see_all);
+        if (seeAll != null) {
+            seeAll.setOnClickListener(v -> {
+                Intent intent = new Intent(DashboardActivity.this, com.hazora.app.ui.incidents.IncidentsActivity.class);
+                startActivity(intent);
+            });
+        }
     }
 }

@@ -742,6 +742,7 @@
                         android:textColor="#1A1A1A" />
 
                     <TextView
+                        android:id="@+id/tv_see_all"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="See All"

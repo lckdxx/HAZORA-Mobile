@@ -26,6 +26,14 @@ public class DashboardActivity extends AppCompatActivity {
             });
         }
 
+        View messagesCard = findViewById(R.id.card_messages);
+        if (messagesCard != null) {
+            messagesCard.setOnClickListener(v -> {
+                Intent intent = new Intent(DashboardActivity.this, com.hazora.app.ui.messages.MessagesActivity.class);
+                startActivity(intent);
+            });
+        }
+
         BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
         if (bottomNav != null) {
             bottomNav.setOnItemSelectedListener(item -> {

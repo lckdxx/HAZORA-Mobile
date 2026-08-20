@@ -39,6 +39,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".ui.messages.MessageDetailActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ui.profile.ProfileActivity"
             android:exported="false" />
 

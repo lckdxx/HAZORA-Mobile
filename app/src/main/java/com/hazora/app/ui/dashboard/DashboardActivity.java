@@ -3,13 +3,11 @@ package com.hazora.app.ui.dashboard;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.hazora.app.R;
 
 /** Dashboard UI (static/mock data) for Phase 6A. */
@@ -22,14 +20,10 @@ public class DashboardActivity extends AppCompatActivity {
 
         View aiScanCard = findViewById(R.id.card_ai_scan);
         if (aiScanCard != null) {
-            aiScanCard.setOnClickListener(v ->
-                    Toast.makeText(this, "AI Hazard Scan coming soon", Toast.LENGTH_SHORT).show());
-        }
-
-        FloatingActionButton fab = findViewById(R.id.fab_camera);
-        if (fab != null) {
-            fab.setOnClickListener(v ->
-                    Toast.makeText(this, "AI Hazard Scan coming soon", Toast.LENGTH_SHORT).show());
+            aiScanCard.setOnClickListener(v -> {
+                Intent intent = new Intent(DashboardActivity.this, com.hazora.app.ui.hazardscan.HazardScanActivity.class);
+                startActivity(intent);
+            });
         }
 
         BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);

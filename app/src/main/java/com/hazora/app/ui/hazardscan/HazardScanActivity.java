@@ -1,14 +1,23 @@
 package com.hazora.app.ui.hazardscan;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
+import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.material.appbar.MaterialToolbar;
 import com.hazora.app.R;
+import com.hazora.app.ui.incidents.IncidentDetailActivity;
 
 public class HazardScanActivity extends AppCompatActivity {
+
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private View analyzingLayout;
+    private View resultCard;
+    private Button startButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -16,12 +25,38 @@ public class HazardScanActivity extends AppCompatActivity {
         setContentView(R.layout.activity_hazard_scan);
 
         View back = findViewById(R.id.tv_back);
-        if (back != null) back.setOnClickListener(v -> finish());
+        back.setOnClickListener(v -> finish());
 
-        View startBtn = findViewById(R.id.btn_start_scan);
-        if (startBtn != null) {
-            startBtn.setOnClickListener(v ->
-                    android.widget.Toast.makeText(this, "AI Hazard Scan coming soon.", android.widget.Toast.LENGTH_SHORT).show());
-        }
+        analyzingLayout = findViewById(R.id.layout_analyzing);
+        resultCard = findViewById(R.id.card_scan_result);
+        startButton = findViewById(R.id.btn_start_scan);
+
+        startButton.setOnClickListener(v -> startScan());
+        findViewById(R.id.btn_view_incident).setOnClickListener(v -> openIncident());
+        findViewById(R.id.btn_scan_again).setOnClickListener(v -> resetScan());
+    }
+
+    private void startScan() {
+        startButton.setEnabled(false);
+        analyzingLayout.setVisibility(View.VISIBLE);
+        resultCard.setVisibility(View.GONE);
+
+        handler.postDelayed(() -> {
+            analyzingLayout.setVisibility(View.GONE);
+            resultCard.setVisibility(View.VISIBLE);
+        }, 2400);
+    }
+
+    private void resetScan() {
+        handler.removeCallbacksAndMessages(null);
+        analyzingLayout.setVisibility(View.GONE);
+        resultCard.setVisibility(View.GONE);
+        startButton.setEnabled(true);
+    }
+
+    private void openIncident() {
+        Intent intent = new Intent(this, IncidentDetailActivity.class);
+        intent.putExtra("incident_index", 0);
+        startActivity(intent);
     }
 }

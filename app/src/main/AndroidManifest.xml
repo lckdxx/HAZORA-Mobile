@@ -28,26 +28,32 @@
 
         <activity
             android:name=".ui.incidents.IncidentsActivity"
+            android:theme="@style/Theme.HAZORA.Light"
             android:exported="false" />
 
         <activity
             android:name=".ui.hazardscan.HazardScanActivity"
+            android:theme="@style/Theme.HAZORA.Light"
             android:exported="false" />
 
         <activity
             android:name=".ui.messages.MessagesActivity"
+            android:theme="@style/Theme.HAZORA.Light"
             android:exported="false" />
 
         <activity
             android:name=".ui.messages.MessageDetailActivity"
+            android:theme="@style/Theme.HAZORA.Light"
             android:exported="false" />
 
         <activity
             android:name=".ui.profile.ProfileActivity"
+            android:theme="@style/Theme.HAZORA.Light"
             android:exported="false" />
 
         <activity
             android:name=".ui.incidents.IncidentDetailActivity"
+            android:theme="@style/Theme.HAZORA.Light"
             android:exported="false" />
 
         <activity

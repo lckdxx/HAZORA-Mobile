@@ -31,6 +31,10 @@ public class HazardScanActivity extends AppCompatActivity {
         resultCard = findViewById(R.id.card_scan_result);
         startButton = findViewById(R.id.btn_start_scan);
 
+        startButton.setBackgroundTintList(null);
+        ((Button) findViewById(R.id.btn_view_incident)).setBackgroundTintList(null);
+        ((Button) findViewById(R.id.btn_scan_again)).setBackgroundTintList(null);
+
         startButton.setOnClickListener(v -> startScan());
         findViewById(R.id.btn_view_incident).setOnClickListener(v -> openIncident());
         findViewById(R.id.btn_scan_again).setOnClickListener(v -> resetScan());
@@ -38,6 +42,7 @@ public class HazardScanActivity extends AppCompatActivity {
 
     private void startScan() {
         startButton.setEnabled(false);
+        startButton.setAlpha(0.55f);
         analyzingLayout.setVisibility(View.VISIBLE);
         resultCard.setVisibility(View.GONE);
 
@@ -52,6 +57,7 @@ public class HazardScanActivity extends AppCompatActivity {
         analyzingLayout.setVisibility(View.GONE);
         resultCard.setVisibility(View.GONE);
         startButton.setEnabled(true);
+        startButton.setAlpha(1f);
     }
 
     private void openIncident() {

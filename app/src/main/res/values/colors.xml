@@ -29,6 +29,9 @@
     <color name="dashboard_header_top">#214F93</color>
     <color name="dashboard_header_bottom">#2459A8</color>
     <color name="background_light">#F7F9FC</color>
+    <color name="hazora_blue">#2455A4</color>
+    <color name="hazora_surface_light">#F5F7FA</color>
+    <color name="hazora_text_muted">#64748B</color>
     <color name="welcome_button_pressed">#E38B00</color>
     <color name="welcome_glass_background">#332D6AAC</color>
     <color name="welcome_logo_glass_background">#14FFFFFF</color>

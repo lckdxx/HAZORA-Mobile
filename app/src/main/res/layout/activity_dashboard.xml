@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         android:clipToPadding="false"
         android:fillViewport="true"
-        android:paddingBottom="80dp">
+        android:paddingBottom="96dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -293,7 +293,7 @@
 
                     <androidx.cardview.widget.CardView
                         android:layout_width="0dp"
-                        android:layout_height="128dp"
+                        android:layout_height="148dp"
                         android:layout_weight="1"
                         android:layout_marginEnd="8dp"
                         app:cardCornerRadius="16dp"
@@ -323,10 +323,12 @@
                                 android:textColor="#1A1A1A"
                                 android:layout_marginTop="10dp" />
 
-                            <TextView
-                                android:layout_width="wrap_content"
+                                <TextView
+                                    android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:text="Active Hazards"
+                                    android:gravity="center"
+                                    android:maxLines="2"
                                 android:textSize="12sp"
                                 android:textColor="#64748B"
                                 android:layout_marginTop="6dp" />
@@ -337,7 +339,7 @@
 
                     <androidx.cardview.widget.CardView
                         android:layout_width="0dp"
-                        android:layout_height="128dp"
+                        android:layout_height="148dp"
                         android:layout_weight="1"
                         android:layout_marginEnd="8dp"
                         app:cardCornerRadius="16dp"
@@ -367,10 +369,12 @@
                                 android:textColor="#1A1A1A"
                                 android:layout_marginTop="10dp" />
 
-                            <TextView
-                                android:layout_width="wrap_content"
+                                <TextView
+                                    android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:text="Today's Incidents"
+                                    android:gravity="center"
+                                    android:maxLines="2"
                                 android:textSize="12sp"
                                 android:textColor="#64748B"
                                 android:layout_marginTop="6dp" />
@@ -381,7 +385,7 @@
 
                     <androidx.cardview.widget.CardView
                         android:layout_width="0dp"
-                        android:layout_height="128dp"
+                        android:layout_height="148dp"
                         android:layout_weight="1"
                         app:cardCornerRadius="16dp"
                         app:cardElevation="4dp">
@@ -410,10 +414,12 @@
                                 android:textColor="#1A1A1A"
                                 android:layout_marginTop="10dp" />
 
-                            <TextView
-                                android:layout_width="wrap_content"
+                                <TextView
+                                    android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:text="Resolved Today"
+                                    android:gravity="center"
+                                    android:maxLines="2"
                                 android:textSize="12sp"
                                 android:textColor="#64748B"
                                 android:layout_marginTop="6dp" />
@@ -527,7 +533,6 @@
                     android:layout_marginBottom="12dp">
 
                     <androidx.cardview.widget.CardView
-                        android:id="@+id/card_messages"
                         android:layout_width="0dp"
                         android:layout_height="86dp"
                         android:layout_weight="1"
@@ -564,6 +569,7 @@
                     </androidx.cardview.widget.CardView>
 
                     <androidx.cardview.widget.CardView
+                        android:id="@+id/card_messages"
                         android:layout_width="0dp"
                         android:layout_height="86dp"
                         android:layout_weight="1"
@@ -755,7 +761,7 @@
                 <!-- Detection cards -->
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
-                    android:layout_height="78dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginBottom="12dp"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp"
@@ -763,7 +769,7 @@
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical">
 
@@ -814,7 +820,7 @@
 
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
-                    android:layout_height="78dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginBottom="12dp"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp"
@@ -822,7 +828,7 @@
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical">
 
@@ -873,7 +879,7 @@
 
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
-                    android:layout_height="78dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginBottom="24dp"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp"
@@ -881,9 +887,10 @@
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:gravity="center_vertical">
+                        android:gravity="center_vertical"
+                        android:padding="12dp">
 
                         <ImageView
                             android:layout_width="52dp"

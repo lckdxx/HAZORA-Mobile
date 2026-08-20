@@ -59,16 +59,16 @@ public class IncidentsActivity extends AppCompatActivity {
         View.OnClickListener click = v -> {
             selectedFilter = ((TextView) v).getText().toString();
             // update visual selection
-            all.setBackgroundResource(R.drawable.bg_welcome_logo_glass);
-            ne.setBackgroundResource(R.drawable.bg_welcome_logo_glass);
-            ack.setBackgroundResource(R.drawable.bg_welcome_logo_glass);
-            res.setBackgroundResource(R.drawable.bg_welcome_logo_glass);
+            all.setBackgroundResource(R.drawable.bg_message_filter_unselected);
+            ne.setBackgroundResource(R.drawable.bg_message_filter_unselected);
+            ack.setBackgroundResource(R.drawable.bg_message_filter_unselected);
+            res.setBackgroundResource(R.drawable.bg_message_filter_unselected);
             all.setTextColor(getResources().getColor(R.color.primary_blue));
             ne.setTextColor(getResources().getColor(R.color.primary_blue));
             ack.setTextColor(getResources().getColor(R.color.primary_blue));
             res.setTextColor(getResources().getColor(R.color.primary_blue));
 
-            v.setBackgroundResource(R.drawable.bg_primary_button);
+            v.setBackgroundResource(R.drawable.bg_message_filter_selected);
             ((TextView) v).setTextColor(getResources().getColor(R.color.white));
 
             applyFilter();
@@ -80,7 +80,7 @@ public class IncidentsActivity extends AppCompatActivity {
         res.setOnClickListener(click);
 
         // default selection All
-        all.setBackgroundResource(R.drawable.bg_filter_selected_blue);
+        all.setBackgroundResource(R.drawable.bg_message_filter_selected);
         all.setTextColor(getResources().getColor(R.color.white));
     }
 

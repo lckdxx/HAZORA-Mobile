@@ -11,9 +11,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingTop="24dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
+        android:paddingTop="20dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
         android:paddingBottom="12dp">
 
         <LinearLayout
@@ -132,51 +132,50 @@
 
             <TextView
                 android:id="@+id/filter_all"
-                style="@style/Widget.MaterialComponents.Button"
                 android:layout_width="wrap_content"
-                android:layout_height="36dp"
+                android:layout_height="44dp"
                 android:gravity="center"
                 android:paddingLeft="16dp"
                 android:paddingRight="16dp"
                 android:text="All"
                 android:layout_marginEnd="8dp"
-                android:background="@drawable/bg_primary_button"
+                android:background="@drawable/bg_message_filter_selected"
                 android:textColor="@color/white" />
 
             <TextView
                 android:id="@+id/filter_new"
                 android:layout_width="wrap_content"
-                android:layout_height="36dp"
+                android:layout_height="44dp"
                 android:gravity="center"
                 android:paddingLeft="16dp"
                 android:paddingRight="16dp"
                 android:text="New"
                 android:layout_marginEnd="8dp"
-                android:background="@drawable/bg_welcome_logo_glass"
+                android:background="@drawable/bg_message_filter_unselected"
                 android:textColor="@color/primary_blue" />
 
             <TextView
                 android:id="@+id/filter_ack"
                 android:layout_width="wrap_content"
-                android:layout_height="36dp"
+                android:layout_height="44dp"
                 android:gravity="center"
                 android:paddingLeft="16dp"
                 android:paddingRight="16dp"
                 android:text="Acknowledged"
                 android:layout_marginEnd="8dp"
-                android:background="@drawable/bg_welcome_logo_glass"
+                android:background="@drawable/bg_message_filter_unselected"
                 android:textColor="@color/primary_blue" />
 
             <TextView
                 android:id="@+id/filter_resolved"
                 android:layout_width="wrap_content"
-                android:layout_height="36dp"
+                android:layout_height="44dp"
                 android:gravity="center"
                 android:paddingLeft="16dp"
                 android:paddingRight="16dp"
                 android:text="Resolved"
                 android:layout_marginEnd="8dp"
-                android:background="@drawable/bg_welcome_logo_glass"
+                android:background="@drawable/bg_message_filter_unselected"
                 android:textColor="@color/primary_blue" />
 
         </LinearLayout>

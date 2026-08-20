@@ -50,7 +50,7 @@
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
-            android:layout_height="280dp"
+            android:layout_height="248dp"
             android:layout_marginTop="22dp"
             app:cardBackgroundColor="#1B3C79"
             app:cardCornerRadius="16dp"

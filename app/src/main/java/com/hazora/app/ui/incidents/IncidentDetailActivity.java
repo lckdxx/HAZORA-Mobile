@@ -1,6 +1,7 @@
 package com.hazora.app.ui.incidents;
 
 import android.os.Bundle;
+import android.content.Intent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -69,6 +70,18 @@ public class IncidentDetailActivity extends AppCompatActivity {
             } else {
                 ack.setVisibility(View.GONE);
             }
+        }
+
+        Button share = findViewById(R.id.btn_share_team);
+        if (share != null) {
+            share.setOnClickListener(v -> {
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("text/plain");
+                intent.putExtra(Intent.EXTRA_TEXT, incident == null
+                        ? "HAZORA incident"
+                        : incident.getTitle() + " - " + incident.getSite());
+                startActivity(Intent.createChooser(intent, "Share incident"));
+            });
         }
     }
 

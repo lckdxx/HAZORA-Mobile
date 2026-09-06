@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/background_light">
+    android:background="@color/background_light"
+    android:clipToPadding="false">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingBottom="96dp">
 
     <!-- Header -->
     <LinearLayout
@@ -27,7 +33,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="&lt; Back"
-                android:textColor="@color/primary_text_dark"
+                android:textColor="@color/primary_blue"
                 android:textSize="16sp" />
 
             <TextView
@@ -50,6 +56,20 @@
             android:textSize="13sp"
             android:layout_marginTop="8dp" />
 
+            <EditText
+                android:id="@+id/et_incident_search"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_search_field"
+                android:hint="Search incidents"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:singleLine="true"
+                android:textColor="@color/primary_text_dark"
+                android:textColorHint="@color/secondary_text_dark"
+                android:textSize="14sp" />
+
     </LinearLayout>
 
     <!-- Summary card -->
@@ -58,9 +78,11 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="4dp"
-        app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:cardBackgroundColor="@color/surface_white"
+            app:strokeColor="@color/border_light"
+            app:strokeWidth="1dp"
         android:padding="12dp"
         android:layout_marginBottom="12dp">
 
@@ -221,5 +243,13 @@
         </LinearLayout>
 
     </FrameLayout>
+    </LinearLayout>
 
-</LinearLayout>
+    <include
+        android:id="@+id/bottom_navigation"
+        layout="@layout/view_bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="96dp"
+        android:layout_gravity="bottom" />
+
+</FrameLayout>

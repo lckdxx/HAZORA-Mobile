@@ -12,6 +12,7 @@ import com.hazora.app.auth.GoogleSignInHelper;
 import com.hazora.app.auth.SessionManager;
 import com.hazora.app.R;
 import com.hazora.app.ui.login.LoginActivity;
+import com.hazora.app.ui.navigation.BottomNavigationHelper;
 
 import android.widget.TextView;
 
@@ -23,6 +24,7 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+        BottomNavigationHelper.bind(this, R.id.nav_profile);
 
         sessionManager = new SessionManager(this);
 

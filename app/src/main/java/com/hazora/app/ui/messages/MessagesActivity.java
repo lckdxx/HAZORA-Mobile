@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.hazora.app.R;
+import com.hazora.app.ui.navigation.BottomNavigationHelper;
 
 import java.util.ArrayList;
 
@@ -31,6 +32,7 @@ public class MessagesActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_messages);
+        BottomNavigationHelper.bind(this, R.id.nav_messages);
 
         seedMessages();
 

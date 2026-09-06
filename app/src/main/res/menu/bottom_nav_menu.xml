@@ -10,8 +10,8 @@
         android:title="Incidents" />
     <item
         android:id="@+id/nav_camera"
-        android:icon="@drawable/ic_camera"
-        android:title="Camera" />
+        android:icon="@drawable/ic_nav_spacer"
+        android:title="" />
     <item
         android:id="@+id/nav_messages"
         android:icon="@drawable/ic_email"

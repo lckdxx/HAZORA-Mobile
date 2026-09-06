@@ -4,9 +4,11 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
-    app:cardBackgroundColor="#FFFFFF"
+    app:cardBackgroundColor="@color/surface_white"
     app:cardCornerRadius="16dp"
-    app:cardElevation="3dp">
+    app:cardElevation="2dp"
+    app:strokeColor="@color/border_light"
+    app:strokeWidth="1dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -39,7 +41,7 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textColor="#1A1A1A"
+                android:textColor="@color/primary_text_dark"
                 android:textSize="14sp" />
 
             <TextView
@@ -49,7 +51,7 @@
                 android:layout_marginTop="3dp"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textColor="#1A1A1A"
+                android:textColor="@color/primary_text_dark"
                 android:textSize="15sp" />
 
             <TextView
@@ -59,7 +61,7 @@
                 android:layout_marginTop="3dp"
                 android:ellipsize="end"
                 android:maxLines="2"
-                android:textColor="#64748B"
+                android:textColor="@color/secondary_text_dark"
                 android:textSize="12sp" />
         </LinearLayout>
 
@@ -73,7 +75,7 @@
                 android:id="@+id/tv_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#64748B"
+                android:textColor="@color/secondary_text_dark"
                 android:textSize="11sp" />
 
             <View

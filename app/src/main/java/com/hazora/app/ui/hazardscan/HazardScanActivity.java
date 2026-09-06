@@ -25,6 +25,7 @@ import androidx.core.content.ContextCompat;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.hazora.app.R;
 import com.hazora.app.ui.incidents.IncidentDetailActivity;
+import com.hazora.app.ui.navigation.BottomNavigationHelper;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -53,6 +54,7 @@ public class HazardScanActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hazard_scan);
+        BottomNavigationHelper.bind(this, R.id.nav_camera);
 
         cameraExecutor = Executors.newSingleThreadExecutor();
         hazardDetector = new HazardDetector(this);

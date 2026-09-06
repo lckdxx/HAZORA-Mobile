@@ -46,6 +46,10 @@ public class IncidentAdapter extends RecyclerView.Adapter<IncidentAdapter.ViewHo
         holder.title.setText(inc.getTitle());
         holder.cameraTime.setText(inc.getCameraId() + " • " + inc.getTime());
         holder.site.setText(inc.getSite());
+        holder.severity.setText(inc.getSeverity().toUpperCase() + " SEVERITY");
+        holder.severity.setTextColor("High".equalsIgnoreCase(inc.getSeverity())
+            ? context.getResources().getColor(R.color.status_new_text)
+            : context.getResources().getColor(R.color.status_acknowledged_text));
 
         // Icon selection and circular background + tint
         if (inc.getTitle().toLowerCase().contains("hard hat")) {
@@ -71,14 +75,14 @@ public class IncidentAdapter extends RecyclerView.Adapter<IncidentAdapter.ViewHo
         int bgColor;
         int textColor;
         if ("New".equalsIgnoreCase(status)) {
-            bgColor = Color.parseColor("#FEE2E2");
-            textColor = Color.parseColor("#EF4444");
+            bgColor = context.getResources().getColor(R.color.status_new_background);
+            textColor = context.getResources().getColor(R.color.status_new_text);
         } else if ("Acknowledged".equalsIgnoreCase(status)) {
-            bgColor = Color.parseColor("#FFF7ED");
-            textColor = Color.parseColor("#F59E0B");
+            bgColor = context.getResources().getColor(R.color.status_acknowledged_background);
+            textColor = context.getResources().getColor(R.color.status_acknowledged_text);
         } else if ("Resolved".equalsIgnoreCase(status)) {
-            bgColor = Color.parseColor("#DCFCE7");
-            textColor = Color.parseColor("#16A34A");
+            bgColor = context.getResources().getColor(R.color.status_resolved_background);
+            textColor = context.getResources().getColor(R.color.status_resolved_text);
         } else {
             bgColor = Color.parseColor("#FFFFFFFF");
             textColor = Color.parseColor("#1A1A1A");
@@ -114,6 +118,7 @@ public class IncidentAdapter extends RecyclerView.Adapter<IncidentAdapter.ViewHo
         TextView title;
         TextView cameraTime;
         TextView site;
+        TextView severity;
         TextView status;
 
         ViewHolder(@NonNull View itemView) {
@@ -122,6 +127,7 @@ public class IncidentAdapter extends RecyclerView.Adapter<IncidentAdapter.ViewHo
             title = itemView.findViewById(R.id.tv_title);
             cameraTime = itemView.findViewById(R.id.tv_camera_time);
             site = itemView.findViewById(R.id.tv_site);
+            severity = itemView.findViewById(R.id.tv_severity);
             status = itemView.findViewById(R.id.tv_status);
         }
     }

@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.hazora.app.R;
+import com.hazora.app.ui.navigation.BottomNavigationHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,7 @@ public class IncidentsActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_incidents);
+        BottomNavigationHelper.bind(this, R.id.nav_incidents);
 
         View back = findViewById(R.id.tv_back);
         if (back != null) back.setOnClickListener(v -> finish());

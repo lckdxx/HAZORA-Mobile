@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="96dp"
+    android:elevation="16dp">
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/shared_bottom_nav"
+        android:layout_width="match_parent"
+        android:layout_height="68dp"
+        android:layout_gravity="bottom"
+        android:background="@color/white"
+        android:elevation="8dp"
+        app:itemIconSize="22dp"
+        app:itemIconTint="@color/bottom_nav_color"
+        app:itemTextColor="@color/bottom_nav_color"
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/bottom_nav_menu" />
+
+    <ImageButton
+        android:id="@+id/shared_camera_fab"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_gravity="top|center_horizontal"
+        android:background="@drawable/bg_fab_camera"
+        android:contentDescription="Open AI Hazard Scan"
+        android:elevation="20dp"
+        android:padding="16dp"
+        android:src="@drawable/ic_camera"
+        android:tint="@color/white" />
+</FrameLayout>

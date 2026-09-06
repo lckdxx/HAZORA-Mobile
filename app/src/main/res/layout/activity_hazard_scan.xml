@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F7F9FC"
-    android:fillViewport="true">
+    android:background="@color/background_light">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:paddingBottom="96dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -52,9 +58,11 @@
             android:layout_width="match_parent"
             android:layout_height="248dp"
             android:layout_marginTop="22dp"
-            app:cardBackgroundColor="#1B3C79"
+                app:cardBackgroundColor="@color/primary_blue_dark"
             app:cardCornerRadius="16dp"
-            app:cardElevation="3dp">
+                app:cardElevation="3dp"
+                app:strokeColor="@color/primary_blue_light"
+                app:strokeWidth="1dp">
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -122,7 +130,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom|start"
                     android:layout_margin="16dp"
-                    android:background="#80000000"
+                    android:background="@color/background_navy"
                     android:padding="6dp"
                     android:text="CAM-04 LIVE"
                     android:textColor="#FFFFFF"
@@ -150,7 +158,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Camera Connected"
-                android:textColor="#1A1A1A"
+                android:textColor="@color/primary_text_dark"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
@@ -159,7 +167,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:text="CAM-04"
-                android:textColor="#64748B"
+                android:textColor="@color/secondary_text_dark"
                 android:textSize="13sp" />
         </LinearLayout>
 
@@ -229,9 +237,11 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:visibility="gone"
-            app:cardBackgroundColor="#FFFFFF"
+            app:cardBackgroundColor="@color/surface_white"
             app:cardCornerRadius="16dp"
-            app:cardElevation="2dp">
+            app:cardElevation="2dp"
+            app:strokeColor="@color/border_light"
+            app:strokeWidth="1dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -316,4 +326,12 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
-</ScrollView>
+    </ScrollView>
+
+    <include
+        android:id="@+id/bottom_navigation"
+        layout="@layout/view_bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="96dp"
+        android:layout_gravity="bottom" />
+</FrameLayout>

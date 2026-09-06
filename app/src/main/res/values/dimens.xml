@@ -21,4 +21,8 @@
     <dimen name="button_height">56dp</dimen>
     <dimen name="text_field_height">56dp</dimen>
     <dimen name="toolbar_height">64dp</dimen>
+    <dimen name="page_margin">20dp</dimen>
+    <dimen name="card_padding">16dp</dimen>
+    <dimen name="list_item_min_height">104dp</dimen>
+    <dimen name="icon_size_medium">48dp</dimen>
 </resources>

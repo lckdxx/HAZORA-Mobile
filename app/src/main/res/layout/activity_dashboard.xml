@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         android:clipToPadding="false"
         android:fillViewport="true"
-        android:paddingBottom="96dp">
+        android:paddingBottom="144dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -25,7 +25,7 @@
             <!-- Header -->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
+                    android:layout_height="270dp"
                 android:background="@drawable/bg_dashboard_header"
                 android:paddingStart="20dp"
                 android:paddingEnd="20dp"
@@ -94,12 +94,14 @@
                 <androidx.cardview.widget.CardView
                     android:id="@+id/card_ai_monitoring"
                     android:layout_width="0dp"
-                    android:layout_height="116dp"
+                    android:layout_height="126dp"
                     android:layout_marginTop="12dp"
                     android:layout_marginStart="0dp"
                     android:layout_marginEnd="0dp"
                     app:cardCornerRadius="16dp"
-                    app:cardElevation="4dp"
+                        app:cardElevation="3dp"
+                        app:strokeColor="@color/welcome_logo_glass_stroke"
+                        app:strokeWidth="1dp"
                     app:cardUseCompatPadding="true"
                     android:foreground="?attr/selectableItemBackground"
                     app:layout_constraintTop_toBottomOf="@id/tv_location"
@@ -111,7 +113,7 @@
                         android:layout_height="match_parent"
                         android:orientation="vertical"
                         android:padding="12dp"
-                        android:background="@drawable/bg_glass_card">
+                        android:background="@drawable/bg_dashboard_monitoring">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -167,19 +169,12 @@
                                 android:gravity="center"
                                 android:padding="6dp">
 
-                                <ImageView
-                                    android:layout_width="28dp"
-                                    android:layout_height="28dp"
-                                    android:src="@drawable/ic_camera"
-                                    android:tint="@color/primary_blue" />
-
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Cameras"
                                     android:textSize="11sp"
-                                    android:textColor="#64748B"
-                                    android:layout_marginTop="6dp" />
+                                    android:textColor="@color/secondary_text_dark" />
 
                                 <TextView
                                     android:layout_width="wrap_content"
@@ -187,8 +182,8 @@
                                     android:text="12"
                                     android:textSize="18sp"
                                     android:textStyle="bold"
-                                    android:textColor="#1A1A1A"
-                                    android:layout_marginTop="6dp" />
+                                    android:textColor="@color/primary_blue_dark"
+                                    android:layout_marginTop="4dp" />
 
                             </LinearLayout>
 
@@ -205,19 +200,12 @@
                                 android:gravity="center"
                                 android:padding="6dp">
 
-                                <ImageView
-                                    android:layout_width="28dp"
-                                    android:layout_height="28dp"
-                                    android:src="@drawable/ic_clock"
-                                    android:tint="@color/primary_blue" />
-
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Last Detection"
                                     android:textSize="11sp"
-                                    android:textColor="#64748B"
-                                    android:layout_marginTop="6dp" />
+                                    android:textColor="@color/secondary_text_dark" />
 
                                 <TextView
                                     android:layout_width="wrap_content"
@@ -225,8 +213,8 @@
                                     android:text="2m"
                                     android:textSize="18sp"
                                     android:textStyle="bold"
-                                    android:textColor="#1A1A1A"
-                                    android:layout_marginTop="6dp" />
+                                    android:textColor="@color/primary_blue_dark"
+                                    android:layout_marginTop="4dp" />
 
                             </LinearLayout>
 
@@ -243,19 +231,12 @@
                                 android:gravity="center"
                                 android:padding="6dp">
 
-                                <ImageView
-                                    android:layout_width="28dp"
-                                    android:layout_height="28dp"
-                                    android:src="@drawable/ic_analytics"
-                                    android:tint="@color/primary_blue" />
-
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Accuracy"
                                     android:textSize="11sp"
-                                    android:textColor="#64748B"
-                                    android:layout_marginTop="6dp" />
+                                    android:textColor="@color/secondary_text_dark" />
 
                                 <TextView
                                     android:layout_width="wrap_content"
@@ -263,8 +244,8 @@
                                     android:text="98.7%"
                                     android:textSize="18sp"
                                     android:textStyle="bold"
-                                    android:textColor="#1A1A1A"
-                                    android:layout_marginTop="6dp" />
+                                    android:textColor="@color/primary_blue_dark"
+                                    android:layout_marginTop="4dp" />
 
                             </LinearLayout>
 
@@ -293,11 +274,13 @@
 
                     <androidx.cardview.widget.CardView
                         android:layout_width="0dp"
-                        android:layout_height="148dp"
+                        android:layout_height="132dp"
                         android:layout_weight="1"
                         android:layout_marginEnd="8dp"
                         app:cardCornerRadius="16dp"
-                        app:cardElevation="4dp">
+                        app:cardElevation="2dp"
+                        app:strokeColor="@color/border_light"
+                        app:strokeWidth="1dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -339,11 +322,13 @@
 
                     <androidx.cardview.widget.CardView
                         android:layout_width="0dp"
-                        android:layout_height="148dp"
+                        android:layout_height="132dp"
                         android:layout_weight="1"
                         android:layout_marginEnd="8dp"
                         app:cardCornerRadius="16dp"
-                        app:cardElevation="4dp">
+                        app:cardElevation="2dp"
+                        app:strokeColor="@color/border_light"
+                        app:strokeWidth="1dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -385,10 +370,12 @@
 
                     <androidx.cardview.widget.CardView
                         android:layout_width="0dp"
-                        android:layout_height="148dp"
+                        android:layout_height="132dp"
                         android:layout_weight="1"
                         app:cardCornerRadius="16dp"
-                        app:cardElevation="4dp">
+                        app:cardElevation="2dp"
+                        app:strokeColor="@color/border_light"
+                        app:strokeWidth="1dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -447,7 +434,9 @@
                     android:layout_height="96dp"
                     android:layout_marginBottom="12dp"
                     app:cardCornerRadius="18dp"
-                    app:cardElevation="4dp"
+                    app:cardElevation="3dp"
+                    app:strokeColor="@color/primary_blue_light"
+                    app:strokeWidth="1dp"
                     android:foreground="?attr/selectableItemBackground">
 
                     <LinearLayout
@@ -505,7 +494,7 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="Capture &amp; analyze workplace hazards instantly"
+                                android:text="Capture &amp; analyze workplace\nhazards instantly"
                                 android:textColor="@color/white"
                                 android:textSize="12sp"
                                 android:layout_marginTop="6dp" />
@@ -539,6 +528,8 @@
                         android:layout_marginEnd="8dp"
                         app:cardCornerRadius="12dp"
                         app:cardElevation="2dp"
+                        app:strokeColor="@color/border_light"
+                        app:strokeWidth="1dp"
                         android:foreground="?attr/selectableItemBackground">
 
                         <LinearLayout
@@ -576,6 +567,8 @@
                         android:layout_marginEnd="8dp"
                         app:cardCornerRadius="12dp"
                         app:cardElevation="2dp"
+                        app:strokeColor="@color/border_light"
+                        app:strokeWidth="1dp"
                         android:foreground="?attr/selectableItemBackground">
 
                         <LinearLayout
@@ -611,6 +604,8 @@
                         android:layout_weight="1"
                         app:cardCornerRadius="12dp"
                         app:cardElevation="2dp"
+                        app:strokeColor="@color/border_light"
+                        app:strokeWidth="1dp"
                         android:foreground="?attr/selectableItemBackground">
 
                         <LinearLayout
@@ -645,7 +640,7 @@
                 <!-- Site Status card -->
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
-                    android:layout_height="92dp"
+                    android:layout_height="112dp"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="3dp"
                     android:layout_marginBottom="12dp"
@@ -701,6 +696,9 @@
                                 android:gravity="center"
                                 android:text="Safe"
                                 android:textColor="@color/success"
+                                android:background="@drawable/bg_status_safe"
+                                android:paddingStart="8dp"
+                                android:paddingEnd="8dp"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
 
@@ -713,7 +711,9 @@
                                 android:textColor="@color/welcome_accent_orange"
                                 android:textSize="14sp"
                                 android:textStyle="bold"
-                                android:background="@drawable/bg_status_warning" />
+                                android:background="@drawable/bg_status_warning"
+                                android:paddingStart="8dp"
+                                android:paddingEnd="8dp" />
 
                             <TextView
                                 android:layout_width="0dp"
@@ -723,7 +723,10 @@
                                 android:text="Critical"
                                 android:textColor="@color/danger"
                                 android:textSize="14sp"
-                                android:textStyle="bold" />
+                                android:textStyle="bold"
+                                android:background="@drawable/bg_status_critical"
+                                android:paddingStart="8dp"
+                                android:paddingEnd="8dp" />
 
                         </LinearLayout>
 
@@ -811,6 +814,9 @@
                             android:layout_height="wrap_content"
                             android:text="New"
                             android:textColor="@color/danger"
+                            android:background="@drawable/bg_status_new"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
                             android:textSize="12sp"
                             android:textStyle="bold" />
 
@@ -870,6 +876,9 @@
                             android:layout_height="wrap_content"
                             android:text="Acknowledged"
                             android:textColor="@color/welcome_accent_orange"
+                            android:background="@drawable/bg_status_warning"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
                             android:textSize="12sp"
                             android:textStyle="bold" />
 
@@ -930,6 +939,9 @@
                             android:layout_height="wrap_content"
                             android:text="Resolved"
                             android:textColor="@color/success"
+                            android:background="@drawable/bg_status_safe"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
                             android:textSize="12sp"
                             android:textStyle="bold" />
 
@@ -944,17 +956,11 @@
     </androidx.core.widget.NestedScrollView>
 
     <!-- Fixed Bottom Navigation -->
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottom_nav"
+    <include
+        android:id="@+id/bottom_navigation"
+        layout="@layout/view_bottom_navigation"
         android:layout_width="match_parent"
-        android:layout_height="68dp"
-        android:layout_gravity="bottom"
-        android:background="@color/white"
-        app:itemIconSize="24dp"
-        app:itemIconTint="@color/bottom_nav_color"
-        app:itemTextColor="@color/bottom_nav_color"
-        app:labelVisibilityMode="labeled"
-        app:menu="@menu/bottom_nav_menu"
-        android:elevation="8dp" />
+        android:layout_height="96dp"
+        android:layout_gravity="bottom" />
 
 </FrameLayout>

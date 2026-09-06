@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <gradient
+        android:centerColor="@color/welcome_logo_halo_center"
+        android:gradientRadius="110dp"
+        android:startColor="@color/welcome_logo_halo_center"
+        android:endColor="@color/welcome_logo_halo_edge"
+        android:type="radial" />
+</shape>

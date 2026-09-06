@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/login_ripple">
+    <item>
+        <selector>
+            <item android:state_pressed="true">
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/welcome_button_pressed" />
+                    <corners android:radius="@dimen/corner_radius_28" />
+                </shape>
+            </item>
+            <item>
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/welcome_accent_orange" />
+                    <corners android:radius="@dimen/corner_radius_28" />
+                </shape>
+            </item>
+        </selector>
+    </item>
+</ripple>

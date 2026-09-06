@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/login_ripple">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="270"
+                android:endColor="@color/login_button_gradient_end"
+                android:startColor="@color/login_button_gradient_start" />
+            <corners android:radius="@dimen/corner_radius_16" />
+        </shape>
+    </item>
+</ripple>

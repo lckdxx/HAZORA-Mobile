@@ -41,12 +41,22 @@
             android:exported="false" />
 
         <activity
+            android:name=".ui.hazardscan.HazardGalleryActivity"
+            android:theme="@style/Theme.HAZORA.Light"
+            android:exported="false" />
+
+        <activity
             android:name=".ui.messages.MessagesActivity"
             android:theme="@style/Theme.HAZORA.Light"
             android:exported="false" />
 
         <activity
             android:name=".ui.messages.MessageDetailActivity"
+            android:theme="@style/Theme.HAZORA.Light"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.messages.ComposeMessageActivity"
             android:theme="@style/Theme.HAZORA.Light"
             android:exported="false" />
 

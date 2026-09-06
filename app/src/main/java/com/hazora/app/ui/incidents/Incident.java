@@ -6,6 +6,7 @@ public class Incident implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private String id;
     private String title;
     private String cameraId;
     private String time;
@@ -14,7 +15,8 @@ public class Incident implements Serializable {
     private String severity;
     private String description;
 
-    public Incident(String title, String cameraId, String time, String site, String status, String severity, String description) {
+    public Incident(String id, String title, String cameraId, String time, String site, String status, String severity, String description) {
+        this.id = id;
         this.title = title;
         this.cameraId = cameraId;
         this.time = time;
@@ -24,6 +26,7 @@ public class Incident implements Serializable {
         this.description = description;
     }
 
+    public String getId() { return id; }
     public String getTitle() { return title; }
     public String getCameraId() { return cameraId; }
     public String getTime() { return time; }

@@ -8,6 +8,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.hazora.app.R;
 
 public class IncidentDetailActivity extends AppCompatActivity {
@@ -26,6 +27,9 @@ public class IncidentDetailActivity extends AppCompatActivity {
         incidentIndex = getIntent().getIntExtra("incident_index", -1);
         if (incidentIndex >= 0) {
             incident = IncidentRepository.getIncident(incidentIndex);
+        } else {
+            // Check if passed directly via object
+            incident = (Incident) getIntent().getSerializableExtra("incident_data");
         }
 
         if (incident != null) {
@@ -60,11 +64,19 @@ public class IncidentDetailActivity extends AppCompatActivity {
             } else if ("New".equalsIgnoreCase(incident.getStatus())) {
                 ack.setVisibility(View.VISIBLE);
                 ack.setOnClickListener(v -> {
-                    IncidentRepository.updateStatus(incidentIndex, "Acknowledged");
-                    TextView statusTv = findViewById(R.id.tv_status);
-                    statusTv.setText("Acknowledged");
-                    applyStatusStyle(statusTv, "Acknowledged");
-                    ack.setVisibility(View.GONE);
+                    if (incident != null && incident.getId() != null) {
+                        FirebaseFirestore.getInstance().collection("incidents").document(incident.getId())
+                                .update("status", "Acknowledged")
+                                .addOnSuccessListener(aVoid -> {
+                                    IncidentRepository.updateStatus(incidentIndex, "Acknowledged");
+                                    TextView statusTv = findViewById(R.id.tv_status);
+                                    if (statusTv != null) {
+                                        statusTv.setText("Acknowledged");
+                                        applyStatusStyle(statusTv, "Acknowledged");
+                                    }
+                                    ack.setVisibility(View.GONE);
+                                });
+                    }
                 });
             } else {
                 ack.setVisibility(View.GONE);

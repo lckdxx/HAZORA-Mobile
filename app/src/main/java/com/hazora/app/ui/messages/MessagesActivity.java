@@ -7,18 +7,27 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.hazora.app.R;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 public class MessagesActivity extends AppCompatActivity {
 
-    private static final ArrayList<Message> messages = new ArrayList<>();
+    private final ArrayList<Message> messages = new ArrayList<>();
     private final ArrayList<Message> visibleMessages = new ArrayList<>();
     private MessageAdapter adapter;
     private TextView unreadSummary;
@@ -26,13 +35,12 @@ public class MessagesActivity extends AppCompatActivity {
     private Button allFilter;
     private Button unreadFilter;
     private boolean showingUnread;
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance("hazora");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_messages);
-
-        seedMessages();
 
         View back = findViewById(R.id.tv_back);
         back.setOnClickListener(v -> finish());
@@ -44,36 +52,105 @@ public class MessagesActivity extends AppCompatActivity {
 
         RecyclerView recyclerView = findViewById(R.id.rv_messages);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new MessageAdapter(visibleMessages, this::openMessage);
+        adapter = new MessageAdapter(visibleMessages, new MessageAdapter.OnMessageClickListener() {
+            @Override
+            public void onMessageClick(Message message) {
+                openMessage(message);
+            }
+
+            @Override
+            public void onMessageLongClick(Message message) {
+                confirmDeletion(message);
+            }
+        });
         recyclerView.setAdapter(adapter);
         allFilter.setOnClickListener(v -> setFilter(false));
         unreadFilter.setOnClickListener(v -> setFilter(true));
-        refreshMessages();
+
+        TextView deleteRead = findViewById(R.id.tv_delete_read);
+        deleteRead.setOnClickListener(v -> confirmDeleteAllRead());
+
+        findViewById(R.id.fab_compose).setOnClickListener(v -> 
+            startActivity(new Intent(this, ComposeMessageActivity.class)));
+
+        fetchMessagesFromFirebase();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (adapter != null) refreshMessages();
+    private void fetchMessagesFromFirebase() {
+        db.collection("messages")
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .addSnapshotListener((value, error) -> {
+                    if (error != null) {
+                        Toast.makeText(this, "Error fetching messages: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    if (value != null) {
+                        messages.clear();
+                        for (DocumentSnapshot doc : value.getDocuments()) {
+                            String id = doc.getId();
+                            String body = doc.getString("message");
+                            String senderEmail = doc.getString("senderEmail");
+                            Object createdAt = doc.get("createdAt");
+                            Object readAt = doc.get("readAt");
+
+                            String time = "Recent";
+                            if (createdAt instanceof Timestamp) {
+                                Date date = ((Timestamp) createdAt).toDate();
+                                SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault());
+                                time = sdf.format(date);
+                            }
+
+                            boolean isUnread = (readAt == null);
+                            
+                            messages.add(new Message(
+                                    id,
+                                    senderEmail != null ? senderEmail : "Safety System",
+                                    "Safety Officer",
+                                    "New Update",
+                                    body != null ? body : "",
+                                    body != null ? body : "",
+                                    time,
+                                    isUnread
+                            ));
+                        }
+                        refreshMessages();
+                    }
+                });
     }
 
-    private void seedMessages() {
-        if (!messages.isEmpty()) return;
-        messages.add(new Message("MSG-001", "Safety Management", "Safety Officer", "New Safety Alert",
-                "A new workplace hazard has been detected at Construction Site A.",
-                "A new safety hazard was detected by the HAZORA monitoring system at Construction Site A — Zone B. Please review the incident and take appropriate action.", "09:20 AM", true));
-        messages.add(new Message("MSG-002", "Site Supervisor", "Site Supervisor", "Incident Acknowledged",
-                "The missing hard hat incident has been acknowledged.",
-                "The missing hard hat incident detected by CAM-04 has been reviewed and acknowledged by the site supervisor.", "09:05 AM", true));
-        messages.add(new Message("MSG-003", "Safety Management", "Safety Officer", "Daily Safety Reminder",
-                "Please ensure all workers comply with PPE requirements.",
-                "Reminder: all personnel working in monitored areas must wear the required personal protective equipment, including hard hats, safety vests, and safety shoes.", "08:00 AM", true));
-        messages.add(new Message("MSG-004", "System", "HAZORA Monitoring System", "Incident Resolved",
-                "The missing safety shoes incident has been resolved.",
-                "The safety shoes violation detected by CAM-07 has been marked as resolved.", "Yesterday", false));
-        messages.add(new Message("MSG-005", "Safety Management", "Safety Officer", "Weekly Safety Report",
-                "The latest workplace safety report is available.",
-                "The weekly HAZORA safety monitoring report has been prepared for review.", "Yesterday", false));
+    private void confirmDeleteAllRead() {
+        ArrayList<Message> readMessages = new ArrayList<>();
+        for (Message m : messages) if (!m.isUnread()) readMessages.add(m);
+
+        if (readMessages.isEmpty()) {
+            Toast.makeText(this, "No read messages to delete", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle("Delete Read Messages")
+                .setMessage("Delete all " + readMessages.size() + " read messages from the database?")
+                .setPositiveButton("Delete All", (dialog, which) -> {
+                    for (Message m : readMessages) {
+                        db.collection("messages").document(m.getId()).delete();
+                    }
+                    Toast.makeText(this, "Read messages deleted", Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void confirmDeletion(Message message) {
+        new AlertDialog.Builder(this)
+                .setTitle("Delete Message")
+                .setMessage("Delete this message from the database?")
+                .setPositiveButton("Delete", (dialog, which) -> {
+                    db.collection("messages").document(message.getId()).delete();
+                    Toast.makeText(this, "Message deleted", Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     private void setFilter(boolean unreadOnly) {
@@ -99,7 +176,11 @@ public class MessagesActivity extends AppCompatActivity {
     }
 
     private void openMessage(Message message) {
-        message.setUnread(false);
+        if (message.isUnread()) {
+            db.collection("messages").document(message.getId())
+                    .update("readAt", Timestamp.now());
+        }
+
         Intent intent = new Intent(this, MessageDetailActivity.class);
         intent.putExtra("message_id", message.getId());
         intent.putExtra("message_sender", message.getSender());

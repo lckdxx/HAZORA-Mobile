@@ -17,6 +17,7 @@ import java.util.List;
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
     public interface OnMessageClickListener {
         void onMessageClick(Message message);
+        void onMessageLongClick(Message message);
     }
 
     private final List<Message> messages;
@@ -53,6 +54,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         holder.subject.setTypeface(null, weight);
         holder.unreadDot.setVisibility(message.isUnread() ? View.VISIBLE : View.GONE);
         holder.itemView.setOnClickListener(v -> listener.onMessageClick(message));
+        holder.itemView.setOnLongClickListener(v -> {
+            listener.onMessageLongClick(message);
+            return true;
+        });
     }
 
     @Override

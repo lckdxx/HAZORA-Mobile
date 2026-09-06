@@ -65,27 +65,30 @@
                     android:tint="#1F6FB2" />
 
                 <TextView
+                    android:id="@+id/tv_profile_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="14dp"
-                    android:text="Earl Johnson"
+                    android:text="User Name"
                     android:textColor="#1A1A1A"
                     android:textSize="21sp"
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tv_profile_role"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Engineer"
+                    android:text="Role"
                     android:textColor="#64748B"
                     android:textSize="14sp" />
 
                 <TextView
+                    android:id="@+id/tv_profile_site"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
-                    android:text="Construction Site A — Zone B"
+                    android:text="Site"
                     android:textColor="#64748B"
                     android:textSize="13sp" />
             </LinearLayout>
@@ -143,10 +146,11 @@
                             android:textSize="12sp" />
 
                         <TextView
+                            android:id="@+id/tv_info_name"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="3dp"
-                            android:text="Earl Johnson"
+                            android:text="User Name"
                             android:textColor="#1A1A1A"
                             android:textSize="15sp" />
                     </LinearLayout>
@@ -222,10 +226,11 @@
                             android:textSize="12sp" />
 
                         <TextView
+                            android:id="@+id/tv_info_role"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="3dp"
-                            android:text="Engineer"
+                            android:text="Role"
                             android:textColor="#1A1A1A"
                             android:textSize="15sp" />
                     </LinearLayout>
@@ -261,10 +266,11 @@
                             android:textSize="12sp" />
 
                         <TextView
+                            android:id="@+id/tv_info_site"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="3dp"
-                            android:text="Construction Site A — Zone B"
+                            android:text="Site Information"
                             android:textColor="#1A1A1A"
                             android:textSize="15sp" />
                     </LinearLayout>

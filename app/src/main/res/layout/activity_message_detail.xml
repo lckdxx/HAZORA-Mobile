@@ -99,6 +99,17 @@
                     android:lineSpacingExtra="4dp"
                     android:textColor="#1A1A1A"
                     android:textSize="15sp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_reply"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="24dp"
+                    android:text="Reply"
+                    android:textAllCaps="false"
+                    android:textStyle="bold"
+                    app:backgroundTint="#244C97"
+                    app:cornerRadius="12dp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>

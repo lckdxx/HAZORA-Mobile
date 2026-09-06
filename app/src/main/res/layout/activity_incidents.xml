@@ -32,13 +32,23 @@
 
             <TextView
                 android:id="@+id/tv_title"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
+                android:layout_weight="1"
                 android:text="Incidents"
                 android:textColor="@color/primary_text_dark"
                 android:textStyle="bold"
                 android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/tv_delete_resolved"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Delete Resolved"
+                android:textColor="#EF4444"
+                android:textSize="14sp"
+                android:textStyle="bold" />
 
         </LinearLayout>
 

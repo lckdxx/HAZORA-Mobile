@@ -1,7 +1,6 @@
 package com.hazora.app.ui.incidents;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
@@ -20,11 +19,18 @@ import java.util.List;
 
 public class IncidentAdapter extends RecyclerView.Adapter<IncidentAdapter.ViewHolder> {
 
+    public interface OnIncidentClickListener {
+        void onIncidentClick(Incident incident);
+        void onIncidentLongClick(Incident incident);
+    }
+
     private final List<Incident> items = new ArrayList<>();
     private final Context context;
+    private final OnIncidentClickListener listener;
 
-    public IncidentAdapter(Context context) {
+    public IncidentAdapter(Context context, OnIncidentClickListener listener) {
         this.context = context;
+        this.listener = listener;
     }
 
     public void setItems(List<Incident> list) {
@@ -91,12 +97,10 @@ public class IncidentAdapter extends RecyclerView.Adapter<IncidentAdapter.ViewHo
         holder.status.setTextColor(textColor);
         holder.status.setText(status.toUpperCase());
 
-        holder.itemView.setOnClickListener(v -> {
-            // find index in repository
-            int idx = IncidentRepository.getIncidents().indexOf(inc);
-            Intent intent = new Intent(context, IncidentDetailActivity.class);
-            intent.putExtra("incident_index", idx);
-            context.startActivity(intent);
+        holder.itemView.setOnClickListener(v -> listener.onIncidentClick(inc));
+        holder.itemView.setOnLongClickListener(v -> {
+            listener.onIncidentLongClick(inc);
+            return true;
         });
     }
 

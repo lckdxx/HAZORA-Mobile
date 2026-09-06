@@ -44,7 +44,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:text="AI-powered workplace safety monitoring"
+            android:text="Capture image for workplace safety monitoring"
             android:textColor="#64748B"
             android:textSize="14sp" />
 
@@ -65,6 +65,12 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
 
+                <!-- Custom view for drawing detection boxes (only after capture) -->
+                <com.hazora.app.ui.hazardscan.DetectionOverlayView
+                    android:id="@+id/detection_overlay"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
                 <LinearLayout
                     android:id="@+id/camera_placeholder"
                     android:layout_width="match_parent"
@@ -77,7 +83,7 @@
                     <ImageView
                         android:layout_width="56dp"
                         android:layout_height="56dp"
-                        android:contentDescription="Camera feed"
+                        android:contentDescription="Camera placeholder"
                         android:src="@drawable/ic_camera"
                         android:tint="#FFFFFF" />
 
@@ -97,80 +103,12 @@
                         android:text="CAM-04"
                         android:textColor="#D7E4FA"
                         android:textSize="14sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="22dp"
-                        android:text="Monitoring Area"
-                        android:textColor="#FFFFFF"
-                        android:textSize="15sp" />
                 </LinearLayout>
-
-                <!-- Overlay for when camera is active -->
-                <View
-                    android:id="@+id/scan_overlay"
-                    android:layout_width="match_parent"
-                    android:layout_height="2dp"
-                    android:layout_marginTop="20dp"
-                    android:background="#EF4444"
-                    android:visibility="gone" />
-
-                <TextView
-                    android:id="@+id/tv_camera_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom|start"
-                    android:layout_margin="16dp"
-                    android:background="#80000000"
-                    android:padding="6dp"
-                    android:text="CAM-04 LIVE"
-                    android:textColor="#FFFFFF"
-                    android:textSize="12sp"
-                    android:visibility="gone" />
 
             </FrameLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
 
-            <View
-                android:layout_width="9dp"
-                android:layout_height="9dp"
-                android:layout_marginEnd="8dp"
-                android:background="@drawable/bg_welcome_circle"
-                android:backgroundTint="#22C55E" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Camera Connected"
-                android:textColor="#1A1A1A"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="CAM-04"
-                android:textColor="#64748B"
-                android:textSize="13sp" />
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="17dp"
-            android:layout_marginTop="4dp"
-            android:text="Construction Site A — Zone B"
-            android:textColor="#64748B"
-            android:textSize="13sp" />
 
         <LinearLayout
             android:id="@+id/layout_analyzing"
@@ -212,14 +150,39 @@
         </LinearLayout>
 
         <Button
-            android:id="@+id/btn_start_scan"
+            android:id="@+id/btn_capture"
             android:layout_width="match_parent"
             android:layout_height="54dp"
             android:layout_marginTop="20dp"
             android:background="@drawable/bg_hazard_primary_button"
-            android:text="Start AI Hazard Scan"
+            android:text="Capture Photo"
             android:textAllCaps="false"
             android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btn_start_scan"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_hazard_primary_button"
+            android:text="Open Camera"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btn_view_gallery"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_hazard_secondary_button"
+            android:text="View Detection Gallery"
+            android:textAllCaps="false"
+            android:textColor="#244C97"
             android:textSize="15sp"
             android:textStyle="bold" />
 
@@ -238,6 +201,14 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="18dp">
+
+                <ImageView
+                    android:id="@+id/iv_captured_result"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:scaleType="centerCrop"
+                    android:layout_marginBottom="16dp"
+                    android:background="#EEEEEE" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -262,6 +233,7 @@
                 </LinearLayout>
 
                 <TextView
+                    android:id="@+id/tv_hazard_title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
@@ -271,10 +243,11 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tv_hazard_details"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:text="Camera:  CAM-04\nLocation:  Construction Site A — Zone B\nConfidence:  96.4%"
+                    android:text="Confidence:  96.4%"
                     android:textColor="#64748B"
                     android:textSize="14sp" />
 

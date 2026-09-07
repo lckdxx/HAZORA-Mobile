@@ -5,8 +5,8 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
     app:cardBackgroundColor="@color/white"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="3dp">
+    app:cardCornerRadius="@dimen/dashboard_card_radius"
+    app:cardElevation="2dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,20 +14,24 @@
         android:gravity="center_vertical"
         android:minHeight="76dp"
         android:orientation="horizontal"
-        android:padding="12dp">
+        android:paddingStart="14dp"
+        android:paddingTop="14dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="14dp">
 
         <ImageView
             android:id="@+id/img_icon"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
             android:contentDescription="Incident hazard"
+            android:padding="12dp"
             android:scaleType="centerInside" />
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginStart="14dp"
+            android:layout_marginEnd="10dp"
             android:layout_weight="1"
             android:orientation="vertical">
 
@@ -39,23 +43,30 @@
                 android:maxLines="2"
                 android:text="Incident title"
                 android:textColor="@color/primary_text_dark"
-                android:textSize="15sp"
+                android:textSize="16sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tv_camera_time"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="6dp"
                 android:text="CAM-04 • 09:14 AM"
                 android:textColor="@color/secondary_text_dark"
                 android:textSize="12sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="7dp"
+                android:background="#EEF2F7" />
 
             <TextView
                 android:id="@+id/tv_site"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
+                android:layout_marginTop="0dp"
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:text="Construction Site A — Zone B"
@@ -69,11 +80,11 @@
             android:layout_height="wrap_content"
             android:layout_gravity="top"
             android:gravity="center"
-            android:minWidth="58dp"
+            android:minWidth="62dp"
             android:paddingStart="8dp"
-            android:paddingTop="5dp"
+            android:paddingTop="6dp"
             android:paddingEnd="8dp"
-            android:paddingBottom="5dp"
+            android:paddingBottom="6dp"
             android:text="NEW"
             android:textSize="11sp"
             android:textStyle="bold" />

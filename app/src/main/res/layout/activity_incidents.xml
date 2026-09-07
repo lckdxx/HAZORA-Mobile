@@ -11,10 +11,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingTop="20dp"
+        android:paddingTop="16dp"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        android:paddingBottom="12dp">
+        android:paddingBottom="14dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -26,28 +26,32 @@
                 android:id="@+id/tv_back"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="&lt; Back"
+                android:text="‹"
+                android:contentDescription="Back"
                 android:textColor="@color/primary_text_dark"
-                android:textSize="16sp" />
+                android:textSize="30sp"
+                android:gravity="center"
+                android:minWidth="36dp"
+                android:minHeight="40dp" />
 
             <TextView
                 android:id="@+id/tv_title"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
+                android:layout_marginStart="8dp"
                 android:layout_weight="1"
                 android:text="Incidents"
                 android:textColor="@color/primary_text_dark"
                 android:textStyle="bold"
-                android:textSize="22sp" />
+                android:textSize="24sp" />
 
             <TextView
                 android:id="@+id/tv_delete_resolved"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Delete Resolved"
-                android:textColor="#EF4444"
-                android:textSize="14sp"
+                android:textColor="@color/danger"
+                android:textSize="12sp"
                 android:textStyle="bold" />
 
         </LinearLayout>
@@ -56,9 +60,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Monitor and review detected workplace hazards."
-            android:textColor="@color/secondary_text_dark"
+            android:textColor="@color/dashboard_text_muted"
             android:textSize="13sp"
-            android:layout_marginTop="8dp" />
+            android:layout_marginTop="6dp" />
 
     </LinearLayout>
 
@@ -68,11 +72,11 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="4dp"
+        app:cardCornerRadius="@dimen/dashboard_card_radius"
+        app:cardElevation="2dp"
         app:cardBackgroundColor="@color/white"
-        android:padding="12dp"
-        android:layout_marginBottom="12dp">
+        android:padding="16dp"
+        android:layout_marginBottom="10dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -81,26 +85,26 @@
             android:gravity="center_vertical">
 
             <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
                 android:src="@drawable/ic_alert"
                 android:background="@drawable/bg_icon_red"
-                android:tint="#EF4444"
-                android:padding="8dp" />
+                android:tint="@color/danger"
+                android:padding="9dp" />
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:paddingStart="12dp">
+                android:paddingStart="14dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Today's Incidents"
-                    android:textColor="@color/secondary_text_dark"
-                    android:textSize="14sp" />
+                    android:textColor="@color/dashboard_text_muted"
+                    android:textSize="13sp" />
 
                 <TextView
                     android:id="@+id/tv_today_count"
@@ -109,13 +113,13 @@
                     android:text="5"
                     android:textColor="@color/primary_text_dark"
                     android:textStyle="bold"
-                    android:textSize="20sp" />
+                    android:textSize="24sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Detected workplace safety incidents"
-                    android:textColor="@color/secondary_text_dark"
+                    android:textColor="@color/dashboard_text_muted"
                     android:textSize="12sp" />
 
             </LinearLayout>
@@ -137,16 +141,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp">
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp">
 
             <TextView
                 android:id="@+id/filter_all"
                 android:layout_width="wrap_content"
-                android:layout_height="44dp"
+                android:layout_height="40dp"
                 android:gravity="center"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp"
                 android:text="All"
                 android:layout_marginEnd="8dp"
                 android:background="@drawable/bg_message_filter_selected"
@@ -155,10 +159,10 @@
             <TextView
                 android:id="@+id/filter_new"
                 android:layout_width="wrap_content"
-                android:layout_height="44dp"
+                android:layout_height="40dp"
                 android:gravity="center"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp"
                 android:text="New"
                 android:layout_marginEnd="8dp"
                 android:background="@drawable/bg_message_filter_unselected"
@@ -167,10 +171,10 @@
             <TextView
                 android:id="@+id/filter_ack"
                 android:layout_width="wrap_content"
-                android:layout_height="44dp"
+                android:layout_height="40dp"
                 android:gravity="center"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp"
                 android:text="Acknowledged"
                 android:layout_marginEnd="8dp"
                 android:background="@drawable/bg_message_filter_unselected"
@@ -179,10 +183,10 @@
             <TextView
                 android:id="@+id/filter_resolved"
                 android:layout_width="wrap_content"
-                android:layout_height="44dp"
+                android:layout_height="40dp"
                 android:gravity="center"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp"
                 android:text="Resolved"
                 android:layout_marginEnd="8dp"
                 android:background="@drawable/bg_message_filter_unselected"
@@ -198,7 +202,7 @@
         android:layout_height="match_parent"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
-        android:paddingTop="8dp">
+            android:paddingTop="6dp">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_incidents"
@@ -212,6 +216,15 @@
             android:orientation="vertical"
             android:gravity="center"
             android:visibility="gone">
+
+            <ImageView
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="@drawable/bg_icon_blue_light"
+                android:contentDescription="No incidents"
+                android:padding="14dp"
+                android:src="@drawable/ic_alert"
+                android:tint="@color/primary_blue" />
 
             <TextView
                 android:layout_width="wrap_content"

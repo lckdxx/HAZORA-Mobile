@@ -21,4 +21,8 @@
     <dimen name="button_height">56dp</dimen>
     <dimen name="text_field_height">56dp</dimen>
     <dimen name="toolbar_height">64dp</dimen>
+    <dimen name="dashboard_horizontal_margin">20dp</dimen>
+    <dimen name="dashboard_card_radius">16dp</dimen>
+    <dimen name="dashboard_nav_height">72dp</dimen>
+    <dimen name="dashboard_camera_size">72dp</dimen>
 </resources>

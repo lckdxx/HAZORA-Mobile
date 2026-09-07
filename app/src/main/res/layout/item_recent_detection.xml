@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
-    app:cardCornerRadius="16dp"
+    app:cardBackgroundColor="@color/dashboard_surface"
+    app:cardCornerRadius="@dimen/dashboard_card_radius"
     app:cardElevation="2dp">
 
     <LinearLayout
@@ -38,7 +39,7 @@
                 android:text="Safety Violation"
                 android:textSize="14sp"
                 android:textStyle="bold"
-                android:textColor="#1A1A1A" />
+                android:textColor="@color/dashboard_text_primary" />
 
             <TextView
                 android:id="@+id/tv_detection_details"
@@ -46,7 +47,7 @@
                 android:layout_height="wrap_content"
                 android:text="CAM-00 • 00:00 AM"
                 android:textSize="12sp"
-                android:textColor="#64748B"
+                android:textColor="@color/dashboard_text_muted"
                 android:layout_marginTop="4dp" />
 
         </LinearLayout>
@@ -56,7 +57,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="New"
-            android:textColor="#EF4444"
+            android:background="@drawable/bg_dashboard_status_new"
+            android:paddingStart="8dp"
+            android:paddingTop="4dp"
+            android:paddingEnd="8dp"
+            android:paddingBottom="4dp"
+            android:textColor="@color/dashboard_status_new"
             android:textSize="12sp"
             android:textStyle="bold" />
 

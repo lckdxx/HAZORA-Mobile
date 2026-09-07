@@ -9,35 +9,43 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingTop="20dp"
-        android:paddingBottom="28dp">
+        android:paddingTop="14dp"
+        android:paddingBottom="32dp">
 
         <!-- Header -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
+            android:paddingStart="18dp"
+            android:paddingEnd="18dp"
+            android:paddingBottom="4dp"
             android:gravity="center_vertical">
 
             <TextView
                 android:id="@+id/tv_back"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="&lt; Back"
+                android:text="‹"
+                android:contentDescription="Back"
                 android:textColor="@color/primary_text_dark"
-                android:textSize="16sp" />
+                android:textSize="30sp"
+                android:gravity="center"
+                android:minWidth="36dp"
+                android:minHeight="40dp" />
 
             <TextView
                 android:id="@+id/tv_header_title"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="2"
                 android:text="Incident Title"
                 android:textColor="@color/primary_text_dark"
                 android:textStyle="bold"
-                android:textSize="20sp" />
+                android:textSize="22sp" />
 
         </LinearLayout>
 
@@ -45,18 +53,18 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:cardBackgroundColor="@color/white"
+            android:layout_marginTop="14dp"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="4dp"
-            app:cardBackgroundColor="@color/white"
-            android:layout_marginTop="18dp">
+            app:cardCornerRadius="@dimen/dashboard_card_radius"
+            app:cardElevation="2dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="18dp">
 
                 <!-- Card Title -->
                 <TextView
@@ -66,7 +74,7 @@
                     android:text="Missing Hard Hat Detected"
                     android:textColor="@color/primary_text_dark"
                     android:textStyle="bold"
-                    android:textSize="20sp" />
+                    android:textSize="22sp" />
 
                 <!-- Status pill -->
                 <TextView
@@ -78,6 +86,7 @@
                     android:paddingRight="12dp"
                     android:paddingTop="6dp"
                     android:paddingBottom="6dp"
+                    android:minHeight="32dp"
                     android:text="NEW"
                     android:textSize="12sp"
                     android:textStyle="bold" />
@@ -87,13 +96,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_marginTop="20dp">
+                    android:layout_marginTop="18dp">
 
                     <TextView
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Severity"
-                        android:textColor="@color/secondary_text_dark"
+                        android:textColor="@color/dashboard_text_muted"
                         android:textSize="12sp" />
 
                     <TextView
@@ -101,8 +110,13 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="High"
-                        android:textColor="@color/primary_text_dark"
+                        android:textColor="@color/dashboard_text_primary"
                         android:textSize="15sp"
+                        android:background="@drawable/bg_detail_severity"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:paddingTop="5dp"
+                        android:paddingBottom="5dp"
                         android:layout_marginTop="4dp" />
 
                     <View android:layout_width="match_parent" android:layout_height="12dp" />
@@ -183,11 +197,15 @@
                 <Button
                     android:id="@+id/btn_acknowledge"
                     android:layout_width="match_parent"
-                    android:layout_height="52dp"
-                    android:layout_marginTop="20dp"
+                    android:layout_height="54dp"
+                    android:layout_marginTop="22dp"
                     android:text="Acknowledge Incident"
                     android:textColor="@color/white"
-                    android:backgroundTint="@color/hazora_blue" />
+                    android:background="@drawable/bg_primary_button"
+                    android:backgroundTint="@null"
+                    android:elevation="2dp"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
 
             </LinearLayout>
 

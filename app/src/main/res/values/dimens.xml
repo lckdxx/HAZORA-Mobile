@@ -25,4 +25,7 @@
     <dimen name="dashboard_card_radius">16dp</dimen>
     <dimen name="dashboard_nav_height">72dp</dimen>
     <dimen name="dashboard_camera_size">72dp</dimen>
+    <dimen name="surface_card_radius">16dp</dimen>
+    <dimen name="surface_card_elevation">2dp</dimen>
+    <dimen name="screen_horizontal_margin">20dp</dimen>
 </resources>

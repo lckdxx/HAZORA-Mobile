@@ -3,16 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F7F9FC"
+    android:background="@color/background_light"
     android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingStart="20dp"
-        android:paddingTop="20dp"
-        android:paddingEnd="20dp"
+        android:paddingStart="@dimen/screen_horizontal_margin"
+        android:paddingTop="16dp"
+        android:paddingEnd="@dimen/screen_horizontal_margin"
         android:paddingBottom="28dp">
 
         <LinearLayout
@@ -25,36 +25,41 @@
                 android:id="@+id/tv_back"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="&lt; Back"
-                android:textColor="#244C97"
-                android:textSize="16sp" />
+                android:text="‹"
+                android:contentDescription="Back"
+                android:textColor="@color/primary_blue"
+                android:textSize="30sp"
+                android:gravity="center"
+                android:minWidth="36dp"
+                android:minHeight="40dp" />
 
             <TextView
                 android:id="@+id/tv_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="14dp"
+                android:layout_marginStart="8dp"
                 android:text="AI Hazard Scan"
-                android:textColor="#1A1A1A"
-                android:textSize="20sp"
+                android:textColor="@color/dashboard_text_primary"
+                android:textSize="24sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
+            android:layout_marginTop="5dp"
             android:text="Capture image for workplace safety monitoring"
-            android:textColor="#64748B"
-            android:textSize="14sp" />
+            android:textColor="@color/dashboard_text_muted"
+            android:textSize="13sp" />
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
-            android:layout_height="248dp"
-            android:layout_marginTop="22dp"
+            android:layout_height="272dp"
+            android:layout_marginTop="18dp"
             app:cardBackgroundColor="#1B3C79"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="3dp">
+            app:cardCornerRadius="@dimen/dashboard_card_radius"
+            app:cardElevation="3dp"
+            android:clipToOutline="true">
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -85,7 +90,7 @@
                         android:layout_height="56dp"
                         android:contentDescription="Camera placeholder"
                         android:src="@drawable/ic_camera"
-                        android:tint="#FFFFFF" />
+                        android:tint="@color/white" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -93,7 +98,7 @@
                         android:layout_marginTop="14dp"
                         android:text="ESP32-CAM"
                         android:textColor="#FFFFFF"
-                        android:textSize="18sp"
+                        android:textSize="19sp"
                         android:textStyle="bold" />
 
                     <TextView
@@ -101,7 +106,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text="CAM-04"
-                        android:textColor="#D7E4FA"
+                        android:textColor="#C9DDF7"
                         android:textSize="14sp" />
                 </LinearLayout>
 
@@ -114,7 +119,7 @@
             android:id="@+id/layout_analyzing"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="18dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:visibility="gone">
@@ -122,7 +127,7 @@
             <ProgressBar
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:indeterminateTint="#244C97" />
+                android:indeterminateTint="@color/primary_blue" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -135,7 +140,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Analyzing Workplace Image..."
-                    android:textColor="#1A1A1A"
+                    android:textColor="@color/dashboard_text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
@@ -144,7 +149,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="3dp"
                     android:text="Scanning for hazards and PPE violations."
-                    android:textColor="#64748B"
+                    android:textColor="@color/dashboard_text_muted"
                     android:textSize="13sp" />
             </LinearLayout>
         </LinearLayout>
@@ -152,12 +157,12 @@
         <Button
             android:id="@+id/btn_capture"
             android:layout_width="match_parent"
-            android:layout_height="54dp"
-            android:layout_marginTop="20dp"
+            android:layout_height="56dp"
+            android:layout_marginTop="18dp"
             android:background="@drawable/bg_hazard_primary_button"
             android:text="Capture Photo"
             android:textAllCaps="false"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/white"
             android:textSize="15sp"
             android:textStyle="bold"
             android:visibility="gone" />
@@ -165,24 +170,24 @@
         <Button
             android:id="@+id/btn_start_scan"
             android:layout_width="match_parent"
-            android:layout_height="54dp"
+            android:layout_height="56dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/bg_hazard_primary_button"
             android:text="Open Camera"
             android:textAllCaps="false"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/white"
             android:textSize="15sp"
             android:textStyle="bold" />
 
         <Button
             android:id="@+id/btn_view_gallery"
             android:layout_width="match_parent"
-            android:layout_height="54dp"
+            android:layout_height="56dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/bg_hazard_secondary_button"
             android:text="View Detection Gallery"
             android:textAllCaps="false"
-            android:textColor="#244C97"
+            android:textColor="@color/primary_blue"
             android:textSize="15sp"
             android:textStyle="bold" />
 
@@ -190,11 +195,12 @@
             android:id="@+id/card_scan_result"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="18dp"
             android:visibility="gone"
             app:cardBackgroundColor="#FFFFFF"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp">
+            app:cardCornerRadius="@dimen/dashboard_card_radius"
+            app:cardElevation="2dp"
+            android:clipToOutline="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -227,8 +233,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Hazard Detected"
-                        android:textColor="#EF4444"
-                        android:textSize="17sp"
+                        android:textColor="@color/danger"
+                        android:textSize="16sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
@@ -238,8 +244,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:text="Missing Hard Hat"
-                    android:textColor="#1A1A1A"
-                    android:textSize="20sp"
+                    android:textColor="@color/dashboard_text_primary"
+                    android:textSize="22sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -248,7 +254,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:text="Confidence:  96.4%"
-                    android:textColor="#64748B"
+                    android:textColor="@color/dashboard_text_muted"
                     android:textSize="14sp" />
 
                 <TextView
@@ -261,7 +267,7 @@
                     android:paddingEnd="10dp"
                     android:paddingBottom="5dp"
                     android:text="NEW"
-                    android:textColor="#EF4444"
+                    android:textColor="@color/danger"
                     android:textSize="12sp"
                     android:textStyle="bold" />
 

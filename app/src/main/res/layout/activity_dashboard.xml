@@ -105,7 +105,7 @@
                         android:layout_height="136dp"
                         android:layout_weight="1"
                         android:layout_marginEnd="8dp"
-                        app:cardCornerRadius="@dimen/dashboard_card_radius"
+                        app:cardCornerRadius="@dimen/surface_card_radius"
                         app:cardElevation="2dp"
                         app:cardBackgroundColor="@color/dashboard_surface">
 
@@ -153,7 +153,7 @@
                         android:layout_height="136dp"
                         android:layout_weight="1"
                         android:layout_marginEnd="8dp"
-                        app:cardCornerRadius="@dimen/dashboard_card_radius"
+                        app:cardCornerRadius="@dimen/surface_card_radius"
                         app:cardElevation="2dp"
                         app:cardBackgroundColor="@color/dashboard_surface">
 
@@ -200,7 +200,7 @@
                         android:layout_width="0dp"
                         android:layout_height="136dp"
                         android:layout_weight="1"
-                        app:cardCornerRadius="@dimen/dashboard_card_radius"
+                        app:cardCornerRadius="@dimen/surface_card_radius"
                         app:cardElevation="2dp"
                         app:cardBackgroundColor="@color/dashboard_surface">
 
@@ -261,7 +261,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="108dp"
                     android:layout_marginBottom="12dp"
-                    app:cardCornerRadius="@dimen/dashboard_card_radius"
+                    app:cardCornerRadius="@dimen/surface_card_radius"
                     app:cardElevation="3dp"
                     app:cardBackgroundColor="@color/dashboard_surface"
                     android:foreground="?attr/selectableItemBackground">
@@ -356,7 +356,7 @@
                         android:layout_height="92dp"
                         android:layout_weight="1"
                         android:layout_marginEnd="8dp"
-                        app:cardCornerRadius="@dimen/dashboard_card_radius"
+                        app:cardCornerRadius="@dimen/surface_card_radius"
                         app:cardElevation="2dp"
                         app:cardBackgroundColor="@color/dashboard_surface"
                         android:foreground="?attr/selectableItemBackground">
@@ -394,7 +394,7 @@
                         android:layout_height="92dp"
                         android:layout_weight="1"
                         android:layout_marginEnd="8dp"
-                        app:cardCornerRadius="@dimen/dashboard_card_radius"
+                        app:cardCornerRadius="@dimen/surface_card_radius"
                         app:cardElevation="2dp"
                         app:cardBackgroundColor="@color/dashboard_surface"
                         android:foreground="?attr/selectableItemBackground">
@@ -431,7 +431,7 @@
                         android:layout_width="0dp"
                         android:layout_height="92dp"
                         android:layout_weight="1"
-                        app:cardCornerRadius="@dimen/dashboard_card_radius"
+                        app:cardCornerRadius="@dimen/surface_card_radius"
                         app:cardElevation="2dp"
                         app:cardBackgroundColor="@color/dashboard_surface"
                         android:foreground="?attr/selectableItemBackground">

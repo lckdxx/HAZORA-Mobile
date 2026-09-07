@@ -19,8 +19,11 @@
             android:orientation="horizontal"
             android:paddingStart="18dp"
             android:paddingEnd="18dp"
-            android:paddingBottom="4dp"
-            android:gravity="center_vertical">
+            android:paddingTop="18dp"
+            android:paddingBottom="20dp"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_dashboard_header"
+            android:minHeight="126dp">
 
             <TextView
                 android:id="@+id/tv_back"
@@ -28,8 +31,8 @@
                 android:layout_height="wrap_content"
                 android:text="‹"
                 android:contentDescription="Back"
-                android:textColor="@color/primary_text_dark"
-                android:textSize="30sp"
+                android:textColor="@color/white"
+                android:textSize="32sp"
                 android:gravity="center"
                 android:minWidth="36dp"
                 android:minHeight="40dp" />
@@ -43,9 +46,9 @@
                 android:ellipsize="end"
                 android:maxLines="2"
                 android:text="Incident Title"
-                android:textColor="@color/primary_text_dark"
+                android:textColor="@color/white"
                 android:textStyle="bold"
-                android:textSize="22sp" />
+                android:textSize="24sp" />
 
         </LinearLayout>
 
@@ -57,7 +60,7 @@
             android:layout_marginTop="14dp"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            app:cardCornerRadius="@dimen/dashboard_card_radius"
+            app:cardCornerRadius="@dimen/surface_card_radius"
             app:cardElevation="2dp">
 
             <LinearLayout

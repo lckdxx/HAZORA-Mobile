@@ -10,7 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.35" />
+        app:layout_constraintGuide_percent="0.37" />
 
     <ImageView
         android:id="@+id/image_hero"
@@ -45,11 +45,11 @@
         app:layout_constraintTop_toTopOf="@id/image_hero">
 
         <FrameLayout
-            android:layout_width="104dp"
-            android:layout_height="104dp"
+            android:layout_width="112dp"
+            android:layout_height="112dp"
             android:background="@drawable/bg_login_logo_glass"
             android:elevation="6dp"
-            android:padding="14dp">
+            android:padding="16dp">
 
             <ImageView
                 android:layout_width="match_parent"
@@ -63,7 +63,7 @@
             style="@style/TextAppearance.Material3.TitleLarge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
             android:letterSpacing="0.12"
             android:text="@string/app_name"
             android:textColor="@color/white"
@@ -95,9 +95,9 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingStart="24dp"
-            android:paddingTop="28dp"
+            android:paddingTop="30dp"
             android:paddingEnd="24dp"
-            android:paddingBottom="20dp">
+            android:paddingBottom="24dp">
 
             <TextView
                 style="@style/TextAppearance.Material3.HeadlineSmall"
@@ -119,7 +119,7 @@
                 style="@style/TextAppearance.Material3.LabelMedium"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="26dp"
                 android:letterSpacing="0.08"
                 android:text="@string/email_address"
                 android:textColor="@color/login_text_primary"
@@ -129,7 +129,7 @@
                 android:id="@+id/input_layout_email"
                 style="@style/Widget.Material3.TextInputLayout.FilledBox"
                 android:layout_width="match_parent"
-                android:layout_height="58dp"
+                android:layout_height="60dp"
                 android:layout_marginTop="8dp"
                 app:boxBackgroundColor="@color/login_input_background"
                 app:boxCornerRadiusBottomEnd="@dimen/corner_radius_16"
@@ -161,7 +161,7 @@
                 style="@style/TextAppearance.Material3.LabelMedium"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="22dp"
                 android:letterSpacing="0.08"
                 android:text="@string/password_label"
                 android:textColor="@color/login_text_primary"
@@ -171,7 +171,7 @@
                 android:id="@+id/input_layout_password"
                 style="@style/Widget.Material3.TextInputLayout.FilledBox"
                 android:layout_width="match_parent"
-                android:layout_height="58dp"
+                android:layout_height="60dp"
                 android:layout_marginTop="8dp"
                 app:boxBackgroundColor="@color/login_input_background"
                 app:boxCornerRadiusBottomEnd="@dimen/corner_radius_16"
@@ -230,7 +230,7 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_login"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="58dp"
                 android:layout_marginTop="12dp"
                 android:background="@drawable/bg_login_sign_in"
                 android:text="@string/sign_in"
@@ -240,7 +240,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="18dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -270,7 +270,7 @@
                 android:id="@+id/button_google_sign_in"
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
+                android:layout_height="54dp"
                 android:text="@string/sign_in_with_google"
                 android:textColor="@color/login_text_primary"
                 app:cornerRadius="@dimen/corner_radius_16"

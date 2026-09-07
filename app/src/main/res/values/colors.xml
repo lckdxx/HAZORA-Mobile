@@ -2,64 +2,75 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="primary_blue">#1769AA</color>
-    <color name="primary_blue_dark">#0D4774</color>
+
+    <!-- Figma Color Palette -->
+    <color name="hazora_primary_blue">#2457A6</color>
+    <color name="hazora_deep_navy">#0D1B2A</color>
+    <color name="hazora_accent_orange">#FF9800</color>
+    <color name="hazora_background_light">#F5F7FA</color>
+    <color name="hazora_card_white">#FFFFFF</color>
+
+    <!-- Text Colors -->
+    <color name="hazora_text_primary">#0D1B2A</color>
+    <color name="hazora_text_secondary">#64748B</color>
+    <color name="hazora_text_on_blue">#FFFFFF</color>
+
+    <!-- Status Colors -->
+    <color name="hazora_success">#22C55E</color>
+    <color name="hazora_warning">#FF9800</color>
+    <color name="hazora_danger">#EF4444</color>
+    <color name="hazora_danger_light">#FEE2E2</color>
+
+    <!-- Legacy / Alias support (Fixes resource linking) -->
+    <color name="primary_blue">@color/hazora_primary_blue</color>
     <color name="primary_blue_light">#65A8DC</color>
-    <color name="accent_orange">#F7941D</color>
+    <color name="primary_blue_dark">#0D4774</color>
+    <color name="text_primary">@color/hazora_text_primary</color>
+    <color name="text_secondary">@color/hazora_text_secondary</color>
+    <color name="accent_orange">@color/hazora_accent_orange</color>
+    <color name="navy_900">#071A2C</color>
+    <color name="navy_800">#173047</color>
+    <color name="hazora_orange">@color/hazora_accent_orange</color>
+    <color name="hazora_input_stroke">#6D8294</color>
+    <color name="input_stroke">#6D8294</color>
+    <color name="background_light">@color/hazora_background_light</color>
+    <color name="dashboard_surface">@color/hazora_card_white</color>
+    <color name="dashboard_text_primary">@color/hazora_text_primary</color>
+    <color name="dashboard_text_muted">@color/hazora_text_secondary</color>
+    <color name="dashboard_nav_muted">#94A3B8</color>
+    <color name="dashboard_status_new">@color/hazora_danger</color>
+    <color name="dashboard_status_resolved">@color/hazora_success</color>
+
+    <!-- Hero / Header Gradients -->
+    <color name="dashboard_header_top">#2457A6</color>
+    <color name="dashboard_header_bottom">#2A5BB0</color>
+    <color name="login_hero_overlay">#B40D1B2A</color>
+    <color name="login_button_gradient_start">#2457A6</color>
+    <color name="login_button_gradient_end">#2A5BB0</color>
+    <color name="login_ripple">#33FFFFFF</color>
+
+    <!-- Backgrounds for legacy items -->
     <color name="background_navy">#071A2C</color>
     <color name="card_gray">#173047</color>
-    <color name="glass_card_background">#1F2A4760</color>
-    <color name="text_primary">#FFFFFFFF</color>
-    <color name="text_secondary">#B8C4D0</color>
-    <color name="success">#35B66F</color>
-    <color name="warning">#F7B731</color>
-    <color name="danger">#E55353</color>
-    <color name="input_stroke">#6D8294</color>
-    <color name="login_hero_overlay">#B4071A2C</color>
-    <color name="login_input_background">#F4F6F8</color>
-    <color name="login_text_primary">#17212B</color>
-    <color name="login_text_secondary">#667684</color>
+    <color name="login_text_primary">#0D1B2A</color>
+    <color name="login_text_secondary">#64748B</color>
     <color name="login_divider">#D9E1E8</color>
-    <color name="login_button_gradient_start">#2F62C6</color>
-    <color name="login_button_gradient_end">#214A97</color>
-    <color name="login_ripple">#33FFFFFF</color>
-    <color name="welcome_gradient_top">#214F93</color>
-    <color name="welcome_gradient_bottom">#12376A</color>
-    <color name="welcome_accent_orange">#F59E0B</color>
-    <color name="dashboard_header_top">#214F93</color>
-    <color name="dashboard_header_bottom">#2459A8</color>
-    <color name="background_light">#F7F9FC</color>
-    <color name="hazora_blue">#2455A4</color>
-    <color name="hazora_surface_light">#F5F7FA</color>
-    <color name="hazora_text_muted">#64748B</color>
-    <color name="welcome_button_pressed">#E38B00</color>
-    <color name="welcome_glass_background">#332D6AAC</color>
-    <color name="welcome_logo_glass_background">#14FFFFFF</color>
-    <color name="welcome_logo_glass_stroke">#59FFFFFF</color>
-    <color name="welcome_logo_glow">#33FFFFFF</color>
-    <color name="welcome_logo_halo_center">#0FFFFFFF</color>
-    <color name="welcome_logo_halo_edge">#00FFFFFF</color>
+    <color name="login_input_background">#F4F6F8</color>
+    <!-- Welcome & Splash specific (Restoring for build stability) -->
+    <color name="glass_card_background">#1F2A4760</color>
     <color name="splash_gradient_top">#0B1E38</color>
     <color name="splash_gradient_bottom">#09182F</color>
+    <color name="welcome_gradient_top">@color/hazora_primary_blue</color>
+    <color name="welcome_gradient_bottom">@color/hazora_deep_navy</color>
+    <color name="welcome_logo_glass_background">#14FFFFFF</color>
+    <color name="welcome_logo_glass_stroke">#59FFFFFF</color>
+    <color name="welcome_logo_halo_center">#0FFFFFFF</color>
+    <color name="welcome_logo_halo_edge">#00FFFFFF</color>
+    <color name="welcome_button_pressed">#E38B00</color>
+    <color name="welcome_accent_orange">@color/hazora_accent_orange</color>
 
-    <!-- Dark text colors for dashboard content -->
-    <color name="primary_text_dark">#1A1A1A</color>
-    <color name="secondary_text_dark">#6B7280</color>
-
-    <color name="dashboard_surface">#FFFFFFFF</color>
-    <color name="dashboard_text_primary">#17212B</color>
-    <color name="dashboard_text_muted">#64748B</color>
-    <color name="dashboard_nav_muted">#94A3B8</color>
-    <color name="dashboard_camera_blue">#1769AA</color>
-    <color name="dashboard_camera_ring">#FFFFFFFF</color>
-    <color name="dashboard_status_new">#EF4444</color>
-    <color name="dashboard_status_resolved">#22C55E</color>
-
-    <!-- Backward-compatible aliases used by existing screens. -->
-    <color name="navy_900">@color/background_navy</color>
-    <color name="navy_800">@color/card_gray</color>
-    <color name="hazora_orange">@color/accent_orange</color>
-    <color name="hazora_text_primary">@color/text_primary</color>
-    <color name="hazora_text_secondary">@color/text_secondary</color>
-    <color name="hazora_input_stroke">@color/input_stroke</color>
+    <!-- Navigation -->
+    <color name="dashboard_nav_active">#2457A6</color>
+    <color name="dashboard_camera_blue">#2457A6</color>
+    <color name="dashboard_camera_ring">#FFFFFF</color>
 </resources>

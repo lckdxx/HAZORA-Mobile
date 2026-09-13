@@ -87,12 +87,21 @@ public class IncidentsActivity extends AppCompatActivity {
                             String cam = doc.getString("cameraSource");
                             String loc = doc.getString("location");
                             String status = doc.getString("status");
+                            String severity = doc.getString("severity");
+                            String description = doc.getString("description");
+                            String prevention = doc.getString("prevention");
                             Object ts = doc.get("timestamp");
                             
                             String time = "Recent";
                             if (ts instanceof Timestamp) {
                                 Date date = ((Timestamp) ts).toDate();
-                                time = new SimpleDateFormat("hh:mm a", Locale.getDefault()).format(date);
+                                // Realtime format with Date as requested
+                                time = new SimpleDateFormat("MMM dd, yyyy • hh:mm a", Locale.getDefault()).format(date);
+                            }
+
+                            // Handle alternative word for unassigned location
+                            if (loc == null || loc.isEmpty() || "Location Not Set".equalsIgnoreCase(loc)) {
+                                loc = "Not assigned location site";
                             }
 
                             Incident inc = new Incident(
@@ -100,10 +109,11 @@ public class IncidentsActivity extends AppCompatActivity {
                                     type != null ? type : "Unknown Hazard",
                                     cam != null ? cam : "CAM-XX",
                                     time,
-                                    loc != null ? loc : "Location Not Set",
+                                    loc,
                                     status != null ? status : "New",
-                                    "High",
-                                    "AI detected a potential safety violation."
+                                    severity != null ? severity : "High",
+                                    description != null ? description : "AI detected a potential safety violation.",
+                                    prevention != null ? prevention : "Follow safety protocols."
                             );
                             
                             allIncidents.add(inc);

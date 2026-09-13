@@ -6,14 +6,6 @@
         <entry key="Firebase Crashlytics">
           <value>
             <InsightsFilterSettings>
-              <option name="connection">
-                <ConnectionSetting>
-                  <option name="appId" value="com.hazora.app" />
-                  <option name="mobileSdkAppId" value="1:94553925828:android:5a5af4c9f37e30f9f44191" />
-                  <option name="projectId" value="project-hazora" />
-                  <option name="projectNumber" value="94553925828" />
-                </ConnectionSetting>
-              </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
               <option name="timeIntervalDays" value="THIRTY_DAYS" />
               <option name="visibilityType" value="ALL" />

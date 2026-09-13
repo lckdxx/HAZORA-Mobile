@@ -15,16 +15,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Detection Overlay -->
-    <com.hazora.app.ui.hazardscan.DetectionOverlayView
-        android:id="@+id/detection_overlay"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <!-- Top Toolbar Overlay -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_toolbar"
@@ -217,12 +207,14 @@
                 android:orientation="horizontal">
 
                 <View
+                    android:id="@+id/tv_hazard_detected_dot"
                     android:layout_width="12dp"
                     android:layout_height="12dp"
                     android:background="@drawable/bg_circle_light_red"
                     android:backgroundTint="@color/hazora_danger" />
 
                 <TextView
+                    android:id="@+id/tv_hazard_detected_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"

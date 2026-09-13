@@ -15,6 +15,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -38,6 +40,9 @@ public class HazardGalleryActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private GalleryAdapter adapter;
     private List<Map<String, Object>> hazardList = new ArrayList<>();
+    private List<Map<String, Object>> filteredList = new ArrayList<>();
+    private String currentSearchQuery = "";
+    private String currentSeverityFilter = "All";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,10 +53,84 @@ public class HazardGalleryActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.rv_gallery);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new GalleryAdapter(hazardList);
+        adapter = new GalleryAdapter(filteredList);
         recyclerView.setAdapter(adapter);
 
+        setupFilters();
+        setupSearch();
         fetchHazards();
+    }
+
+    private void setupSearch() {
+        SearchView searchView = findViewById(R.id.search_view);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                currentSearchQuery = query;
+                applyFilters();
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                currentSearchQuery = newText;
+                applyFilters();
+                return true;
+            }
+        });
+    }
+
+    private void setupFilters() {
+        TextView filterAll = findViewById(R.id.filter_all);
+        TextView filterCritical = findViewById(R.id.filter_critical);
+        TextView filterHigh = findViewById(R.id.filter_high);
+        TextView filterLow = findViewById(R.id.filter_low);
+
+        View.OnClickListener filterClickListener = v -> {
+            filterAll.setBackgroundResource(R.drawable.bg_message_filter_unselected);
+            filterCritical.setBackgroundResource(R.drawable.bg_message_filter_unselected);
+            filterHigh.setBackgroundResource(R.drawable.bg_message_filter_unselected);
+            filterLow.setBackgroundResource(R.drawable.bg_message_filter_unselected);
+            filterAll.setTextColor(ContextCompat.getColor(this, R.color.primary_blue));
+            filterCritical.setTextColor(ContextCompat.getColor(this, R.color.primary_blue));
+            filterHigh.setTextColor(ContextCompat.getColor(this, R.color.primary_blue));
+            filterLow.setTextColor(ContextCompat.getColor(this, R.color.primary_blue));
+
+            v.setBackgroundResource(R.drawable.bg_message_filter_selected);
+            ((TextView) v).setTextColor(ContextCompat.getColor(this, R.color.white));
+            
+            currentSeverityFilter = ((TextView) v).getText().toString();
+            applyFilters();
+        };
+
+        filterAll.setOnClickListener(filterClickListener);
+        filterCritical.setOnClickListener(filterClickListener);
+        filterHigh.setOnClickListener(filterClickListener);
+        filterLow.setOnClickListener(filterClickListener);
+    }
+
+    private void applyFilters() {
+        filteredList.clear();
+        for (Map<String, Object> item : hazardList) {
+            boolean matchesSearch = true;
+            if (!currentSearchQuery.isEmpty()) {
+                String type = item.get("hazardType") != null ? ((String) item.get("hazardType")).toLowerCase() : "";
+                String loc = item.get("location") != null ? ((String) item.get("location")).toLowerCase() : "";
+                matchesSearch = type.contains(currentSearchQuery.toLowerCase()) || 
+                               loc.contains(currentSearchQuery.toLowerCase());
+            }
+
+            boolean matchesSeverity = true;
+            if (!currentSeverityFilter.equalsIgnoreCase("All")) {
+                String severity = (String) item.get("severity");
+                matchesSeverity = currentSeverityFilter.equalsIgnoreCase(severity);
+            }
+
+            if (matchesSearch && matchesSeverity) {
+                filteredList.add(item);
+            }
+        }
+        adapter.notifyDataSetChanged();
     }
 
     private void fetchHazards() {
@@ -67,7 +146,7 @@ public class HazardGalleryActivity extends AppCompatActivity {
                             hazardList.add(data);
                         }
                     }
-                    adapter.notifyDataSetChanged();
+                    applyFilters();
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Failed to load gallery: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -102,6 +181,13 @@ public class HazardGalleryActivity extends AppCompatActivity {
                 holder.tvTimestamp.setText(timeStr);
             }
 
+            // Severity Badge
+            String severity = (String) item.get("severity");
+            if (severity != null) {
+                String type = (String) item.get("hazardType");
+                holder.tvType.setText(String.format(Locale.getDefault(), "%s (%s)", type, severity));
+            }
+
             String base64Data = (String) item.get("imageData");
             if (base64Data != null && !base64Data.isEmpty()) {
                 byte[] decodedString = Base64.decode(base64Data, Base64.DEFAULT);
@@ -120,16 +206,16 @@ public class HazardGalleryActivity extends AppCompatActivity {
                 Context context = v.getContext();
                 Intent intent = new Intent(context, IncidentDetailActivity.class);
                 
-                // Create a temporary Incident object to pass data
                 Incident inc = new Incident(
-                    (String) item.get("id"), // We should store ID in map if available
+                    (String) item.get("id"),
                     (String) item.get("hazardType"),
                     (String) item.get("cameraSource"),
                     finalTime,
                     (String) item.get("location"),
                     (String) item.get("status"),
-                    "High",
-                    "AI detected safety violation"
+                    (String) item.get("severity"),
+                    (String) item.get("description"),
+                    (String) item.get("prevention")
                 );
                 intent.putExtra("incident_data", inc);
                 context.startActivity(intent);

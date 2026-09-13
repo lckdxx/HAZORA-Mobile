@@ -76,15 +76,12 @@ public class DetectionOverlayView extends View {
             if (result.type == HazardDetector.DetectionType.PERSON) {
                 boxPaint.setColor(Color.CYAN);
                 boxPaint.setStrokeWidth(4f);
-            } else if (result.type == HazardDetector.DetectionType.FACE) {
-                boxPaint.setColor(Color.YELLOW);
-                boxPaint.setStrokeWidth(4f);
             } else if (result.isSecure) {
                 boxPaint.setColor(Color.GREEN);
                 boxPaint.setStrokeWidth(8f);
             } else {
-                boxPaint.setColor(Color.RED);
-                boxPaint.setStrokeWidth(8f);
+                // Skip drawing Face (Yellow) and other detections (Red) as requested
+                continue;
             }
             
             canvas.drawRect(left, top, right, bottom, boxPaint);

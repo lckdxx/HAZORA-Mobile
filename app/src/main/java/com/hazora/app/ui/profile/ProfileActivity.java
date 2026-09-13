@@ -3,28 +3,32 @@ package com.hazora.app.ui.profile;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.hazora.app.auth.GoogleSignInHelper;
 import com.hazora.app.auth.SessionManager;
 import com.hazora.app.R;
 import com.hazora.app.ui.login.LoginActivity;
 
-import android.widget.TextView;
-import android.widget.Toast;
-
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ProfileActivity extends AppCompatActivity {
 
     private SessionManager sessionManager;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance("hazora");
+    private DocumentSnapshot currentDoc;
+    private String currentCollection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +43,11 @@ public class ProfileActivity extends AppCompatActivity {
         loadUserData();
 
         findViewById(R.id.btn_logout).setOnClickListener(v -> showLogoutConfirmation());
+        
+        View editBtn = findViewById(R.id.btn_edit_profile);
+        if (editBtn != null) {
+            editBtn.setOnClickListener(v -> showEditProfileDialog());
+        }
     }
 
     private void loadUserData() {
@@ -55,7 +64,9 @@ public class ProfileActivity extends AppCompatActivity {
                     .get()
                     .addOnSuccessListener(queryDocumentSnapshots -> {
                         if (!queryDocumentSnapshots.isEmpty()) {
-                            processProfileDoc(queryDocumentSnapshots.getDocuments().get(0));
+                            currentCollection = "mobile_accounts";
+                            currentDoc = queryDocumentSnapshots.getDocuments().get(0);
+                            processProfileDoc(currentDoc);
                         } else {
                             // 2. Try searching by email/createdByEmail
                             db.collection("mobile_accounts")
@@ -63,7 +74,9 @@ public class ProfileActivity extends AppCompatActivity {
                                     .get()
                                     .addOnSuccessListener(snapshots -> {
                                         if (!snapshots.isEmpty()) {
-                                            processProfileDoc(snapshots.getDocuments().get(0));
+                                            currentCollection = "mobile_accounts";
+                                            currentDoc = snapshots.getDocuments().get(0);
+                                            processProfileDoc(currentDoc);
                                         } else {
                                             // 3. Fallback to "users" collection
                                             db.collection("users")
@@ -71,7 +84,9 @@ public class ProfileActivity extends AppCompatActivity {
                                                     .get()
                                                     .addOnSuccessListener(userSnapshots -> {
                                                         if (!userSnapshots.isEmpty()) {
-                                                            processProfileDoc(userSnapshots.getDocuments().get(0));
+                                                            currentCollection = "users";
+                                                            currentDoc = userSnapshots.getDocuments().get(0);
+                                                            processProfileDoc(currentDoc);
                                                         }
                                                     });
                                         }
@@ -105,12 +120,68 @@ public class ProfileActivity extends AppCompatActivity {
             infoRole.setText(role);
         }
         if (site != null) {
+            profileSite.setVisibility(View.VISIBLE);
             profileSite.setText(site);
             infoSite.setText(site);
         } else {
             profileSite.setVisibility(View.GONE);
             infoSite.setText("Not Assigned");
         }
+    }
+
+    private void showEditProfileDialog() {
+        if (currentDoc == null) {
+            Toast.makeText(this, "Profile data not loaded yet", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_profile, null);
+        EditText etName = dialogView.findViewById(R.id.et_edit_name);
+        EditText etUsername = dialogView.findViewById(R.id.et_edit_username);
+        EditText etEmail = dialogView.findViewById(R.id.et_edit_email);
+        EditText etPassword = dialogView.findViewById(R.id.et_edit_password);
+
+        etName.setText(currentDoc.getString("name"));
+        etUsername.setText(currentDoc.getString("username"));
+        etEmail.setText(currentDoc.getString("email") != null ? currentDoc.getString("email") : currentDoc.getString("createdByEmail"));
+        etPassword.setText(currentDoc.getString("password"));
+
+        new MaterialAlertDialogBuilder(this)
+                .setView(dialogView)
+                .setPositiveButton("Save", (dialog, which) -> {
+                    saveProfileChanges(
+                            etName.getText().toString(),
+                            etUsername.getText().toString(),
+                            etEmail.getText().toString(),
+                            etPassword.getText().toString()
+                    );
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void saveProfileChanges(String name, String username, String email, String password) {
+        if (currentDoc == null || currentCollection == null) return;
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("name", name);
+        updates.put("username", username);
+        if (currentDoc.contains("email")) {
+            updates.put("email", email);
+        } else if (currentDoc.contains("createdByEmail")) {
+            updates.put("createdByEmail", email);
+        }
+        updates.put("password", password);
+
+        db.collection(currentCollection).document(currentDoc.getId())
+                .update(updates)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show();
+                    loadUserData(); // Reload to reflect changes
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Failed to update profile", Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void showLogoutConfirmation() {

@@ -52,9 +52,18 @@ public class IncidentDetailActivity extends AppCompatActivity {
             TextView time = findViewById(R.id.tv_time);
             if (time != null) time.setText(incident.getTime());
             TextView site = findViewById(R.id.tv_site);
-            if (site != null) site.setText(incident.getSite());
+            if (site != null) {
+                String siteStr = incident.getSite();
+                if (siteStr == null || siteStr.isEmpty() || "Location Not Set".equalsIgnoreCase(siteStr)) {
+                    site.setText("Not assigned location site");
+                } else {
+                    site.setText(siteStr);
+                }
+            }
             TextView desc = findViewById(R.id.tv_description);
             if (desc != null) desc.setText(incident.getDescription());
+            TextView prev = findViewById(R.id.tv_prevention);
+            if (prev != null) prev.setText(incident.getPrevention());
         }
 
         Button ack = findViewById(R.id.btn_acknowledge);

@@ -18,6 +18,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.hazora.app.auth.SessionManager;
 import com.hazora.app.R;
 import com.hazora.app.ui.hazardscan.HazardScanActivity;
 import com.hazora.app.ui.incidents.IncidentsActivity;
@@ -31,14 +32,16 @@ import java.util.Locale;
 public class DashboardActivity extends AppCompatActivity {
 
     private final FirebaseFirestore db = FirebaseFirestore.getInstance("hazora");
-    private TextView tvName, tvActiveHazards, tvTotalIncidents, tvResolvedIncidents;
+    private TextView tvName, tvActiveHazards, tvTotalIncidents, tvResolvedIncidents, tvSiteContext;
     private LinearLayout containerRecent;
+    private SessionManager sessionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
 
+        sessionManager = new SessionManager(this);
         initViews();
         setupNavigation();
         loadUserData();
@@ -48,6 +51,7 @@ public class DashboardActivity extends AppCompatActivity {
 
     private void initViews() {
         tvName = findViewById(R.id.tv_name);
+        tvSiteContext = findViewById(R.id.tv_site_context);
         tvActiveHazards = findViewById(R.id.tv_active_hazards);
         tvTotalIncidents = findViewById(R.id.tv_total_incidents);
         tvResolvedIncidents = findViewById(R.id.tv_resolved_incidents);
@@ -71,12 +75,63 @@ public class DashboardActivity extends AppCompatActivity {
 
     private void loadUserData() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null && tvName != null) {
-            String name = user.getDisplayName();
-            if (name == null || name.isEmpty()) {
-                name = user.getEmail();
-            }
+        String searchKey = user != null && user.getEmail() != null ? user.getEmail() : sessionManager.getUserEmail();
+
+        if (searchKey == null || searchKey.isEmpty()) {
+            if (tvSiteContext != null) tvSiteContext.setText("Not assigned location site");
+            return;
+        }
+
+        // 1. Try searching by username (e.g., "MOB - 001")
+        db.collection("mobile_accounts")
+                .whereEqualTo("username", searchKey)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        updateProfileHeader(queryDocumentSnapshots.getDocuments().get(0));
+                    } else {
+                        // 2. Try searching by email/createdByEmail
+                        db.collection("mobile_accounts")
+                                .whereEqualTo("createdByEmail", searchKey)
+                                .get()
+                                .addOnSuccessListener(snapshots -> {
+                                    if (!snapshots.isEmpty()) {
+                                        updateProfileHeader(snapshots.getDocuments().get(0));
+                                    } else {
+                                        // 3. Fallback to "users" collection
+                                        db.collection("users")
+                                                .whereEqualTo("email", searchKey)
+                                                .get()
+                                                .addOnSuccessListener(userSnapshots -> {
+                                                    if (!userSnapshots.isEmpty()) {
+                                                        updateProfileHeader(userSnapshots.getDocuments().get(0));
+                                                    } else {
+                                                        if (tvSiteContext != null) tvSiteContext.setText("Not assigned location site");
+                                                    }
+                                                });
+                                    }
+                                });
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    if (tvSiteContext != null) tvSiteContext.setText("Not assigned location site");
+                });
+    }
+
+    private void updateProfileHeader(DocumentSnapshot doc) {
+        String name = doc.getString("name");
+        String site = doc.getString("site");
+
+        if (name != null && !name.isEmpty() && tvName != null) {
             tvName.setText(name);
+        }
+
+        if (tvSiteContext != null) {
+            if (site != null && !site.isEmpty()) {
+                tvSiteContext.setText(site);
+            } else {
+                tvSiteContext.setText("Not assigned location site");
+            }
         }
     }
 
@@ -131,7 +186,8 @@ public class DashboardActivity extends AppCompatActivity {
         String time = "Recent";
         if (ts instanceof Timestamp) {
             Date date = ((Timestamp) ts).toDate();
-            time = new SimpleDateFormat("hh:mm a", Locale.getDefault()).format(date);
+            // Use realtime format with Date
+            time = new SimpleDateFormat("MMM dd, yyyy • hh:mm a", Locale.getDefault()).format(date);
         }
         details.setText((cam != null ? cam : "CAM-XX") + " • " + time);
         

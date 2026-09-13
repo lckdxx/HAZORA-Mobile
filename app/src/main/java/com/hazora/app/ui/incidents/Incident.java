@@ -14,8 +14,9 @@ public class Incident implements Serializable {
     private String status;
     private String severity;
     private String description;
+    private String prevention;
 
-    public Incident(String id, String title, String cameraId, String time, String site, String status, String severity, String description) {
+    public Incident(String id, String title, String cameraId, String time, String site, String status, String severity, String description, String prevention) {
         this.id = id;
         this.title = title;
         this.cameraId = cameraId;
@@ -24,6 +25,7 @@ public class Incident implements Serializable {
         this.status = status;
         this.severity = severity;
         this.description = description;
+        this.prevention = prevention;
     }
 
     public String getId() { return id; }
@@ -35,4 +37,5 @@ public class Incident implements Serializable {
     public void setStatus(String status) { this.status = status; }
     public String getSeverity() { return severity; }
     public String getDescription() { return description; }
+    public String getPrevention() { return prevention; }
 }

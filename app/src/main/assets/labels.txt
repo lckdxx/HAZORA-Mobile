@@ -1,0 +1,5 @@
+0 Charger Cord
+1 Charger Head
+2 Earpods
+3 Tablet
+4 Notebook

@@ -1,5 +1,5 @@
 [versions]
-agp = "9.2.1"
+agp = "8.9.1"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
@@ -9,13 +9,19 @@ activityKtx = "1.13.0"
 constraintlayout = "2.2.1"
 googleAuth = "21.2.0"
 camerax = "1.3.4"
-tensorflowLite = "2.16.1"
-tensorflowLiteSupport = "0.5.0"
+tensorflowLite = "2.14.0"
+tensorflowLiteSupport = "0.4.4"
 firebaseBom = "34.18.0"
 googleServices = "4.4.2"
 firebaseDatabase = "22.0.1"
+kotlin = "2.0.0"
+androidxCore = "1.15.0"
+androidxActivity = "1.9.3"
+guava = "33.7.1-android"
 
 [libraries]
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCore" }
+androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "androidxActivity" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -36,7 +42,9 @@ firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
 glide = { group = "com.github.bumptech.glide", name = "glide", version = "4.16.0" }
+guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

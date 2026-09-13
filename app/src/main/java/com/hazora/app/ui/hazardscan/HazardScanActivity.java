@@ -3,6 +3,7 @@ package com.hazora.app.ui.hazardscan;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
@@ -30,14 +31,18 @@ import androidx.core.content.ContextCompat;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.hazora.app.R;
+import com.hazora.app.ui.incidents.Incident;
 import com.hazora.app.ui.incidents.IncidentDetailActivity;
 
 import java.io.ByteArrayOutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -58,13 +63,14 @@ public class HazardScanActivity extends AppCompatActivity {
     private Button startButton;
     private PreviewView previewView;
     private View cameraPlaceholder;
-    private DetectionOverlayView detectionOverlay;
     private Button captureButton;
     private ImageView ivCapturedResult;
     private ProcessCameraProvider cameraProvider;
     private ExecutorService cameraExecutor;
     private HazardDetector hazardDetector;
     private boolean isScanning = false;
+    private String userAssignedSite = "Not assigned location site";
+    private Incident lastDetectedIncident;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,7 +88,6 @@ public class HazardScanActivity extends AppCompatActivity {
         startButton = findViewById(R.id.btn_start_scan);
         previewView = findViewById(R.id.previewView);
         cameraPlaceholder = findViewById(R.id.camera_placeholder);
-        detectionOverlay = findViewById(R.id.detection_overlay);
         captureButton = findViewById(R.id.btn_capture);
         ivCapturedResult = findViewById(R.id.iv_captured_result);
 
@@ -106,6 +111,46 @@ public class HazardScanActivity extends AppCompatActivity {
 
         findViewById(R.id.btn_view_incident).setOnClickListener(v -> openIncident());
         findViewById(R.id.btn_scan_again).setOnClickListener(v -> resetScan());
+
+        loadUserSite();
+    }
+
+    private void loadUserSite() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return;
+
+        String userEmail = user.getEmail();
+        if (userEmail == null || userEmail.isEmpty()) return;
+
+        FirebaseFirestore.getInstance("hazora").collection("mobile_accounts")
+                .whereEqualTo("username", userEmail)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        String site = queryDocumentSnapshots.getDocuments().get(0).getString("site");
+                        if (site != null && !site.isEmpty()) userAssignedSite = site;
+                    } else {
+                        FirebaseFirestore.getInstance("hazora").collection("mobile_accounts")
+                                .whereEqualTo("createdByEmail", userEmail)
+                                .get()
+                                .addOnSuccessListener(snapshots -> {
+                                    if (!snapshots.isEmpty()) {
+                                        String site = snapshots.getDocuments().get(0).getString("site");
+                                        if (site != null && !site.isEmpty()) userAssignedSite = site;
+                                    } else {
+                                        FirebaseFirestore.getInstance("hazora").collection("users")
+                                                .whereEqualTo("email", userEmail)
+                                                .get()
+                                                .addOnSuccessListener(userSnapshots -> {
+                                                    if (!userSnapshots.isEmpty()) {
+                                                        String site = userSnapshots.getDocuments().get(0).getString("site");
+                                                        if (site != null && !site.isEmpty()) userAssignedSite = site;
+                                                    }
+                                                });
+                                    }
+                                });
+                    }
+                });
     }
 
     private boolean allPermissionsGranted() {
@@ -175,26 +220,18 @@ public class HazardScanActivity extends AppCompatActivity {
         resultCard.setVisibility(View.GONE);
 
         cameraExecutor.execute(() -> {
-            // Run AI Detection on the captured frame
+            // Run Local TFLite/YOLOv8 Detection
             List<HazardDetector.DetectionResult> detections = hazardDetector.detect(bitmap);
             
-            // Artificial delay to show "Analyzing" state for a moment
-            try { Thread.sleep(1500); } catch (InterruptedException ignored) {}
-
             runOnUiThread(() -> {
                 analyzingLayout.setVisibility(View.GONE);
                 
                 if (!detections.isEmpty()) {
+                    // Show the most relevant result (usually index 0)
                     HazardDetector.DetectionResult bestMatch = detections.get(0);
-                    
-                    // Show bounding boxes on the UI overlay
-                    detectionOverlay.updateResults(detections);
-                    
-                    // Display result card and upload
                     showDetectionResult(bestMatch, bitmap);
                 } else {
-                    detectionOverlay.clear();
-                    Toast.makeText(this, "No hazards detected in this capture.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "No hazards detected.", Toast.LENGTH_SHORT).show();
                     isScanning = false;
                 }
             });
@@ -210,17 +247,30 @@ public class HazardScanActivity extends AppCompatActivity {
 
         TextView tvTitle = findViewById(R.id.tv_hazard_title);
         TextView tvDetails = findViewById(R.id.tv_hazard_details);
+        View statusDot = findViewById(R.id.tv_hazard_detected_dot);
+        TextView statusText = findViewById(R.id.tv_hazard_detected_label);
         
         if (tvTitle != null) tvTitle.setText(result.label);
         if (tvDetails != null) {
-            String details = "Confidence:  " + String.format(Locale.US, "%.1f", result.confidence * 100) + "%";
-            tvDetails.setText(details);
+            tvDetails.setText("AI Detection Complete");
         }
 
-        // 1. Resize and Compress for Firestore (to stay under 1MB limit)
+        if (statusText != null && statusDot != null) {
+            if (result.isSecure) {
+                statusText.setText("AREA SECURE");
+                statusText.setTextColor(ContextCompat.getColor(this, R.color.hazora_success));
+                statusDot.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.hazora_success)));
+            } else {
+                statusText.setText("HAZARD DETECTED");
+                statusText.setTextColor(ContextCompat.getColor(this, R.color.hazora_danger));
+                statusDot.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.hazora_danger)));
+            }
+        }
+
+        // 1. Resize and Compress for Firestore
         Bitmap resized = Bitmap.createScaledBitmap(bitmap, 480, (int)(480 * ((float)bitmap.getHeight()/bitmap.getWidth())), true);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        resized.compress(Bitmap.CompressFormat.JPEG, 60, baos); // Lower quality to save space
+        resized.compress(Bitmap.CompressFormat.JPEG, 60, baos);
         byte[] imageBytes = baos.toByteArray();
         String base64Image = Base64.encodeToString(imageBytes, Base64.DEFAULT);
 
@@ -237,16 +287,32 @@ public class HazardScanActivity extends AppCompatActivity {
         incident.put("userId", userId);
         incident.put("hazardType", result.label);
         incident.put("confidence", result.confidence);
-        incident.put("imageData", base64Data); // Store the actual image as text
+        incident.put("imageData", base64Data);
         incident.put("timestamp", Timestamp.now());
-        incident.put("status", "New");
-        incident.put("location", "Location Not Set");
+        incident.put("status", result.isSecure ? "Resolved" : "New");
+        incident.put("severity", result.severity);
+        incident.put("location", userAssignedSite);
         incident.put("cameraSource", "Mobile Capture");
+        incident.put("description", "Detected via on-device AI model.");
+        incident.put("prevention", "Follow standard safety protocols.");
 
         db.collection("incidents")
                 .add(incident)
                 .addOnSuccessListener(doc -> {
                     Toast.makeText(this, "Incident saved to database", Toast.LENGTH_SHORT).show();
+                    
+                    String time = new SimpleDateFormat("MMM dd, yyyy • hh:mm a", Locale.getDefault()).format(new Date());
+                    lastDetectedIncident = new Incident(
+                            doc.getId(),
+                            result.label,
+                            "Mobile Capture",
+                            time,
+                            userAssignedSite,
+                            result.isSecure ? "Resolved" : "New",
+                            result.severity,
+                            "Detected via on-device AI model.",
+                            "Follow standard safety protocols."
+                    );
                 })
                 .addOnFailureListener(e -> {
                     Log.e("HazardScan", "Error saving", e);
@@ -259,7 +325,6 @@ public class HazardScanActivity extends AppCompatActivity {
     private void resetScan() {
         isScanning = false;
         handler.removeCallbacksAndMessages(null);
-        detectionOverlay.clear();
         analyzingLayout.setVisibility(View.GONE);
         resultCard.setVisibility(View.GONE);
         startButton.setEnabled(true);
@@ -277,9 +342,15 @@ public class HazardScanActivity extends AppCompatActivity {
     }
 
     private void openIncident() {
-        Intent intent = new Intent(this, IncidentDetailActivity.class);
-        intent.putExtra("incident_index", 0);
-        startActivity(intent);
+        if (lastDetectedIncident != null) {
+            Intent intent = new Intent(this, IncidentDetailActivity.class);
+            intent.putExtra("incident_data", lastDetectedIncident);
+            startActivity(intent);
+        } else {
+            Intent intent = new Intent(this, IncidentDetailActivity.class);
+            intent.putExtra("incident_index", 0);
+            startActivity(intent);
+        }
     }
 
     @Override

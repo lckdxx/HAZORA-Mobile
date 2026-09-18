@@ -328,21 +328,26 @@
 
                     <!-- SOS -->
                     <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/card_sos"
                         android:layout_width="0dp"
                         android:layout_height="100dp"
                         android:layout_marginEnd="8dp"
                         android:layout_weight="1"
                         app:cardCornerRadius="16dp"
                         app:cardElevation="2dp"
-                        app:cardBackgroundColor="@color/white">
+                        app:cardBackgroundColor="@color/white"
+                        android:clickable="true"
+                        android:focusable="true">
 
                         <LinearLayout
+                            android:id="@+id/layout_sos_inner"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
                             android:orientation="vertical">
 
                             <ImageView
+                                android:id="@+id/iv_sos_icon"
                                 android:layout_width="32dp"
                                 android:layout_height="32dp"
                                 android:background="@drawable/bg_circle_light_red"
@@ -352,6 +357,7 @@
                                 android:contentDescription="SOS" />
 
                             <TextView
+                                android:id="@+id/tv_sos_label"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
@@ -526,5 +532,41 @@
             android:focusable="false" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- SOS Alert Bar (Overlay) -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_sos_alert"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:visibility="gone"
+        app:cardBackgroundColor="@color/hazora_danger"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="8dp"
+        app:layout_constraintBottom_toTopOf="@id/nav_area">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_warning"
+                app:tint="@color/white" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:text="SOS ACTIVE: Emergency team is on the way!"
+                android:textColor="@color/white"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

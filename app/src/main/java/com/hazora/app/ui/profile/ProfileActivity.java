@@ -2,6 +2,7 @@ package com.hazora.app.ui.profile;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -166,21 +167,35 @@ public class ProfileActivity extends AppCompatActivity {
         Map<String, Object> updates = new HashMap<>();
         updates.put("name", name);
         updates.put("username", username);
+        
+        // Handle different email field names in different collections
         if (currentDoc.contains("email")) {
             updates.put("email", email);
         } else if (currentDoc.contains("createdByEmail")) {
             updates.put("createdByEmail", email);
         }
-        updates.put("password", password);
+        
+        if (password != null && !password.isEmpty()) {
+            updates.put("password", password);
+        }
+
+        // Show loading toast
+        Toast.makeText(this, "Updating profile...", Toast.LENGTH_SHORT).show();
 
         db.collection(currentCollection).document(currentDoc.getId())
                 .update(updates)
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show();
+                    // Update session manager if email changed
+                    if (sessionManager.getUserEmail().equals(currentDoc.getString("email")) || 
+                        sessionManager.getUserEmail().equals(currentDoc.getString("createdByEmail"))) {
+                        sessionManager.saveUserEmail(email);
+                    }
                     loadUserData(); // Reload to reflect changes
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Failed to update profile", Toast.LENGTH_SHORT).show();
+                    Log.e("ProfileActivity", "Update failed", e);
+                    Toast.makeText(this, "Update failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
     }
 

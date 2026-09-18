@@ -8,7 +8,7 @@
     <string name="email_address">EMAIL ADDRESS</string>
     <string name="password">Password</string>
     <string name="password_label">PASSWORD</string>
-    <string name="email_hint">Enter your email address</string>
+    <string name="email_hint">Enter your email or username (Email/Username)</string>
     <string name="password_hint">Enter your password</string>
     <string name="sign_in">Sign In</string>
     <string name="signing_in">Signing in…</string>

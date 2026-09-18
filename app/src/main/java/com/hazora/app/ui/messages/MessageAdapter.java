@@ -39,20 +39,17 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
         Message message = messages.get(position);
         holder.sender.setText(message.getSender());
-        holder.subject.setText(message.getSubject());
         holder.preview.setText(message.getPreview());
         holder.time.setText(message.getTime());
-        if ("Site Supervisor".equals(message.getSender())) {
-            holder.icon.setImageResource(R.drawable.ic_person);
-        } else if ("System".equals(message.getSender())) {
-            holder.icon.setImageResource(R.drawable.ic_pulse);
-        } else {
-            holder.icon.setImageResource(R.drawable.ic_warning);
-        }
+        
+        // Use generic avatar or based on name
+        holder.icon.setImageResource(R.drawable.ic_person);
+        
         int weight = message.isUnread() ? Typeface.BOLD : Typeface.NORMAL;
         holder.sender.setTypeface(null, weight);
-        holder.subject.setTypeface(null, weight);
+        holder.preview.setTypeface(null, weight);
         holder.unreadDot.setVisibility(message.isUnread() ? View.VISIBLE : View.GONE);
+        
         holder.itemView.setOnClickListener(v -> listener.onMessageClick(message));
         holder.itemView.setOnLongClickListener(v -> {
             listener.onMessageLongClick(message);
@@ -68,7 +65,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     static class MessageViewHolder extends RecyclerView.ViewHolder {
         final ImageView icon;
         final TextView sender;
-        final TextView subject;
         final TextView preview;
         final TextView time;
         final View unreadDot;
@@ -77,7 +73,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             super(itemView);
             icon = itemView.findViewById(R.id.img_message_icon);
             sender = itemView.findViewById(R.id.tv_sender);
-            subject = itemView.findViewById(R.id.tv_subject);
             preview = itemView.findViewById(R.id.tv_preview);
             time = itemView.findViewById(R.id.tv_time);
             unreadDot = itemView.findViewById(R.id.view_unread_dot);

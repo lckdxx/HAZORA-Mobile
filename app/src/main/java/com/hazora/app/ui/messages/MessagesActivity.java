@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.Timestamp;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -23,12 +24,15 @@ import com.hazora.app.R;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 public class MessagesActivity extends AppCompatActivity {
 
     private final ArrayList<Message> messages = new ArrayList<>();
     private final ArrayList<Message> visibleMessages = new ArrayList<>();
+    private final Map<String, String> nameCache = new HashMap<>();
     private MessageAdapter adapter;
     private TextView unreadSummary;
     private View emptyState;
@@ -77,6 +81,9 @@ public class MessagesActivity extends AppCompatActivity {
     }
 
     private void fetchMessagesFromFirebase() {
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser() != null ? 
+                             FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
+
         db.collection("messages")
                 .orderBy("createdAt", Query.Direction.DESCENDING)
                 .addSnapshotListener((value, error) -> {
@@ -91,32 +98,66 @@ public class MessagesActivity extends AppCompatActivity {
                             String id = doc.getId();
                             String body = doc.getString("message");
                             String senderEmail = doc.getString("senderEmail");
+                            String senderId = doc.getString("senderId");
+                            String imageUrl = doc.getString("imageUrl");
                             Object createdAt = doc.get("createdAt");
                             Object readAt = doc.get("readAt");
 
                             String time = "Recent";
                             if (createdAt instanceof Timestamp) {
                                 Date date = ((Timestamp) createdAt).toDate();
-                                SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault());
-                                time = sdf.format(date);
+                                time = new SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault()).format(date);
                             }
 
-                            boolean isUnread = (readAt == null);
-                            
+                            boolean isMine = senderId != null && senderId.equals(currentUserId);
+                            String displayName = resolveName(senderEmail);
+
                             messages.add(new Message(
                                     id,
-                                    senderEmail != null ? senderEmail : "Safety System",
-                                    "Safety Officer",
-                                    "New Update",
-                                    body != null ? body : "",
+                                    displayName,
+                                    senderEmail,
+                                    senderId,
+                                    body != null ? body : (imageUrl != null ? "Sent an image" : ""),
                                     body != null ? body : "",
                                     time,
-                                    isUnread
+                                    readAt == null && !isMine,
+                                    isMine,
+                                    imageUrl
                             ));
                         }
                         refreshMessages();
                     }
                 });
+    }
+
+    private String resolveName(String email) {
+        if (email == null) return "Safety System";
+        if (nameCache.containsKey(email)) return nameCache.get(email);
+
+        // Perform lazy lookup (the UI will refresh once found)
+        db.collection("mobile_accounts").whereEqualTo("username", email).get()
+            .addOnSuccessListener(snaps -> {
+                if (!snaps.isEmpty()) {
+                    String name = snaps.getDocuments().get(0).getString("name");
+                    if (name != null) {
+                        nameCache.put(email, name);
+                        refreshMessages();
+                    }
+                } else {
+                    db.collection("users").whereEqualTo("email", email).get()
+                        .addOnSuccessListener(uSnaps -> {
+                            if (!uSnaps.isEmpty()) {
+                                String name = uSnaps.getDocuments().get(0).getString("name");
+                                if (name != null) {
+                                    nameCache.put(email, name);
+                                    refreshMessages();
+                                }
+                            }
+                        });
+                }
+            });
+
+        return email; // Return email until name is resolved
     }
 
     private void confirmDeleteAllRead() {
@@ -183,9 +224,8 @@ public class MessagesActivity extends AppCompatActivity {
 
         Intent intent = new Intent(this, MessageDetailActivity.class);
         intent.putExtra("message_id", message.getId());
-        intent.putExtra("message_sender", message.getSender());
-        intent.putExtra("message_role", message.getRole());
-        intent.putExtra("message_subject", message.getSubject());
+        intent.putExtra("message_sender", message.getSenderEmail());
+        intent.putExtra("message_display_name", message.getSender());
         intent.putExtra("message_time", message.getTime());
         intent.putExtra("message_body", message.getBody());
         startActivity(intent);

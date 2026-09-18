@@ -7,10 +7,11 @@ import android.graphics.Rect;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
- * Ported PPE Detection logic for Android.
- * Implements color-based detection heuristics and prepares for TFLite integration.
+ * AI-Driven PPE Detection engine for HAZORA.
+ * Uses YOLOv8 TFLite model for object detection and spatial grouping for body analysis.
  */
 public class HazardDetector {
 
@@ -26,265 +27,205 @@ public class HazardDetector {
         yoloDetector = new YOLODetector(context);
     }
 
-    public float getAutoBrightnessScale(Bitmap bitmap) {
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
-        float luminanceTotal = 0;
-        int sampledPixels = 0;
-        int brightPixels = 0;
-
-        // Sample every 8th pixel horizontally and vertically
-        for (int y = 0; y < height; y += 8) {
-            for (int x = 0; x < width; x += 8) {
-                int pixel = bitmap.getPixel(x, y);
-                int r = Color.red(pixel);
-                int g = Color.green(pixel);
-                int b = Color.blue(pixel);
-                
-                float luminance = (0.2126f * r + 0.7152f * g + 0.0722f * b) / 255f;
-                luminanceTotal += luminance;
-                sampledPixels++;
-                if (luminance >= 0.94f) brightPixels++;
-            }
-        }
-
-        if (sampledPixels == 0) return 1f;
-
-        float averageLuminance = luminanceTotal / sampledPixels;
-        float brightPixelRatio = (float) brightPixels / sampledPixels;
-        
-        if (averageLuminance <= 0.72f && brightPixelRatio <= 0.28f) return 1f;
-
-        float averageScale = 0.72f / Math.max(averageLuminance, 0.72f);
-        float highlightScale = brightPixelRatio > 0.45f ? 0.72f : 0.84f;
-        return Math.max(0.55f, Math.min(1f, Math.min(averageScale, highlightScale)));
-    }
-
-    public Rect getHelmetRegionFromPerson(Rect personBbox) {
-        int width = personBbox.width();
-        // Selfie optimization: Increase height check area to 45% of top area
-        // and adjust width to center better on close-up faces.
-        return new Rect(
-            (int) (personBbox.left + width * 0.1),
-            personBbox.top,
-            (int) (personBbox.left + width * 0.9),
-            (int) (personBbox.top + personBbox.height() * 0.45)
-        );
-    }
-
+    /** Analyzes image for multiple people and their PPE compliance using YOLO AI. */
     public List<DetectionResult> detect(Bitmap bitmap) {
         List<DetectionResult> results = new ArrayList<>();
         
-        // 1. Try YOLOv8 Detector First (High Precision Object Detection)
-        List<YOLODetector.Recognition> yoloRecognitions = yoloDetector.detect(bitmap);
-        if (!yoloRecognitions.isEmpty()) {
-            for (YOLODetector.Recognition rec : yoloRecognitions) {
-                String label = rec.title.toLowerCase();
-                float confidence = rec.confidence;
-                Rect region = new Rect((int)rec.location.left, (int)rec.location.top, (int)rec.location.right, (int)rec.location.bottom);
+        // 1. Image Quality Check: Detect if the image is too blurry for AI
+        boolean isBlurry = isImageBlurry(bitmap);
+        
+        // 2. Lighting Normalization: Enhance image for better AI shape recognition
+        float lightScale = getAutoBrightnessScale(bitmap);
+        Bitmap analysisBitmap = bitmap;
+        if (lightScale != 1.0f) {
+            analysisBitmap = boostBrightness(bitmap, lightScale);
+        }
 
-                if (label.contains("hardhat") || label.contains("helmet")) {
-                    results.add(new DetectionResult("PPE: Helmet", confidence, true, region, DetectionType.HELMET, "Low"));
-                } else if (label.contains("no-hardhat") || label.contains("no-helmet")) {
-                    results.add(new DetectionResult("Violation: No Helmet", confidence, false, region, DetectionType.HELMET, "Critical"));
-                } else if (label.contains("vest")) {
-                    results.add(new DetectionResult("PPE: Safety Vest", confidence, true, region, DetectionType.HELMET, "Low"));
-                } else if (label.contains("no-vest")) {
-                    results.add(new DetectionResult("Violation: No Vest", confidence, false, region, DetectionType.HELMET, "High"));
-                } else if (label.contains("hazard") || label.contains("danger")) {
-                    results.add(new DetectionResult("Hazard Detected: " + rec.title, confidence, false, region, DetectionType.HELMET, "High"));
+        // 3. Run YOLOv8 AI Detection
+        List<YOLODetector.Recognition> yoloRecognitions = yoloDetector.detect(analysisBitmap);
+        Rect fullFrameRect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+
+        if (!yoloRecognitions.isEmpty()) {
+            List<PPECluster> clusters = groupDetectionsIntoPeople(yoloRecognitions);
+            int totalPeople = clusters.size();
+            int violations = 0;
+
+            for (int i = 0; i < clusters.size(); i++) {
+                PPECluster cluster = clusters.get(i);
+                boolean isSecure = cluster.hasHelmet && cluster.hasVest && cluster.hasShoes;
+                if (!isSecure) violations++;
+
+                String label;
+                String recommendation = isSecure ? "Worker is safe to proceed." : "Action Required: " + cluster.getMissingAction();
+                
+                if (totalPeople > 1) {
+                    label = "Person " + (i + 1) + ": " + (isSecure ? "Secure" : cluster.getMissingRemarks());
                 } else {
-                    results.add(new DetectionResult(rec.title, confidence, true, region, DetectionType.HELMET, "Low"));
+                    label = isSecure ? "AREA SECURE: Full PPE" : "Violation: No " + cluster.getMissingRemarks();
+                }
+
+                if (isBlurry) recommendation = "Warning: Image is blurry. " + recommendation;
+
+                results.add(new DetectionResult(label, recommendation, 0.95f, isSecure, cluster.getCombinedBounds(), DetectionType.PERSON, isSecure ? "Low" : "Critical"));
+                
+                for (YOLODetector.Recognition rec : cluster.detections) {
+                    results.add(new DetectionResult("PPE: " + rec.title, "Verified via AI", rec.confidence, true, 
+                        new Rect((int)rec.location.left, (int)rec.location.top, (int)rec.location.right, (int)rec.location.bottom), 
+                        DetectionType.HELMET, "Low"));
                 }
             }
-            if (!results.isEmpty()) return results;
-        }
 
-        // 2. Run Heuristics (Fallback)
-        // 1. Detect Person - Wider bounds for selfie/close-up
-        Rect personRect = new Rect(
-            (int)(bitmap.getWidth() * 0.05),
-            (int)(bitmap.getHeight() * 0.05),
-            (int)(bitmap.getWidth() * 0.95),
-            (int)(bitmap.getHeight() * 0.95)
-        );
-        
-        // 2. Identify Helmet Region (Top of the head area)
-        Rect helmetRegion = getHelmetRegionFromPerson(personRect);
-        
-        // 3. Classify Helmet
-        DetectionResult helmetResult = classifyHelmetRegion(bitmap, helmetRegion, 0.0f);
-        
-        if (helmetResult != null && helmetResult.isSecure) {
-            // If helmet is detected, we report the person as secure
-            results.add(new DetectionResult("Person (Secure)", 0.95f, true, personRect, DetectionType.PERSON, "Low"));
-            results.add(helmetResult);
+            if (totalPeople > 1) {
+                String summary = String.format(Locale.getDefault(), "%d People: %d Secure, %d Violations", totalPeople, (totalPeople - violations), violations);
+                results.add(0, new DetectionResult(summary, "Please review individual assessments below.", 1.0f, violations == 0, fullFrameRect, DetectionType.PERSON, violations > 0 ? "High" : "Low"));
+            }
         } else {
-            // If no helmet, this is a violation
-            results.add(new DetectionResult("Safety Violation", 0.92f, false, personRect, DetectionType.PERSON, "Critical"));
-            if (helmetResult != null) results.add(helmetResult);
+            String advice = isBlurry ? "Hold the phone steady and move closer." : "Ensure the person is centered in the frame.";
+            results.add(new DetectionResult("Violation: No Helmet, Vest or Safety Shoes", "Action: Equip all required PPE. " + advice, 0.0f, false, fullFrameRect, DetectionType.PERSON, "Critical"));
+        }
+        
+        return results;
+    }
+
+    private boolean isImageBlurry(Bitmap bitmap) {
+        // Simple variance check: sample pixels and look for sharp color changes
+        // If the colors change too gradually, the image is likely blurry.
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        long totalDiff = 0;
+        int count = 0;
+        
+        for (int y = 32; y < height - 32; y += 32) {
+            for (int x = 32; x < width - 32; x += 32) {
+                int p1 = bitmap.getPixel(x, y);
+                int p2 = bitmap.getPixel(x + 1, y);
+                totalDiff += Math.abs(Color.red(p1) - Color.red(p2));
+                count++;
+            }
+        }
+        return (count > 0 && (totalDiff / count) < 4); // Threshold for low variance (blur)
+    }
+
+    private List<PPECluster> groupDetectionsIntoPeople(List<YOLODetector.Recognition> recognitions) {
+        List<PPECluster> clusters = new ArrayList<>();
+        for (YOLODetector.Recognition rec : recognitions) {
+            boolean added = false;
+            for (PPECluster cluster : clusters) {
+                if (cluster.isPartOfBody(rec)) {
+                    cluster.add(rec);
+                    added = true;
+                    break;
+                }
+            }
+            if (!added) {
+                clusters.add(new PPECluster(rec));
+            }
+        }
+        return clusters;
+    }
+
+    private static class PPECluster {
+        List<YOLODetector.Recognition> detections = new ArrayList<>();
+        boolean hasHelmet = false, hasVest = false, hasShoes = false;
+        float centerX;
+
+        PPECluster(YOLODetector.Recognition first) { add(first); }
+
+        void add(YOLODetector.Recognition rec) {
+            detections.add(rec);
+            String label = rec.title.toLowerCase();
+            if (label.contains("helmet")) hasHelmet = true;
+            if (label.contains("vest")) hasVest = true;
+            if (label.contains("shoes")) hasShoes = true;
+            
+            float totalX = 0;
+            for (YOLODetector.Recognition d : detections) totalX += d.location.centerX();
+            centerX = totalX / detections.size();
         }
 
-        // 4. Detect Face
-        Rect faceRect = new Rect(
-            (int)(personRect.left + personRect.width() * 0.25),
-            (int)(personRect.top + personRect.height() * 0.2),
-            (int)(personRect.left + personRect.width() * 0.75),
-            (int)(personRect.top + personRect.height() * 0.5)
-        );
-        results.add(new DetectionResult("Face", 0.88f, true, faceRect, DetectionType.FACE, "Low"));
+        boolean isPartOfBody(YOLODetector.Recognition rec) {
+            return Math.abs(rec.location.centerX() - centerX) < (640 * 0.25);
+        }
 
-        return results;
+        Rect getCombinedBounds() {
+            float left = Float.MAX_VALUE, top = Float.MAX_VALUE, right = 0, bottom = 0;
+            for (YOLODetector.Recognition d : detections) {
+                left = Math.min(left, d.location.left);
+                top = Math.min(top, d.location.top);
+                right = Math.max(right, d.location.right);
+                bottom = Math.max(bottom, d.location.bottom);
+            }
+            return new Rect((int)left, (int)(top - 20), (int)right, (int)(bottom + 50));
+        }
+
+        String getMissingRemarks() {
+            List<String> missing = new ArrayList<>();
+            if (!hasHelmet) missing.add("Helmet");
+            if (!hasVest) missing.add("Vest");
+            if (!hasShoes) missing.add("Shoes");
+            return String.join(" & ", missing);
+        }
+
+        String getMissingAction() {
+            List<String> actions = new ArrayList<>();
+            if (!hasHelmet) actions.add("Wear a safety helmet");
+            if (!hasVest) actions.add("Equip high-vis vest");
+            if (!hasShoes) actions.add("Wear safety shoes");
+            return String.join(", ", actions) + ".";
+        }
+    }
+
+    public float getAutoBrightnessScale(Bitmap bitmap) {
+        int width = bitmap.getWidth(), height = bitmap.getHeight();
+        float luminanceTotal = 0;
+        int sampledPixels = 0, darkPixels = 0;
+
+        for (int y = 0; y < height; y += 8) {
+            for (int x = 0; x < width; x += 8) {
+                int pixel = bitmap.getPixel(x, y);
+                float luminance = (0.2126f * Color.red(pixel) + 0.7152f * Color.green(pixel) + 0.0722f * Color.blue(pixel)) / 255f;
+                luminanceTotal += luminance;
+                sampledPixels++;
+                if (luminance < 0.25f) darkPixels++;
+            }
+        }
+        if (sampledPixels == 0) return 1f;
+        float avgLuminance = luminanceTotal / sampledPixels;
+        if (avgLuminance < 0.35f || ((float)darkPixels/sampledPixels) > 0.5f) {
+            return Math.min(2.5f, 0.5f / Math.max(avgLuminance, 0.1f));
+        }
+        return avgLuminance > 0.75f ? 0.75f / avgLuminance : 1f;
+    }
+
+    private Bitmap boostBrightness(Bitmap bitmap, float factor) {
+        if (factor == 1.0f) return bitmap;
+        Bitmap output = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+        int[] pixels = new int[output.getWidth() * output.getHeight()];
+        output.getPixels(pixels, 0, output.getWidth(), 0, 0, output.getWidth(), output.getHeight());
+        for (int i = 0; i < pixels.length; i++) {
+            int r = Math.min(255, (int)(Color.red(pixels[i]) * factor));
+            int g = Math.min(255, (int)(Color.green(pixels[i]) * factor));
+            int b = Math.min(255, (int)(Color.blue(pixels[i]) * factor));
+            pixels[i] = Color.rgb(r, g, b);
+        }
+        output.setPixels(pixels, 0, output.getWidth(), 0, 0, output.getWidth(), output.getHeight());
+        return output;
     }
 
     public enum DetectionType { PERSON, FACE, HELMET }
 
-    public DetectionResult classifyHelmetRegion(Bitmap bitmap, Rect region, float helmetAiScore) {
-        // Clamp region to bitmap bounds
-        int left = Math.max(0, region.left);
-        int top = Math.max(0, region.top);
-        int right = Math.min(bitmap.getWidth(), region.right);
-        int bottom = Math.min(bitmap.getHeight(), region.bottom);
-        int width = right - left;
-        int height = bottom - top;
-
-        if (width < 8 || height < 8) return null;
-
-        Bitmap cropped;
-        try {
-            cropped = Bitmap.createBitmap(bitmap, left, top, width, height);
-        } catch (Exception e) {
-            return null;
-        }
-        
-        HelmetStats stats = getHelmetRegionStats(cropped);
-
-        boolean hasHelmet = resolveHelmetDecision(helmetAiScore, stats);
-        
-        String label = hasHelmet ? "Helmet Detected" : "No Helmet";
-        float confidence = Math.max(helmetAiScore, stats.colorScore);
-        String severity = hasHelmet ? "Low" : "High";
-
-        return new DetectionResult(label, confidence, hasHelmet, new Rect(left, top, right, bottom), DetectionType.HELMET, severity);
-    }
-
-    private HelmetStats getHelmetRegionStats(Bitmap bitmap) {
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
-        int helmetPixels = 0;
-        int lowerHelmetPixels = 0;
-        int upperHelmetPixels = 0;
-        float darkPixels = 0;
-        int visiblePixels = 0;
-        int lowerVisiblePixels = 0;
-        int upperVisiblePixels = 0;
-
-        // Increased sampling for better accuracy
-        int step = 2; 
-
-        for (int y = 0; y < height; y += step) {
-            for (int x = 0; x < width; x += step) {
-                // Selfie optimization: check 90% of the center width
-                boolean inCenter = x > width * 0.05 && x < width * 0.95;
-                // Check 60% of the top for helmet
-                boolean inUpperBand = y < height * 0.60;
-                boolean inLowerBand = y > height * 0.40;
-
-                if (!inCenter) continue;
-
-                int pixel = bitmap.getPixel(x, y);
-                int r = Color.red(pixel);
-                int g = Color.green(pixel);
-                int b = Color.blue(pixel);
-
-                float[] hsv = new float[3];
-                Color.RGBToHSV(r, g, b, hsv);
-                float saturation = hsv[1];
-                float brightness = hsv[2];
-
-                if (brightness < 0.12f) continue;
-                visiblePixels++;
-                if (inLowerBand) lowerVisiblePixels++;
-                if (inUpperBand) upperVisiblePixels++;
-
-                // Hair detection - covers dark, brown, and lit hair
-                boolean hairColor = (brightness < 0.42f && saturation < 0.55f);
-                boolean brownishHair = (r > g && g > b && r < 130 && saturation < 0.6f);
-                if ((hairColor || brownishHair) && inLowerBand) {
-                    darkPixels++;
-                }
-
-                // Skin detection - if skin is visible in the forehead area, helmet is likely missing
-                boolean skinColor = r > 150 && g > 110 && b > 90 && r > g && g > b && saturation < 0.45f;
-                if (skinColor && inLowerBand) {
-                    // Lowered weight for skin in lower band for selfies (glasses/hair overlap)
-                    darkPixels += 0.5f; 
-                }
-
-                // Expanded color ranges for white helmets - ULTRA shadow tolerant for indoors
-                boolean whiteBody = r > 125 && g > 125 && b > 120 && saturation < 0.30f && brightness > 0.35f;
-                boolean brightHighlight = r > 200 && g > 200 && b > 190 && saturation < 0.20f;
-                
-                boolean yellow = r > 120 && g > 90 && b < 110 && saturation > 0.2f;
-                boolean orange = r > 130 && g > 50 && g < 185 && b < 110 && saturation > 0.25f;
-                boolean red = r > 120 && g < 120 && b < 120 && saturation > 0.25f;
-                boolean blue = b > 90 && r < 140 && g > 40 && saturation > 0.2f;
-                boolean green = g > 90 && r < 140 && b < 140 && saturation > 0.2f;
-                
-                boolean isHelmetColor = whiteBody || brightHighlight || yellow || orange || red || blue || green;
-
-                if (isHelmetColor) {
-                    helmetPixels++;
-                    if (inLowerBand) lowerHelmetPixels++;
-                    if (inUpperBand) upperHelmetPixels++;
-                }
-            }
-        }
-
-        HelmetStats stats = new HelmetStats();
-        stats.colorScore = visiblePixels > 0 ? (float) helmetPixels / visiblePixels : 0;
-        stats.lowerColorScore = lowerVisiblePixels > 0 ? (float) lowerHelmetPixels / lowerVisiblePixels : 0;
-        stats.upperColorScore = upperVisiblePixels > 0 ? (float) upperHelmetPixels / upperVisiblePixels : 0;
-        stats.darkScore = lowerVisiblePixels > 0 ? darkPixels / lowerVisiblePixels : 0;
-        return stats;
-    }
-
-    private boolean resolveHelmetDecision(float helmetScore, HelmetStats stats) {
-        // AI Score takes priority if available
-        if (helmetScore > 0.85f) return true;
-
-        // Tilted Helmet/Selfie optimization: allow up to 80% dark pixels if top is clearly helmet
-        if (stats.upperColorScore > 0.5f && stats.darkScore < 0.80f) return true;
-
-        if (stats.darkScore > 0.70f) return false;
-
-        // Scenario 1: Solid helmet top presence (most reliable in selfies)
-        if (stats.upperColorScore > 0.40f && stats.darkScore < 0.60f) return true;
-
-        // Scenario 2: Moderate overall coverage
-        if (stats.colorScore > 0.30f && stats.darkScore < 0.50f) return true;
-
-        // Scenario 3: Presence of "Specular Highlights" or shiny surfaces
-        return (stats.upperColorScore > 0.25f || stats.colorScore > 0.20f) && stats.darkScore < 0.40f;
-    }
-
-    private static class HelmetStats {
-        float colorScore;
-        float upperColorScore;
-        float lowerColorScore;
-        float darkScore;
-    }
-
     public static class DetectionResult {
         public final String label;
+        public final String description;
         public final float confidence;
         public final boolean isSecure;
         public final Rect region;
         public final DetectionType type;
         public final String severity;
 
-        public DetectionResult(String label, float confidence, boolean isSecure, Rect region, DetectionType type, String severity) {
+        public DetectionResult(String label, String description, float confidence, boolean isSecure, Rect region, DetectionType type, String severity) {
             this.label = label;
+            this.description = description;
             this.confidence = confidence;
             this.isSecure = isSecure;
             this.region = region;

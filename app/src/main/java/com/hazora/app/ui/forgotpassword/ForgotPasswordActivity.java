@@ -4,19 +4,23 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Patterns;
 
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.FirebaseAuth;
 import com.hazora.app.R;
 
-/** Captures a reset email until password-reset backend support is available. */
+/** Captures a reset email and sends a real reset link via Firebase. */
 public class ForgotPasswordActivity extends AppCompatActivity {
 
     private TextInputLayout emailInputLayout;
     private TextInputEditText emailEditText;
+    private MaterialButton sendResetButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +29,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
         emailInputLayout = findViewById(R.id.input_layout_company_email);
         emailEditText = findViewById(R.id.edit_text_company_email);
-        MaterialButton sendResetButton = findViewById(R.id.button_send_reset_link);
+        sendResetButton = findViewById(R.id.button_send_reset_link);
 
         sendResetButton.setOnClickListener(view -> sendResetLink());
         findViewById(R.id.text_back_to_sign_in).setOnClickListener(view -> finish());
@@ -43,10 +47,31 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         }
 
         emailInputLayout.setError(null);
+        setLoadingState(true);
+
+        FirebaseAuth.getInstance().sendPasswordResetEmail(email)
+                .addOnCompleteListener(task -> {
+                    setLoadingState(false);
+                    if (task.isSuccessful()) {
+                        showSuccessDialog();
+                    } else {
+                        String error = task.getException() != null ? task.getException().getMessage() : "Unknown error";
+                        Toast.makeText(this, "Error: " + error, Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
+
+    private void setLoadingState(boolean isLoading) {
+        sendResetButton.setEnabled(!isLoading);
+        sendResetButton.setText(isLoading ? "Sending..." : getString(R.string.send_reset_link));
+    }
+
+    private void showSuccessDialog() {
         new MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.password_reset_title)
-                .setMessage(R.string.password_reset_message)
-                .setPositiveButton(R.string.back_to_sign_in, (dialog, which) -> finish())
+                .setTitle("Email Sent")
+                .setMessage("A password reset link has been sent to " + getEmail() + ". Please check your inbox.")
+                .setPositiveButton("Back to Login", (dialog, which) -> finish())
+                .setCancelable(false)
                 .show();
     }
 

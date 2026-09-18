@@ -7,13 +7,11 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.hazora.app.R;
 import com.hazora.app.auth.AuthRepository;
-import com.hazora.app.auth.GoogleSignInHelper;
 import com.hazora.app.auth.SessionManager;
 import com.hazora.app.ui.dashboard.DashboardActivity;
 import com.hazora.app.ui.forgotpassword.ForgotPasswordActivity;
@@ -27,7 +25,6 @@ public class LoginActivity extends AppCompatActivity {
     private TextInputEditText passwordEditText;
     private MaterialButton loginButton;
     private AuthRepository authRepository;
-    private GoogleSignInHelper googleSignInHelper;
     private SessionManager sessionManager;
 
     @Override
@@ -46,14 +43,11 @@ public class LoginActivity extends AppCompatActivity {
         passwordEditText = findViewById(R.id.edit_text_password);
         loginButton = findViewById(R.id.button_login);
         authRepository = new AuthRepository();
-        googleSignInHelper = new GoogleSignInHelper(this);
         sessionManager = new SessionManager(this);
     }
 
     private void configureActions() {
-        MaterialButton googleSignInButton = findViewById(R.id.button_google_sign_in);
         loginButton.setOnClickListener(view -> attemptLogin());
-        googleSignInButton.setOnClickListener(view -> googleSignInHelper.signIn(this));
         findViewById(R.id.text_forgot_password).setOnClickListener(view ->
                 startActivity(new Intent(this, ForgotPasswordActivity.class)));
     }
@@ -114,26 +108,5 @@ public class LoginActivity extends AppCompatActivity {
     private void openDashboard() {
         startActivity(new Intent(this, DashboardActivity.class));
         finish();
-    }
-
-    @Override
-    @Deprecated
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == GoogleSignInHelper.GOOGLE_SIGN_IN_REQUEST_CODE) {
-            googleSignInHelper.handleResult(data, new GoogleSignInHelper.GoogleSignInCallback() {
-                @Override
-                public void onSuccess(GoogleSignInAccount account) {
-                    sessionManager.saveLoginState(true);
-                    sessionManager.saveUserEmail(account.getEmail() == null ? "" : account.getEmail());
-                    openDashboard();
-                }
-
-                @Override
-                public void onError(int statusCode) {
-                    Toast.makeText(LoginActivity.this, R.string.google_sign_in_failed, Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
     }
 }

@@ -24,13 +24,15 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:text="Safety System"
+        android:text="User Name"
         android:textColor="@color/hazora_text_primary"
-        android:textSize="16sp"
+        android:textSize="17sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@id/tv_time"
         app:layout_constraintStart_toEndOf="@id/img_message_icon"
-        app:layout_constraintTop_toTopOf="@id/img_message_icon" />
+        app:layout_constraintTop_toTopOf="@id/img_message_icon"
+        app:layout_constraintBottom_toTopOf="@id/tv_preview"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <TextView
         android:id="@+id/tv_time"
@@ -43,49 +45,30 @@
         app:layout_constraintTop_toTopOf="@id/tv_sender" />
 
     <TextView
-        android:id="@+id/tv_subject"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:text="Safety Protocol Update"
-        android:textColor="@color/hazora_text_primary"
-        android:textSize="14sp"
-        app:layout_constraintEnd_toStartOf="@id/view_unread_dot"
-        app:layout_constraintStart_toStartOf="@id/tv_sender"
-        app:layout_constraintTop_toBottomOf="@id/tv_sender" />
-
-    <TextView
         android:id="@+id/tv_preview"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
         android:ellipsize="end"
         android:maxLines="1"
-        android:text="Please review the new safety protocols for Zone B..."
+        android:text="Latest message content goes here..."
         android:textColor="@color/hazora_text_secondary"
-        android:textSize="13sp"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toStartOf="@id/view_unread_dot"
         app:layout_constraintStart_toStartOf="@id/tv_sender"
-        app:layout_constraintTop_toBottomOf="@id/tv_subject" />
+        app:layout_constraintTop_toBottomOf="@id/tv_sender"
+        app:layout_constraintBottom_toBottomOf="@id/img_message_icon" />
 
     <View
         android:id="@+id/view_unread_dot"
         android:layout_width="10dp"
         android:layout_height="10dp"
         android:background="@drawable/bg_message_unread_dot"
-        app:layout_constraintBottom_toBottomOf="@id/tv_subject"
+        android:layout_marginStart="8dp"
+        app:layout_constraintBottom_toBottomOf="@id/tv_preview"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/tv_subject" />
+        app:layout_constraintTop_toTopOf="@id/tv_preview" />
 
-    <View
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:layout_marginTop="16dp"
-        android:background="#F0F4F8"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@id/tv_sender"
-        app:layout_constraintTop_toBottomOf="@id/tv_preview" />
+    <!-- Removed tv_subject and divider for cleaner chat look -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

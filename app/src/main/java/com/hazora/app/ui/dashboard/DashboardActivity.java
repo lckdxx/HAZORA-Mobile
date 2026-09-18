@@ -8,10 +8,13 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -35,6 +38,11 @@ public class DashboardActivity extends AppCompatActivity {
     private TextView tvName, tvActiveHazards, tvTotalIncidents, tvResolvedIncidents, tvSiteContext;
     private LinearLayout containerRecent;
     private SessionManager sessionManager;
+    
+    // SOS Features
+    private MaterialCardView cardSos;
+    private View cardSosAlert;
+    private boolean isSosActive = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +64,14 @@ public class DashboardActivity extends AppCompatActivity {
         tvTotalIncidents = findViewById(R.id.tv_total_incidents);
         tvResolvedIncidents = findViewById(R.id.tv_resolved_incidents);
         containerRecent = findViewById(R.id.container_recent_detections);
+        
+        // SOS Initialization
+        cardSos = findViewById(R.id.card_sos);
+        cardSosAlert = findViewById(R.id.card_sos_alert);
+        
+        if (cardSos != null) {
+            cardSos.setOnClickListener(v -> toggleSos());
+        }
 
         findViewById(R.id.card_ai_scan).setOnClickListener(v -> 
             startActivity(new Intent(this, HazardScanActivity.class)));
@@ -71,6 +87,53 @@ public class DashboardActivity extends AppCompatActivity {
 
         findViewById(R.id.tv_see_all).setOnClickListener(v -> 
             startActivity(new Intent(this, IncidentsActivity.class)));
+    }
+
+    private void toggleSos() {
+        if (!isSosActive) {
+            // Confirmation for activation
+            new MaterialAlertDialogBuilder(this)
+                .setTitle("Trigger SOS?")
+                .setMessage("Are you sure you want to signal an emergency? This will notify the response team.")
+                .setPositiveButton("Trigger", (dialog, which) -> applySosState(true))
+                .setNegativeButton("Cancel", null)
+                .show();
+        } else {
+            // Confirmation for deactivation
+            new MaterialAlertDialogBuilder(this)
+                .setTitle("Stop SOS?")
+                .setMessage("Are you sure you want to stop the emergency alert?")
+                .setPositiveButton("Stop", (dialog, which) -> applySosState(false))
+                .setNegativeButton("Cancel", null)
+                .show();
+        }
+    }
+
+    private void applySosState(boolean active) {
+        isSosActive = active;
+        
+        if (isSosActive) {
+            // SOS ON: Show alert and change card color to active red
+            if (cardSosAlert != null) cardSosAlert.setVisibility(View.VISIBLE);
+            if (cardSos != null) {
+                cardSos.setCardBackgroundColor(Color.parseColor("#EF4444")); // hazora_danger
+                ImageView icon = cardSos.findViewById(R.id.iv_sos_icon);
+                if (icon != null) icon.setColorFilter(Color.WHITE);
+                TextView label = cardSos.findViewById(R.id.tv_sos_label);
+                if (label != null) label.setTextColor(Color.WHITE);
+            }
+            Toast.makeText(this, "Emergency team is on the way!", Toast.LENGTH_LONG).show();
+        } else {
+            // SOS OFF: Hide alert and return card to white
+            if (cardSosAlert != null) cardSosAlert.setVisibility(View.GONE);
+            if (cardSos != null) {
+                cardSos.setCardBackgroundColor(Color.WHITE);
+                ImageView icon = cardSos.findViewById(R.id.iv_sos_icon);
+                if (icon != null) icon.setColorFilter(Color.parseColor("#EF4444"));
+                TextView label = cardSos.findViewById(R.id.tv_sos_label);
+                if (label != null) label.setTextColor(Color.parseColor("#0D1B2A"));
+            }
+        }
     }
 
     private void loadUserData() {

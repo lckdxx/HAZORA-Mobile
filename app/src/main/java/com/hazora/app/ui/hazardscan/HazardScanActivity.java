@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -226,14 +227,17 @@ public class HazardScanActivity extends AppCompatActivity {
             runOnUiThread(() -> {
                 analyzingLayout.setVisibility(View.GONE);
                 
+                // UNCONDITIONAL: Always show the result card
+                HazardDetector.DetectionResult bestMatch;
                 if (!detections.isEmpty()) {
-                    // Show the most relevant result (usually index 0)
-                    HazardDetector.DetectionResult bestMatch = detections.get(0);
-                    showDetectionResult(bestMatch, bitmap);
+                    bestMatch = detections.get(0);
                 } else {
-                    Toast.makeText(this, "No hazards detected.", Toast.LENGTH_SHORT).show();
-                    isScanning = false;
+                    // Safety Fallback: Should not happen with new Detector logic
+                    bestMatch = new HazardDetector.DetectionResult("Violation: No PPE Detected", "Action: Equip all required PPE.", 0f, false, 
+                        new Rect(0,0,bitmap.getWidth(), bitmap.getHeight()),
+                        HazardDetector.DetectionType.PERSON, "Critical");
                 }
+                showDetectionResult(bestMatch, bitmap);
             });
         });
     }
@@ -252,7 +256,8 @@ public class HazardScanActivity extends AppCompatActivity {
         
         if (tvTitle != null) tvTitle.setText(result.label);
         if (tvDetails != null) {
-            tvDetails.setText("AI Detection Complete");
+            // Show the smart solution/description in the details area
+            tvDetails.setText(result.description);
         }
 
         if (statusText != null && statusDot != null) {

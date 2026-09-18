@@ -1,15 +1,18 @@
 package com.hazora.app.ui.dashboard;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -55,6 +58,123 @@ public class DashboardActivity extends AppCompatActivity {
         loadUserData();
         fetchStats();
         fetchRecentDetections();
+        showUserGuideIfNeeded();
+    }
+
+    private int tutorialStep = 0;
+    private View tutorialOverlay;
+    private View tutorialHighlight;
+    private View tutorialBubble;
+    private TextView tvTutorialTitle, tvTutorialDesc;
+    private Button btnTutorialNext;
+
+    private void showUserGuideIfNeeded() {
+        SharedPreferences prefs = getSharedPreferences("hazora_prefs", MODE_PRIVATE);
+        boolean guideShown = prefs.getBoolean("user_guide_shown", false);
+        
+        if (!guideShown) {
+            tutorialOverlay = findViewById(R.id.layout_tutorial_overlay);
+            tutorialHighlight = findViewById(R.id.tutorial_highlight);
+            tutorialBubble = findViewById(R.id.card_tutorial_bubble);
+            tvTutorialTitle = findViewById(R.id.tv_tutorial_title);
+            tvTutorialDesc = findViewById(R.id.tv_tutorial_desc);
+            btnTutorialNext = findViewById(R.id.btn_tutorial_next);
+
+            if (tutorialOverlay == null) return;
+            tutorialOverlay.setVisibility(View.VISIBLE);
+            
+            findViewById(R.id.btn_tutorial_skip).setOnClickListener(v -> finishTutorial(prefs));
+            btnTutorialNext.setOnClickListener(v -> nextTutorialStep(prefs));
+            
+            // Start Step 0
+            updateTutorialUI();
+        }
+    }
+
+    private void nextTutorialStep(SharedPreferences prefs) {
+        tutorialStep++;
+        if (tutorialStep > 7) {
+            finishTutorial(prefs);
+        } else {
+            updateTutorialUI();
+        }
+    }
+
+    private void updateTutorialUI() {
+        View target = null;
+        String title = "";
+        String desc = "";
+
+        switch (tutorialStep) {
+            case 0:
+                target = findViewById(R.id.card_ai_scan);
+                title = "AI Hazard Scan";
+                desc = "Check PPE compliance in any lighting.";
+                break;
+            case 1:
+                target = findViewById(R.id.card_sos);
+                title = "SOS Alert";
+                desc = "Fast emergency signaling for help.";
+                break;
+            case 2:
+                target = findViewById(R.id.card_messages);
+                title = "Messenger Chat";
+                desc = "Real-time chat and photo sharing.";
+                break;
+            case 3:
+                target = findViewById(R.id.layout_stats_summary);
+                title = "Safety Stats";
+                desc = "Quick summary of site hazards and resolutions.";
+                break;
+            case 4:
+                target = findViewById(R.id.card_incidents_list);
+                title = "Incident History";
+                desc = "View the detailed logs of all previous detections.";
+                break;
+            case 5:
+                target = findViewById(R.id.container_recent_detections);
+                title = "Recent Feed";
+                desc = "Your most recent safety scans at a glance.";
+                break;
+            case 6:
+                target = findViewById(R.id.img_avatar);
+                title = "Profile & Settings";
+                desc = "Update your info or log out from here.";
+                break;
+            case 7:
+                target = findViewById(R.id.bottom_nav);
+                title = "Navigation";
+                desc = "Switch quickly between app sections.";
+                btnTutorialNext.setText("Finish");
+                break;
+        }
+
+        if (target != null) {
+            tvTutorialTitle.setText(title);
+            tvTutorialDesc.setText(desc);
+            moveHighlightTo(target);
+        }
+    }
+
+    private void moveHighlightTo(View target) {
+        target.post(() -> {
+            int[] location = new int[2];
+            target.getLocationInWindow(location);
+            
+            // Move highlight
+            tutorialHighlight.setVisibility(View.VISIBLE);
+            tutorialHighlight.setX(location[0] + (target.getWidth() / 2f) - (tutorialHighlight.getWidth() / 2f));
+            tutorialHighlight.setY(location[1] + (target.getHeight() / 2f) - (tutorialHighlight.getHeight() / 2f));
+            
+            // Move bubble (above or below target)
+            float bubbleY = location[1] > 1000 ? location[1] - tutorialBubble.getHeight() - 60 : location[1] + target.getHeight() + 60;
+            tutorialBubble.setY(Math.max(100, bubbleY));
+        });
+    }
+
+    private void finishTutorial(SharedPreferences prefs) {
+        prefs.edit().putBoolean("user_guide_shown", true).apply();
+        tutorialOverlay.setVisibility(View.GONE);
     }
 
     private void initViews() {

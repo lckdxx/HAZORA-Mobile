@@ -39,6 +39,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    buildFeatures {
+        mlModelBinding = true
+    }
 }
 
 dependencies {
@@ -56,6 +59,7 @@ dependencies {
     implementation(libs.camera.lifecycle)
     implementation(libs.camera.view)
     implementation(libs.tensorflow.lite)
+    implementation(libs.tensorflow.lite.metadata)
     implementation(libs.tensorflow.lite.support)
 
     // Firebase

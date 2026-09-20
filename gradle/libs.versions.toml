@@ -18,6 +18,7 @@ kotlin = "2.0.0"
 androidxCore = "1.15.0"
 androidxActivity = "1.9.3"
 guava = "33.7.1-android"
+tensorflowLiteMetadata = "0.4.4"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCore" }
@@ -43,6 +44,7 @@ firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
 glide = { group = "com.github.bumptech.glide", name = "glide", version = "4.16.0" }
 guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
+tensorflow-lite-metadata = { group = "org.tensorflow", name = "tensorflow-lite-metadata", version.ref = "tensorflowLiteMetadata" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

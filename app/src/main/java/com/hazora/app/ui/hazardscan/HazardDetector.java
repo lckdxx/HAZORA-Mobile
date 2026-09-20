@@ -53,15 +53,22 @@ public class HazardDetector {
             for (int i = 0; i < clusters.size(); i++) {
                 PPECluster cluster = clusters.get(i);
                 boolean isSecure = cluster.hasHelmet && cluster.hasVest && cluster.hasShoes;
-                boolean isUncertain = cluster.minConfidence < 0.55f; // Warning if model confidence is low
+                boolean isUncertain = cluster.minConfidence < 0.55f;
                 
                 if (!isSecure) violations++;
 
                 String label;
+                // Detailed Checklist for the description field as requested
+                String checklist = String.format("Helmet: %s | Vest: %s | Shoes: %s", 
+                    cluster.hasHelmet ? "YES" : "NO", 
+                    cluster.hasVest ? "YES" : "NO", 
+                    cluster.hasShoes ? "YES" : "NO");
+
                 String recommendation = isSecure ? "Worker is safe to proceed." : "Action Required: " + cluster.getMissingAction();
+                String finalDescription = checklist + "\n" + recommendation;
                 
                 if (isUncertain) {
-                    recommendation = "Note: Detection is uncertain due to low visibility. " + recommendation;
+                    finalDescription = "Note: Detection is uncertain due to low visibility.\n" + finalDescription;
                 }
 
                 if (totalPeople > 1) {
@@ -70,9 +77,9 @@ public class HazardDetector {
                     label = isSecure ? (isUncertain ? "AREA LIKELY SECURE" : "AREA SECURE: Full PPE") : "Violation: No " + cluster.getMissingRemarks();
                 }
 
-                if (isBlurry) recommendation = "Warning: Image is blurry. " + recommendation;
+                if (isBlurry) finalDescription = "⚠️ Warning: Image is blurry!\n" + finalDescription;
 
-                results.add(new DetectionResult(label, recommendation, cluster.minConfidence, isSecure, cluster.getCombinedBounds(), DetectionType.PERSON, isSecure ? "Low" : "Critical"));
+                results.add(new DetectionResult(label, finalDescription, cluster.minConfidence, isSecure, cluster.getCombinedBounds(), DetectionType.PERSON, isSecure ? "Low" : "Critical"));
                 
                 for (YOLODetector.Recognition rec : cluster.detections) {
                     results.add(new DetectionResult("PPE: " + rec.title, "Verified via AI", rec.confidence, true, 

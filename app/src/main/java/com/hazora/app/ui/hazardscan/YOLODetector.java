@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.graphics.RectF;
+import android.util.Log;
 
 import org.tensorflow.lite.Interpreter;
 import org.tensorflow.lite.support.common.FileUtil;
@@ -28,19 +29,17 @@ public class YOLODetector {
     private final int inputWidth = 640;
     private final int inputHeight = 640;
     private final Context context;
-    private final float confidenceThreshold = 0.38f; // Lowered to handle small dataset (19 images)
+    private final float confidenceThreshold = 0.20f; // Extreme low threshold for debugging small datasets
     private final float iouThreshold = 0.45f;
 
     public YOLODetector(Context context) {
         this.context = context;
         try {
-            // Check for YOLOv8 model in assets
-            if (assetExists("yolov8n.tflite")) {
-                tflite = new Interpreter(loadModelFile("yolov8n.tflite"));
+            // Loading the model trained from ppe.ndjson
+            if (assetExists("ppe_model.tflite")) {
+                tflite = new Interpreter(loadModelFile("ppe_model.tflite"));
                 if (assetExists("yolo_labels.txt")) {
                     labels = FileUtil.loadLabels(context, "yolo_labels.txt");
-                } else if (assetExists("labels.txt")) {
-                    labels = FileUtil.loadLabels(context, "labels.txt");
                 }
             }
         } catch (Exception e) {
@@ -101,6 +100,9 @@ public class YOLODetector {
         List<Recognition> recognitions = new ArrayList<>();
         float[][] data = output[0]; // [4 + numClasses][8400]
 
+        int detectionsCount = 0;
+        float maxSeenProb = 0;
+
         for (int i = 0; i < 8400; i++) {
             float maxClassProb = 0;
             int classId = -1;
@@ -112,8 +114,11 @@ public class YOLODetector {
                     classId = c;
                 }
             }
+            
+            if (maxClassProb > maxSeenProb) maxSeenProb = maxClassProb;
 
             if (maxClassProb > confidenceThreshold) {
+                detectionsCount++;
                 float xCenter = data[0][i];
                 float yCenter = data[1][i];
                 float w = data[2][i];
@@ -136,6 +141,7 @@ public class YOLODetector {
             }
         }
 
+        Log.d("AI_DEBUG", "Scan Complete. Found " + detectionsCount + " items. Max Confidence seen: " + (maxSeenProb * 100) + "%");
         return nms(recognitions);
     }
 

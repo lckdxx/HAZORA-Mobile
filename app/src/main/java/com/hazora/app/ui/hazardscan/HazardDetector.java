@@ -53,20 +53,26 @@ public class HazardDetector {
             for (int i = 0; i < clusters.size(); i++) {
                 PPECluster cluster = clusters.get(i);
                 boolean isSecure = cluster.hasHelmet && cluster.hasVest && cluster.hasShoes;
+                boolean isUncertain = cluster.minConfidence < 0.55f; // Warning if model confidence is low
+                
                 if (!isSecure) violations++;
 
                 String label;
                 String recommendation = isSecure ? "Worker is safe to proceed." : "Action Required: " + cluster.getMissingAction();
                 
+                if (isUncertain) {
+                    recommendation = "Note: Detection is uncertain due to low visibility. " + recommendation;
+                }
+
                 if (totalPeople > 1) {
-                    label = "Person " + (i + 1) + ": " + (isSecure ? "Secure" : cluster.getMissingRemarks());
+                    label = "Person " + (i + 1) + ": " + (isSecure ? (isUncertain ? "Likely Secure" : "Secure") : cluster.getMissingRemarks());
                 } else {
-                    label = isSecure ? "AREA SECURE: Full PPE" : "Violation: No " + cluster.getMissingRemarks();
+                    label = isSecure ? (isUncertain ? "AREA LIKELY SECURE" : "AREA SECURE: Full PPE") : "Violation: No " + cluster.getMissingRemarks();
                 }
 
                 if (isBlurry) recommendation = "Warning: Image is blurry. " + recommendation;
 
-                results.add(new DetectionResult(label, recommendation, 0.95f, isSecure, cluster.getCombinedBounds(), DetectionType.PERSON, isSecure ? "Low" : "Critical"));
+                results.add(new DetectionResult(label, recommendation, cluster.minConfidence, isSecure, cluster.getCombinedBounds(), DetectionType.PERSON, isSecure ? "Low" : "Critical"));
                 
                 for (YOLODetector.Recognition rec : cluster.detections) {
                     results.add(new DetectionResult("PPE: " + rec.title, "Verified via AI", rec.confidence, true, 
@@ -128,6 +134,7 @@ public class HazardDetector {
         List<YOLODetector.Recognition> detections = new ArrayList<>();
         boolean hasHelmet = false, hasVest = false, hasShoes = false;
         float centerX;
+        float minConfidence = 1.0f;
 
         PPECluster(YOLODetector.Recognition first) { add(first); }
 
@@ -137,6 +144,8 @@ public class HazardDetector {
             if (label.contains("helmet")) hasHelmet = true;
             if (label.contains("vest")) hasVest = true;
             if (label.contains("shoes")) hasShoes = true;
+            
+            minConfidence = Math.min(minConfidence, rec.confidence);
             
             float totalX = 0;
             for (YOLODetector.Recognition d : detections) totalX += d.location.centerX();

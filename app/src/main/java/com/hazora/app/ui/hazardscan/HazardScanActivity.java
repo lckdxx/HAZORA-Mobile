@@ -76,6 +76,7 @@ public class HazardScanActivity extends AppCompatActivity {
     private HazardDetector hazardDetector;
     private boolean isScanning = false;
     private String userAssignedSite = "Not assigned location site";
+    private TextView tvSiteLocation;
     private Incident lastDetectedIncident;
     private Bitmap lastCapturedBitmap;
 
@@ -172,7 +173,14 @@ public class HazardScanActivity extends AppCompatActivity {
         findViewById(R.id.btn_view_incident).setOnClickListener(v -> openIncident());
         findViewById(R.id.btn_scan_again).setOnClickListener(v -> resetScan());
 
+        tvSiteLocation = findViewById(R.id.tv_site_location);
         loadUserSite();
+    }
+
+    private void updateSiteLabel() {
+        if (tvSiteLocation != null) {
+            tvSiteLocation.setText("📍 " + userAssignedSite);
+        }
     }
 
     private void loadUserSite() {
@@ -189,6 +197,7 @@ public class HazardScanActivity extends AppCompatActivity {
                     if (!queryDocumentSnapshots.isEmpty()) {
                         String site = queryDocumentSnapshots.getDocuments().get(0).getString("site");
                         if (site != null && !site.isEmpty()) userAssignedSite = site;
+                        updateSiteLabel();
                     } else {
                         FirebaseFirestore.getInstance("hazora").collection("mobile_accounts")
                                 .whereEqualTo("createdByEmail", userEmail)
@@ -197,6 +206,7 @@ public class HazardScanActivity extends AppCompatActivity {
                                     if (!snapshots.isEmpty()) {
                                         String site = snapshots.getDocuments().get(0).getString("site");
                                         if (site != null && !site.isEmpty()) userAssignedSite = site;
+                                        updateSiteLabel();
                                     } else {
                                         FirebaseFirestore.getInstance("hazora").collection("users")
                                                 .whereEqualTo("email", userEmail)
@@ -205,6 +215,7 @@ public class HazardScanActivity extends AppCompatActivity {
                                                     if (!userSnapshots.isEmpty()) {
                                                         String site = userSnapshots.getDocuments().get(0).getString("site");
                                                         if (site != null && !site.isEmpty()) userAssignedSite = site;
+                                                        updateSiteLabel();
                                                     }
                                                 });
                                     }

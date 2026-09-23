@@ -31,9 +31,10 @@ public class YOLODetector {
     private final int inputWidth = 640;
     private final int inputHeight = 640;
     private final Context context;
-    // Slightly lower than the web dashboard (0.45) because a single phone
-    // snapshot is often blurrier than a continuous stream frame.
-    private final float confidenceThreshold = 0.30f;
+    // Lower than the web dashboard (0.45): phone snapshots are single frames
+    // (often blurry) and the subject is usually smaller in frame, so raw
+    // confidence runs lower. 0.15 catches real PPE while NMS removes dupes.
+    private final float confidenceThreshold = 0.15f;
     private final float iouThreshold = 0.45f;
     // Some YOLOv8 TFLite exports expect NCHW ([1,3,H,W]) instead of NHWC ([1,H,W,3]).
     // Detected once from the model's declared input shape.
@@ -101,14 +102,18 @@ public class YOLODetector {
     public List<Recognition> detect(Bitmap bitmap) {
         if (tflite == null) return new ArrayList<>();
 
-        // Preprocess image
-        Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, inputWidth, inputHeight, true);
-        ByteBuffer inputBuffer = convertBitmapToByteBuffer(resizedBitmap);
+        // Match the web dashboard preprocessing exactly (proven to work):
+        // a straight bilinear resize to 640x640, values normalized to 0..1.
+        // No letterbox padding, so coordinate back-mapping is a simple scale.
+        Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, inputWidth, inputHeight, true);
+        ByteBuffer inputBuffer = convertBitmapToByteBuffer(scaledBitmap);
 
         List<Recognition> recognitions = new ArrayList<>();
 
         try {
             int[] outputShape = tflite.getOutputTensor(0).shape(); // e.g. [1, 7, 8400] or [1, 8400, 7]
+            Log.d("AI_DEBUG", "Output tensor shape: " + Arrays.toString(outputShape)
+                    + " inputShape: " + Arrays.toString(tflite.getInputTensor(0).shape()));
             int dim1 = outputShape.length > 1 ? outputShape[1] : 7;
             int dim2 = outputShape.length > 2 ? outputShape[2] : 8400;
 
@@ -124,13 +129,27 @@ public class YOLODetector {
             tflite.run(inputBuffer, output);
             float[][] data = output[0];
 
+            // Detect whether class scores are raw logits (values well outside
+            // 0..1) that need a sigmoid, vs already-activated probabilities.
+            float rawMax = 0;
+            for (int c = 0; c < actualNumClasses; c++) {
+                for (int i = 0; i < numAnchors; i += 50) { // sample for speed
+                    float v = channelsFirstOutput ? data[4 + c][i] : data[i][4 + c];
+                    if (v > rawMax) rawMax = v;
+                }
+            }
+            boolean needsSigmoid = rawMax > 1.05f;
+            Log.d("AI_DEBUG", "rawMax=" + rawMax + " needsSigmoid=" + needsSigmoid
+                    + " layoutChannelsFirst=" + channelsFirstOutput + " classes=" + actualNumClasses);
+
             // Helper to read a channel value for anchor i regardless of layout.
             // channelsFirstOutput: data[channel][anchor]; else data[anchor][channel].
             for (int i = 0; i < numAnchors; i++) {
                 float maxClassProb = 0;
                 int classId = -1;
                 for (int c = 0; c < actualNumClasses; c++) {
-                    float prob = channelsFirstOutput ? data[4 + c][i] : data[i][4 + c];
+                    float raw = channelsFirstOutput ? data[4 + c][i] : data[i][4 + c];
+                    float prob = needsSigmoid ? sigmoid(raw) : raw;
                     if (prob > maxClassProb) {
                         maxClassProb = prob;
                         classId = c;
@@ -147,7 +166,7 @@ public class YOLODetector {
                 float h = channelsFirstOutput ? data[3][i] : data[i][3];
 
                 // YOLOv8 TFLite exports usually output normalized coords (0..1).
-                // Detect that and scale to input pixels; otherwise assume pixels.
+                // Detect that and scale to letterboxed input pixels.
                 if (xCenter <= 1.5f && w <= 1.5f) {
                     xCenter *= inputWidth;
                     yCenter *= inputHeight;
@@ -155,17 +174,14 @@ public class YOLODetector {
                     h *= inputHeight;
                 }
 
-                float left = Math.max(0, xCenter - w / 2);
-                float top = Math.max(0, yCenter - h / 2);
-                float right = Math.min(inputWidth, xCenter + w / 2);
-                float bottom = Math.min(inputHeight, yCenter + h / 2);
+                // Coords are in 640x640 stretched space; map back to the
+                // original bitmap by simple axis scaling.
+                float left = Math.max(0, (xCenter - w / 2) * bitmap.getWidth() / inputWidth);
+                float top = Math.max(0, (yCenter - h / 2) * bitmap.getHeight() / inputHeight);
+                float right = Math.min(bitmap.getWidth(), (xCenter + w / 2) * bitmap.getWidth() / inputWidth);
+                float bottom = Math.min(bitmap.getHeight(), (yCenter + h / 2) * bitmap.getHeight() / inputHeight);
 
-                RectF location = new RectF(
-                        left * bitmap.getWidth() / inputWidth,
-                        top * bitmap.getHeight() / inputHeight,
-                        right * bitmap.getWidth() / inputWidth,
-                        bottom * bitmap.getHeight() / inputHeight
-                );
+                RectF location = new RectF(left, top, right, bottom);
 
                 String label = labels != null && classId < labels.size() ? labels.get(classId) : "Object " + classId;
                 recognitions.add(new Recognition(label, maxClassProb, location));
@@ -210,6 +226,10 @@ public class YOLODetector {
             }
         }
         return byteBuffer;
+    }
+
+    private static float sigmoid(float x) {
+        return (float) (1.0 / (1.0 + Math.exp(-x)));
     }
 
     private void putChannel(ByteBuffer byteBuffer, DataType dataType, int value) {

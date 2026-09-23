@@ -20,10 +20,12 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.AspectRatio;
+import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
+import androidx.camera.core.ZoomState;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
@@ -67,6 +69,9 @@ public class HazardScanActivity extends AppCompatActivity {
     private Button captureButton;
     private ImageView ivCapturedResult;
     private ProcessCameraProvider cameraProvider;
+    private Camera camera;
+    private View zoomControls;
+    private TextView tvZoomLevel;
     private ExecutorService cameraExecutor;
     private HazardDetector hazardDetector;
     private boolean isScanning = false;
@@ -153,6 +158,12 @@ public class HazardScanActivity extends AppCompatActivity {
         ivCapturedResult.setOnClickListener(v -> {
             if (lastCapturedBitmap != null) showFullscreenImage(lastCapturedBitmap);
         });
+
+        // Live camera zoom controls.
+        zoomControls = findViewById(R.id.layout_zoom_controls);
+        tvZoomLevel = findViewById(R.id.tv_zoom_level);
+        findViewById(R.id.btn_zoom_in).setOnClickListener(v -> adjustZoom(0.3f));
+        findViewById(R.id.btn_zoom_out).setOnClickListener(v -> adjustZoom(-0.3f));
 
         findViewById(R.id.btn_view_gallery).setOnClickListener(v -> {
             startActivity(new Intent(this, HazardGalleryActivity.class));
@@ -245,9 +256,19 @@ public class HazardScanActivity extends AppCompatActivity {
                 CameraSelector cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA;
 
                 cameraProvider.unbindAll();
-                cameraProvider.bindToLifecycle(this, cameraSelector, preview);
+                camera = cameraProvider.bindToLifecycle(this, cameraSelector, preview);
 
                 cameraPlaceholder.setVisibility(View.GONE);
+
+                // Show zoom controls and reflect the current zoom level.
+                if (zoomControls != null) zoomControls.setVisibility(View.VISIBLE);
+                if (camera != null && tvZoomLevel != null) {
+                    camera.getCameraInfo().getZoomState().observe(this, state -> {
+                        if (state != null) {
+                            tvZoomLevel.setText(String.format(Locale.getDefault(), "%.1fx", state.getZoomRatio()));
+                        }
+                    });
+                }
 
             } catch (ExecutionException | InterruptedException e) {
                 Toast.makeText(this, "Error starting camera: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -391,7 +412,9 @@ public class HazardScanActivity extends AppCompatActivity {
             cameraProvider.unbindAll();
             cameraProvider = null;
         }
-        
+        camera = null;
+        if (zoomControls != null) zoomControls.setVisibility(View.GONE);
+
         cameraPlaceholder.setVisibility(View.VISIBLE);
     }
 
@@ -405,6 +428,18 @@ public class HazardScanActivity extends AppCompatActivity {
             intent.putExtra("incident_index", 0);
             startActivity(intent);
         }
+    }
+
+    /** Zoom the live camera by a relative ratio delta, clamped to hardware limits. */
+    private void adjustZoom(float delta) {
+        if (camera == null) return;
+        ZoomState state = camera.getCameraInfo().getZoomState().getValue();
+        if (state == null) return;
+        float current = state.getZoomRatio();
+        float min = state.getMinZoomRatio();
+        float max = state.getMaxZoomRatio();
+        float target = Math.max(min, Math.min(max, current + delta));
+        camera.getCameraControl().setZoomRatio(target);
     }
 
     /** Shows the captured image full screen with pinch/double-tap zoom. */

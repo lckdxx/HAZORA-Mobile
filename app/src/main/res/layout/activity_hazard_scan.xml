@@ -15,6 +15,55 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Camera Zoom Controls -->
+    <LinearLayout
+        android:id="@+id/layout_zoom_controls"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="24dp"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/layout_bottom_controls"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/btn_zoom_in"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/bg_circle_light_red"
+            android:backgroundTint="#CC0D1B2A"
+            android:gravity="center"
+            android:text="+"
+            android:textColor="@color/white"
+            android:textSize="26sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_zoom_level"
+            android:layout_width="48dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:gravity="center"
+            android:text="1.0x"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/btn_zoom_out"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_circle_light_red"
+            android:backgroundTint="#CC0D1B2A"
+            android:gravity="center"
+            android:text="−"
+            android:textColor="@color/white"
+            android:textSize="26sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
     <!-- Top Toolbar Overlay -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_toolbar"
@@ -95,6 +144,7 @@
 
     <!-- Bottom Controls -->
     <LinearLayout
+        android:id="@+id/layout_bottom_controls"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"

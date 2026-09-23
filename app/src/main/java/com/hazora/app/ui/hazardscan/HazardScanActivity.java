@@ -80,24 +80,46 @@ public class HazardScanActivity extends AppCompatActivity {
 
         cameraExecutor = Executors.newSingleThreadExecutor();
         hazardDetector = new HazardDetector(this);
-        hazardDetector.setScanMode(HazardDetector.ScanMode.HELMET_ONLY); // Default to Helmet-Only for Headshot & Selfie scans
+        hazardDetector.setScanMode(HazardDetector.ScanMode.AUTO); // Auto-detects required PPE from how much of the body is visible
 
         View back = findViewById(R.id.tv_back);
         back.setOnClickListener(v -> finish());
 
         TextView tvTitle = findViewById(R.id.tv_title);
         if (tvTitle != null) {
-            tvTitle.setText("AI Hazard Scan (Helmet Check)");
+            tvTitle.setText("AI Hazard Scan (Auto)");
+            // Tap the title to cycle through scan modes; default is Auto.
             tvTitle.setOnClickListener(v -> {
-                if (hazardDetector.isRequireVest()) {
-                    hazardDetector.setScanMode(HazardDetector.ScanMode.HELMET_ONLY);
-                    tvTitle.setText("AI Hazard Scan (Helmet Check)");
-                    Toast.makeText(this, "Scan Mode: Helmet Only Check (Headshot)", Toast.LENGTH_SHORT).show();
-                } else {
-                    hazardDetector.setScanMode(HazardDetector.ScanMode.FULL_BODY);
-                    tvTitle.setText("AI Hazard Scan (Full PPE Check)");
-                    Toast.makeText(this, "Scan Mode: Full Body PPE Check (Helmet, Vest & Shoes)", Toast.LENGTH_SHORT).show();
+                HazardDetector.ScanMode next;
+                switch (hazardDetector.getScanMode()) {
+                    case AUTO: next = HazardDetector.ScanMode.HELMET_ONLY; break;
+                    case HELMET_ONLY: next = HazardDetector.ScanMode.UPPER_BODY; break;
+                    case UPPER_BODY: next = HazardDetector.ScanMode.FULL_BODY; break;
+                    default: next = HazardDetector.ScanMode.AUTO; break;
                 }
+                hazardDetector.setScanMode(next);
+
+                String titleText, toastText;
+                switch (next) {
+                    case HELMET_ONLY:
+                        titleText = "AI Hazard Scan (Helmet Check)";
+                        toastText = "Scan Mode: Helmet Only (Headshot)";
+                        break;
+                    case UPPER_BODY:
+                        titleText = "AI Hazard Scan (Upper Body)";
+                        toastText = "Scan Mode: Helmet & Vest";
+                        break;
+                    case FULL_BODY:
+                        titleText = "AI Hazard Scan (Full PPE Check)";
+                        toastText = "Scan Mode: Full Body (Helmet, Vest & Shoes)";
+                        break;
+                    default:
+                        titleText = "AI Hazard Scan (Auto)";
+                        toastText = "Scan Mode: Auto (detects required PPE automatically)";
+                        break;
+                }
+                tvTitle.setText(titleText);
+                Toast.makeText(this, toastText, Toast.LENGTH_SHORT).show();
             });
         }
 

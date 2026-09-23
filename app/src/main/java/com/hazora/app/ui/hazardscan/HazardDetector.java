@@ -16,6 +16,7 @@ import java.util.Locale;
 public class HazardDetector {
 
     public enum ScanMode {
+        AUTO,         // Adaptive: required PPE inferred from how much of the body is visible
         HELMET_ONLY,  // Headshot / Selfie scan
         UPPER_BODY,   // Helmet + Vest
         FULL_BODY     // Helmet + Vest + Shoes
@@ -23,6 +24,7 @@ public class HazardDetector {
 
     private final Context context;
     private YOLODetector yoloDetector;
+    private ScanMode scanMode = ScanMode.AUTO;
     private boolean requireHelmet = true;
     private boolean requireVest = false;
     private boolean requireShoes = false;
@@ -33,7 +35,14 @@ public class HazardDetector {
     }
 
     public void setScanMode(ScanMode mode) {
+        this.scanMode = mode;
         switch (mode) {
+            case AUTO:
+                // Requirements are decided per person at detection time.
+                this.requireHelmet = true;
+                this.requireVest = false;
+                this.requireShoes = false;
+                break;
             case HELMET_ONLY:
                 this.requireHelmet = true;
                 this.requireVest = false;
@@ -51,6 +60,8 @@ public class HazardDetector {
                 break;
         }
     }
+
+    public ScanMode getScanMode() { return scanMode; }
 
     public void setRequiredPPE(boolean helmet, boolean vest, boolean shoes) {
         this.requireHelmet = helmet;
@@ -89,12 +100,25 @@ public class HazardDetector {
             int totalPeople = clusters.size();
             int violations = 0;
 
+            int frameHeight = bitmap.getHeight();
             for (int i = 0; i < clusters.size(); i++) {
                 PPECluster cluster = clusters.get(i);
-                
-                boolean helmetOk = !requireHelmet || cluster.hasHelmet;
-                boolean vestOk = !requireVest || cluster.hasVest;
-                boolean shoesOk = !requireShoes || cluster.hasShoes;
+
+                // In AUTO mode, decide required PPE per person from how much of
+                // the body is visible in the frame. Otherwise use the fixed mode.
+                boolean reqHelmet = requireHelmet;
+                boolean reqVest = requireVest;
+                boolean reqShoes = requireShoes;
+                if (scanMode == ScanMode.AUTO) {
+                    boolean[] req = cluster.inferRequiredPpe(frameHeight);
+                    reqHelmet = req[0];
+                    reqVest = req[1];
+                    reqShoes = req[2];
+                }
+
+                boolean helmetOk = !reqHelmet || cluster.hasHelmet;
+                boolean vestOk = !reqVest || cluster.hasVest;
+                boolean shoesOk = !reqShoes || cluster.hasShoes;
                 boolean isSecure = helmetOk && vestOk && shoesOk;
                 boolean isUncertain = cluster.minConfidence < 0.55f;
                 
@@ -102,12 +126,12 @@ public class HazardDetector {
 
                 String label;
                 StringBuilder checklist = new StringBuilder();
-                if (requireHelmet) checklist.append(String.format("Helmet: %s", cluster.hasHelmet ? "YES" : "NO"));
-                if (requireVest) {
+                if (reqHelmet) checklist.append(String.format("Helmet: %s", cluster.hasHelmet ? "YES" : "NO"));
+                if (reqVest) {
                     if (checklist.length() > 0) checklist.append(" | ");
                     checklist.append(String.format("Vest: %s", cluster.hasVest ? "YES" : "NO"));
                 }
-                if (requireShoes) {
+                if (reqShoes) {
                     if (checklist.length() > 0) checklist.append(" | ");
                     checklist.append(String.format("Shoes: %s", cluster.hasShoes ? "YES" : "NO"));
                 }
@@ -115,8 +139,8 @@ public class HazardDetector {
                     checklist.append(String.format("Helmet: %s", cluster.hasHelmet ? "YES" : "NO"));
                 }
 
-                String missingRemarks = cluster.getMissingRemarks(requireHelmet, requireVest, requireShoes);
-                String missingAction = cluster.getMissingAction(requireHelmet, requireVest, requireShoes);
+                String missingRemarks = cluster.getMissingRemarks(reqHelmet, reqVest, reqShoes);
+                String missingAction = cluster.getMissingAction(reqHelmet, reqVest, reqShoes);
 
                 String recommendation = isSecure ? "Worker is safe to proceed." : "Action Required: " + missingAction;
                 String finalDescription = checklist.toString() + "\n" + recommendation;
@@ -148,7 +172,12 @@ public class HazardDetector {
             }
         } else {
             String advice = isBlurry ? "Hold the phone steady and move closer." : "Ensure the person is centered in the frame.";
-            String missingReq = requireHelmet && !requireVest && !requireShoes ? "Helmet" : "Required PPE";
+            String missingReq;
+            if (scanMode == ScanMode.AUTO) {
+                missingReq = "PPE";
+            } else {
+                missingReq = requireHelmet && !requireVest && !requireShoes ? "Helmet" : "Required PPE";
+            }
             results.add(new DetectionResult("Violation: No " + missingReq + " Detected", "Action: Equip all required PPE. " + advice, 0.0f, false, fullFrameRect, DetectionType.PERSON, "Critical"));
         }
         
@@ -234,6 +263,29 @@ public class HazardDetector {
                 bottom = Math.max(bottom, d.location.bottom);
             }
             return new Rect((int)left, (int)(top - 20), (int)right, (int)(bottom + 50));
+        }
+
+        /**
+         * Adaptive requirement inference for AUTO mode. Decides which PPE items
+         * to check based on how far down the frame this person's detections
+         * reach, plus which items were actually detected.
+         * Returns [requireHelmet, requireVest, requireShoes].
+         */
+        boolean[] inferRequiredPpe(int frameHeight) {
+            float lowestBottom = 0;
+            for (YOLODetector.Recognition d : detections) {
+                lowestBottom = Math.max(lowestBottom, d.location.bottom);
+            }
+            // Fraction of the frame the person's body occupies vertically.
+            float reach = frameHeight > 0 ? lowestBottom / frameHeight : 0f;
+
+            // Always check helmet. Add vest once the torso region is in view,
+            // add shoes only when the body extends near the bottom of the frame.
+            boolean reqHelmet = true;
+            boolean reqVest = hasVest || reach >= 0.55f;
+            boolean reqShoes = hasShoes || reach >= 0.85f;
+
+            return new boolean[] { reqHelmet, reqVest, reqShoes };
         }
 
         String getMissingRemarks(boolean requireHelmet, boolean requireVest, boolean requireShoes) {

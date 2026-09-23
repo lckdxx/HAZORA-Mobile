@@ -31,8 +31,12 @@ public class YOLODetector {
     private final int inputWidth = 640;
     private final int inputHeight = 640;
     private final Context context;
-    private final float confidenceThreshold = 0.10f; // Lowered threshold for reliable headshot & close-up recognition
+    // Aligned with the web dashboard so both platforms behave identically.
+    private final float confidenceThreshold = 0.45f;
     private final float iouThreshold = 0.45f;
+    // Some YOLOv8 TFLite exports expect NCHW ([1,3,H,W]) instead of NHWC ([1,H,W,3]).
+    // Detected once from the model's declared input shape.
+    private boolean channelsFirst = false;
 
     public YOLODetector(Context context) {
         this.context = context;
@@ -40,8 +44,12 @@ public class YOLODetector {
             // Loading the model trained from ppe.ndjson
             if (assetExists("ppe_model.tflite")) {
                 tflite = new Interpreter(loadModelFile("ppe_model.tflite"));
-                Log.d("YOLODetector", "ppe_model.tflite loaded successfully. Input shape: " 
-                        + Arrays.toString(tflite.getInputTensor(0).shape())
+                int[] inputShape = tflite.getInputTensor(0).shape();
+                // NCHW looks like [1, 3, 640, 640]; NHWC looks like [1, 640, 640, 3].
+                channelsFirst = inputShape.length == 4 && inputShape[1] == 3;
+                Log.d("YOLODetector", "ppe_model.tflite loaded successfully. Input shape: "
+                        + Arrays.toString(inputShape)
+                        + " (channelsFirst=" + channelsFirst + ")"
                         + ", Output shape: " + Arrays.toString(tflite.getOutputTensor(0).shape()));
                 if (assetExists("yolo_labels.txt")) {
                     labels = FileUtil.loadLabels(context, "yolo_labels.txt");
@@ -212,32 +220,43 @@ public class YOLODetector {
         DataType dataType = tflite != null ? tflite.getInputTensor(0).dataType() : DataType.FLOAT32;
         boolean isQuantized = (dataType == DataType.UINT8 || dataType == DataType.INT8);
         int numBytesPerChannel = isQuantized ? 1 : 4;
+        int pixelCount = inputWidth * inputHeight;
 
-        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(inputWidth * inputHeight * 3 * numBytesPerChannel);
+        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(pixelCount * 3 * numBytesPerChannel);
         byteBuffer.order(ByteOrder.nativeOrder());
-        int[] intValues = new int[inputWidth * inputHeight];
+        int[] intValues = new int[pixelCount];
         bitmap.getPixels(intValues, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
-        
-        for (int pixelValue : intValues) {
-            int r = (pixelValue >> 16) & 0xFF;
-            int g = (pixelValue >> 8) & 0xFF;
-            int b = pixelValue & 0xFF;
 
-            if (dataType == DataType.UINT8) {
-                byteBuffer.put((byte) r);
-                byteBuffer.put((byte) g);
-                byteBuffer.put((byte) b);
-            } else if (dataType == DataType.INT8) {
-                byteBuffer.put((byte) (r - 128));
-                byteBuffer.put((byte) (g - 128));
-                byteBuffer.put((byte) (b - 128));
-            } else {
-                byteBuffer.putFloat(r / 255.0f);
-                byteBuffer.putFloat(g / 255.0f);
-                byteBuffer.putFloat(b / 255.0f);
+        if (channelsFirst) {
+            // NCHW: write all R values, then all G, then all B.
+            for (int channel = 0; channel < 3; channel++) {
+                for (int pixelValue : intValues) {
+                    int value;
+                    if (channel == 0) value = (pixelValue >> 16) & 0xFF; // R
+                    else if (channel == 1) value = (pixelValue >> 8) & 0xFF; // G
+                    else value = pixelValue & 0xFF; // B
+                    putChannel(byteBuffer, dataType, value);
+                }
+            }
+        } else {
+            // NHWC: write R,G,B interleaved per pixel.
+            for (int pixelValue : intValues) {
+                putChannel(byteBuffer, dataType, (pixelValue >> 16) & 0xFF);
+                putChannel(byteBuffer, dataType, (pixelValue >> 8) & 0xFF);
+                putChannel(byteBuffer, dataType, pixelValue & 0xFF);
             }
         }
         return byteBuffer;
+    }
+
+    private void putChannel(ByteBuffer byteBuffer, DataType dataType, int value) {
+        if (dataType == DataType.UINT8) {
+            byteBuffer.put((byte) value);
+        } else if (dataType == DataType.INT8) {
+            byteBuffer.put((byte) (value - 128));
+        } else {
+            byteBuffer.putFloat(value / 255.0f);
+        }
     }
 
     private List<Recognition> nms(List<Recognition> recognitions) {

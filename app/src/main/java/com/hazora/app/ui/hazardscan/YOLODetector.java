@@ -56,6 +56,12 @@ public class YOLODetector {
                 if (assetExists("yolo_labels.txt")) {
                     labels = FileUtil.loadLabels(context, "yolo_labels.txt");
                 }
+                // Fallback so class names always map correctly even if the label
+                // asset is missing or fails to load.
+                if (labels == null || labels.isEmpty()) {
+                    labels = Arrays.asList("Safety Helmet", "Safety Vest", "Safety Shoes");
+                }
+                Log.d("AI_DEBUG", "Labels loaded: " + labels);
             } else {
                 Log.e("YOLODetector", "ppe_model.tflite asset not found!");
             }
@@ -112,8 +118,10 @@ public class YOLODetector {
 
         try {
             int[] outputShape = tflite.getOutputTensor(0).shape(); // e.g. [1, 7, 8400] or [1, 8400, 7]
-            Log.d("AI_DEBUG", "Output tensor shape: " + Arrays.toString(outputShape)
-                    + " inputShape: " + Arrays.toString(tflite.getInputTensor(0).shape()));
+            Log.d("AI_DEBUG", "Output shape: " + Arrays.toString(outputShape)
+                    + " inputShape: " + Arrays.toString(tflite.getInputTensor(0).shape())
+                    + " inputType: " + tflite.getInputTensor(0).dataType()
+                    + " outputType: " + tflite.getOutputTensor(0).dataType());
             int dim1 = outputShape.length > 1 ? outputShape[1] : 7;
             int dim2 = outputShape.length > 2 ? outputShape[2] : 8400;
 
@@ -129,17 +137,22 @@ public class YOLODetector {
             tflite.run(inputBuffer, output);
             float[][] data = output[0];
 
-            // Detect whether class scores are raw logits (values well outside
-            // 0..1) that need a sigmoid, vs already-activated probabilities.
+            // Scan ALL anchors/classes for the true raw max (not sampled) so we
+            // don't miss the peak. Also inspect the box-coordinate range to see
+            // whether coords are normalized (0..1) or pixel (0..640).
             float rawMax = 0;
-            for (int c = 0; c < actualNumClasses; c++) {
-                for (int i = 0; i < numAnchors; i += 50) { // sample for speed
+            float coordMax = 0;
+            for (int i = 0; i < numAnchors; i++) {
+                for (int c = 0; c < actualNumClasses; c++) {
                     float v = channelsFirstOutput ? data[4 + c][i] : data[i][4 + c];
                     if (v > rawMax) rawMax = v;
                 }
+                float cx = channelsFirstOutput ? data[0][i] : data[i][0];
+                if (cx > coordMax) coordMax = cx;
             }
             boolean needsSigmoid = rawMax > 1.05f;
-            Log.d("AI_DEBUG", "rawMax=" + rawMax + " needsSigmoid=" + needsSigmoid
+            Log.d("AI_DEBUG", "rawMax=" + rawMax + " coordMax=" + coordMax
+                    + " needsSigmoid=" + needsSigmoid
                     + " layoutChannelsFirst=" + channelsFirstOutput + " classes=" + actualNumClasses);
 
             // Helper to read a channel value for anchor i regardless of layout.
@@ -184,6 +197,9 @@ public class YOLODetector {
                 RectF location = new RectF(left, top, right, bottom);
 
                 String label = labels != null && classId < labels.size() ? labels.get(classId) : "Object " + classId;
+                Log.d("AI_DEBUG", "DET " + label + " conf=" + String.format("%.2f", maxClassProb)
+                        + " box=[" + (int) location.left + "," + (int) location.top + ","
+                        + (int) location.right + "," + (int) location.bottom + "]");
                 recognitions.add(new Recognition(label, maxClassProb, location));
             }
 

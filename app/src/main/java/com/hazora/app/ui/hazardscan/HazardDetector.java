@@ -24,6 +24,7 @@ public class HazardDetector {
 
     private final Context context;
     private YOLODetector yoloDetector;
+    private PersonDetector personDetector;
     private ScanMode scanMode = ScanMode.AUTO;
     private boolean requireHelmet = true;
     private boolean requireVest = false;
@@ -75,6 +76,7 @@ public class HazardDetector {
 
     private void setupDetector() {
         yoloDetector = new YOLODetector(context);
+        personDetector = new PersonDetector(context);
     }
 
     /** Analyzes image for multiple people and their PPE compliance using YOLO AI. */
@@ -91,8 +93,45 @@ public class HazardDetector {
             analysisBitmap = boostBrightness(bitmap, lightScale);
         }
 
-        // 3. Run YOLOv8 AI Detection
-        List<YOLODetector.Recognition> yoloRecognitions = yoloDetector.detect(analysisBitmap);
+        // 3. Person-focused PPE detection (matches the web dashboard pipeline):
+        //    find people first, then run YOLO on each person's cropped region so
+        //    the PPE is larger in frame and detected with much higher confidence.
+        List<YOLODetector.Recognition> yoloRecognitions = new ArrayList<>();
+        List<PersonDetector.PersonBox> people =
+                personDetector != null ? personDetector.detect(analysisBitmap) : new java.util.ArrayList<>();
+
+        if (!people.isEmpty()) {
+            for (PersonDetector.PersonBox person : people) {
+                // Expand the person box a bit so helmet/shoes at the edges aren't cut off.
+                android.graphics.RectF b = person.box;
+                float padW = b.width() * 0.12f;
+                float padH = b.height() * 0.12f;
+                int left = Math.max(0, (int) (b.left - padW));
+                int top = Math.max(0, (int) (b.top - padH));
+                int right = Math.min(analysisBitmap.getWidth(), (int) (b.right + padW));
+                int bottom = Math.min(analysisBitmap.getHeight(), (int) (b.bottom + padH));
+                int cropW = right - left;
+                int cropH = bottom - top;
+                if (cropW < 16 || cropH < 16) continue;
+
+                Bitmap personCrop = Bitmap.createBitmap(analysisBitmap, left, top, cropW, cropH);
+                List<YOLODetector.Recognition> cropDetections = yoloDetector.detect(personCrop);
+
+                // Map crop-relative boxes back to the full frame.
+                for (YOLODetector.Recognition rec : cropDetections) {
+                    android.graphics.RectF r = new android.graphics.RectF(
+                            rec.location.left + left,
+                            rec.location.top + top,
+                            rec.location.right + left,
+                            rec.location.bottom + top);
+                    yoloRecognitions.add(new YOLODetector.Recognition(rec.title, rec.confidence, r));
+                }
+            }
+        } else {
+            // Fallback: no person found, run YOLO on the whole frame.
+            yoloRecognitions = yoloDetector.detect(analysisBitmap);
+        }
+
         Rect fullFrameRect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
 
         if (!yoloRecognitions.isEmpty()) {

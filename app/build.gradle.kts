@@ -61,6 +61,8 @@ dependencies {
     implementation(libs.tensorflow.lite)
     implementation(libs.tensorflow.lite.metadata)
     implementation(libs.tensorflow.lite.support)
+    // Task Vision provides the SSD MobileNet object detector for person detection.
+    implementation("org.tensorflow:tensorflow-lite-task-vision:0.4.4")
 
     // Firebase
     implementation(platform(libs.firebase.bom))

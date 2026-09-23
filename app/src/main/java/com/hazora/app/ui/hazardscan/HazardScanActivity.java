@@ -80,9 +80,26 @@ public class HazardScanActivity extends AppCompatActivity {
 
         cameraExecutor = Executors.newSingleThreadExecutor();
         hazardDetector = new HazardDetector(this);
+        hazardDetector.setScanMode(HazardDetector.ScanMode.HELMET_ONLY); // Default to Helmet-Only for Headshot & Selfie scans
 
         View back = findViewById(R.id.tv_back);
         back.setOnClickListener(v -> finish());
+
+        TextView tvTitle = findViewById(R.id.tv_title);
+        if (tvTitle != null) {
+            tvTitle.setText("AI Hazard Scan (Helmet Check)");
+            tvTitle.setOnClickListener(v -> {
+                if (hazardDetector.isRequireVest()) {
+                    hazardDetector.setScanMode(HazardDetector.ScanMode.HELMET_ONLY);
+                    tvTitle.setText("AI Hazard Scan (Helmet Check)");
+                    Toast.makeText(this, "Scan Mode: Helmet Only Check (Headshot)", Toast.LENGTH_SHORT).show();
+                } else {
+                    hazardDetector.setScanMode(HazardDetector.ScanMode.FULL_BODY);
+                    tvTitle.setText("AI Hazard Scan (Full PPE Check)");
+                    Toast.makeText(this, "Scan Mode: Full Body PPE Check (Helmet, Vest & Shoes)", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
 
         analyzingLayout = findViewById(R.id.layout_analyzing);
         resultCard = findViewById(R.id.card_scan_result);

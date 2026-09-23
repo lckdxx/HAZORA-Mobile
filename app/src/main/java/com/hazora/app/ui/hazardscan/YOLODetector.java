@@ -31,7 +31,7 @@ public class YOLODetector {
     private final int inputWidth = 640;
     private final int inputHeight = 640;
     private final Context context;
-    private final float confidenceThreshold = 0.20f; // Extreme low threshold for debugging small datasets
+    private final float confidenceThreshold = 0.10f; // Lowered threshold for reliable headshot & close-up recognition
     private final float iouThreshold = 0.45f;
 
     public YOLODetector(Context context) {

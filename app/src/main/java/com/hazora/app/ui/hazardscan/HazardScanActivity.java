@@ -72,6 +72,7 @@ public class HazardScanActivity extends AppCompatActivity {
     private boolean isScanning = false;
     private String userAssignedSite = "Not assigned location site";
     private Incident lastDetectedIncident;
+    private Bitmap lastCapturedBitmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,6 +148,11 @@ public class HazardScanActivity extends AppCompatActivity {
         });
 
         captureButton.setOnClickListener(v -> captureAndScan());
+
+        // Tap the captured result image to view it full screen with zoom.
+        ivCapturedResult.setOnClickListener(v -> {
+            if (lastCapturedBitmap != null) showFullscreenImage(lastCapturedBitmap);
+        });
 
         findViewById(R.id.btn_view_gallery).setOnClickListener(v -> {
             startActivity(new Intent(this, HazardGalleryActivity.class));
@@ -289,6 +295,7 @@ public class HazardScanActivity extends AppCompatActivity {
         resultCard.setVisibility(View.VISIBLE);
         captureButton.setVisibility(View.VISIBLE);
 
+        lastCapturedBitmap = bitmap;
         ivCapturedResult.setImageBitmap(bitmap);
 
         TextView tvTitle = findViewById(R.id.tv_hazard_title);
@@ -398,6 +405,20 @@ public class HazardScanActivity extends AppCompatActivity {
             intent.putExtra("incident_index", 0);
             startActivity(intent);
         }
+    }
+
+    /** Shows the captured image full screen with pinch/double-tap zoom. */
+    private void showFullscreenImage(Bitmap bitmap) {
+        android.app.Dialog dialog = new android.app.Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+        dialog.setContentView(R.layout.dialog_image_fullscreen);
+
+        ZoomableImageView iv = dialog.findViewById(R.id.iv_fullscreen);
+        iv.setImageBitmap(bitmap);
+
+        View close = dialog.findViewById(R.id.btn_close_fullscreen);
+        close.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
     }
 
     @Override

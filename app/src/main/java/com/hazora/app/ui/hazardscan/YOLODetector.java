@@ -31,8 +31,9 @@ public class YOLODetector {
     private final int inputWidth = 640;
     private final int inputHeight = 640;
     private final Context context;
-    // Aligned with the web dashboard so both platforms behave identically.
-    private final float confidenceThreshold = 0.45f;
+    // Slightly lower than the web dashboard (0.45) because a single phone
+    // snapshot is often blurrier than a continuous stream frame.
+    private final float confidenceThreshold = 0.30f;
     private final float iouThreshold = 0.45f;
     // Some YOLOv8 TFLite exports expect NCHW ([1,3,H,W]) instead of NHWC ([1,H,W,3]).
     // Detected once from the model's declared input shape.
@@ -114,98 +115,60 @@ public class YOLODetector {
             int detectionsCount = 0;
             float maxSeenProb = 0;
 
-            if (dim1 < dim2) {
-                // Layout [1, 4 + numClasses, 8400] (e.g. [1, 7, 8400])
-                float[][][] output = new float[1][dim1][dim2];
-                tflite.run(inputBuffer, output);
-                float[][] data = output[0]; // [dim1][dim2]
-                int numAnchors = dim2;
-                int channels = dim1;
-                int actualNumClasses = channels - 4;
+            boolean channelsFirstOutput = dim1 < dim2;
+            int numAnchors = channelsFirstOutput ? dim2 : dim1;
+            int channels = channelsFirstOutput ? dim1 : dim2;
+            int actualNumClasses = channels - 4;
 
-                for (int i = 0; i < numAnchors; i++) {
-                    float maxClassProb = 0;
-                    int classId = -1;
+            float[][][] output = new float[1][dim1][dim2];
+            tflite.run(inputBuffer, output);
+            float[][] data = output[0];
 
-                    for (int c = 0; c < actualNumClasses; c++) {
-                        float prob = data[4 + c][i];
-                        if (prob > maxClassProb) {
-                            maxClassProb = prob;
-                            classId = c;
-                        }
-                    }
-
-                    if (maxClassProb > maxSeenProb) maxSeenProb = maxClassProb;
-
-                    if (maxClassProb > confidenceThreshold) {
-                        detectionsCount++;
-                        float xCenter = data[0][i];
-                        float yCenter = data[1][i];
-                        float w = data[2][i];
-                        float h = data[3][i];
-
-                        float left = Math.max(0, xCenter - w / 2);
-                        float top = Math.max(0, yCenter - h / 2);
-                        float right = Math.min(inputWidth, xCenter + w / 2);
-                        float bottom = Math.min(inputHeight, yCenter + h / 2);
-
-                        RectF location = new RectF(
-                                left * bitmap.getWidth() / inputWidth,
-                                top * bitmap.getHeight() / inputHeight,
-                                right * bitmap.getWidth() / inputWidth,
-                                bottom * bitmap.getHeight() / inputHeight
-                        );
-
-                        String label = labels != null && classId < labels.size() ? labels.get(classId) : "Object " + classId;
-                        recognitions.add(new Recognition(label, maxClassProb, location));
+            // Helper to read a channel value for anchor i regardless of layout.
+            // channelsFirstOutput: data[channel][anchor]; else data[anchor][channel].
+            for (int i = 0; i < numAnchors; i++) {
+                float maxClassProb = 0;
+                int classId = -1;
+                for (int c = 0; c < actualNumClasses; c++) {
+                    float prob = channelsFirstOutput ? data[4 + c][i] : data[i][4 + c];
+                    if (prob > maxClassProb) {
+                        maxClassProb = prob;
+                        classId = c;
                     }
                 }
-            } else {
-                // Layout [1, 8400, 4 + numClasses] (e.g. [1, 8400, 7])
-                float[][][] output = new float[1][dim1][dim2];
-                tflite.run(inputBuffer, output);
-                float[][] data = output[0]; // [dim1][dim2] = [8400][7]
-                int numAnchors = dim1;
-                int channels = dim2;
-                int actualNumClasses = channels - 4;
 
-                for (int i = 0; i < numAnchors; i++) {
-                    float maxClassProb = 0;
-                    int classId = -1;
+                if (maxClassProb > maxSeenProb) maxSeenProb = maxClassProb;
+                if (maxClassProb <= confidenceThreshold) continue;
 
-                    for (int c = 0; c < actualNumClasses; c++) {
-                        float prob = data[i][4 + c];
-                        if (prob > maxClassProb) {
-                            maxClassProb = prob;
-                            classId = c;
-                        }
-                    }
+                detectionsCount++;
+                float xCenter = channelsFirstOutput ? data[0][i] : data[i][0];
+                float yCenter = channelsFirstOutput ? data[1][i] : data[i][1];
+                float w = channelsFirstOutput ? data[2][i] : data[i][2];
+                float h = channelsFirstOutput ? data[3][i] : data[i][3];
 
-                    if (maxClassProb > maxSeenProb) maxSeenProb = maxClassProb;
-
-                    if (maxClassProb > confidenceThreshold) {
-                        detectionsCount++;
-                        float xCenter = data[i][0];
-                        float yCenter = data[i][1];
-                        float w = data[i][2];
-                        float h = data[i][3];
-
-                        float left = Math.max(0, xCenter - w / 2);
-                        float top = Math.max(0, yCenter - h / 2);
-                        float right = Math.min(inputWidth, xCenter + w / 2);
-                        float bottom = Math.min(inputHeight, yCenter + h / 2);
-
-                        RectF location = new RectF(
-                                left * bitmap.getWidth() / inputWidth,
-                                top * bitmap.getHeight() / inputHeight,
-                                right * bitmap.getWidth() / inputWidth,
-                                bottom * bitmap.getHeight() / inputHeight
-                        );
-
-                        String label = labels != null && classId < labels.size() ? labels.get(classId) : "Object " + classId;
-                        recognitions.add(new Recognition(label, maxClassProb, location));
-                    }
+                // YOLOv8 TFLite exports usually output normalized coords (0..1).
+                // Detect that and scale to input pixels; otherwise assume pixels.
+                if (xCenter <= 1.5f && w <= 1.5f) {
+                    xCenter *= inputWidth;
+                    yCenter *= inputHeight;
+                    w *= inputWidth;
+                    h *= inputHeight;
                 }
+
+                float left = Math.max(0, xCenter - w / 2);
+                float top = Math.max(0, yCenter - h / 2);
+                float right = Math.min(inputWidth, xCenter + w / 2);
+                float bottom = Math.min(inputHeight, yCenter + h / 2);
+
+                RectF location = new RectF(
+                        left * bitmap.getWidth() / inputWidth,
+                        top * bitmap.getHeight() / inputHeight,
+                        right * bitmap.getWidth() / inputWidth,
+                        bottom * bitmap.getHeight() / inputHeight
+                );
+
+                String label = labels != null && classId < labels.size() ? labels.get(classId) : "Object " + classId;
+                recognitions.add(new Recognition(label, maxClassProb, location));
             }
 
             Log.d("AI_DEBUG", "Scan Complete. Found " + detectionsCount + " items. Max Confidence seen: " + (maxSeenProb * 100) + "%");

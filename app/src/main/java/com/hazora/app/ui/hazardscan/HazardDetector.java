@@ -46,7 +46,7 @@ public class HazardDetector {
         Rect fullFrameRect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
 
         if (!yoloRecognitions.isEmpty()) {
-            List<PPECluster> clusters = groupDetectionsIntoPeople(yoloRecognitions);
+            List<PPECluster> clusters = groupDetectionsIntoPeople(yoloRecognitions, bitmap.getWidth());
             int totalPeople = clusters.size();
             int violations = 0;
 
@@ -119,12 +119,12 @@ public class HazardDetector {
         return (count > 0 && (totalDiff / count) < 4); // Threshold for low variance (blur)
     }
 
-    private List<PPECluster> groupDetectionsIntoPeople(List<YOLODetector.Recognition> recognitions) {
+    private List<PPECluster> groupDetectionsIntoPeople(List<YOLODetector.Recognition> recognitions, int frameWidth) {
         List<PPECluster> clusters = new ArrayList<>();
         for (YOLODetector.Recognition rec : recognitions) {
             boolean added = false;
             for (PPECluster cluster : clusters) {
-                if (cluster.isPartOfBody(rec)) {
+                if (cluster.isPartOfBody(rec, frameWidth)) {
                     cluster.add(rec);
                     added = true;
                     break;
@@ -159,8 +159,9 @@ public class HazardDetector {
             centerX = totalX / detections.size();
         }
 
-        boolean isPartOfBody(YOLODetector.Recognition rec) {
-            return Math.abs(rec.location.centerX() - centerX) < (640 * 0.25);
+        boolean isPartOfBody(YOLODetector.Recognition rec, int frameWidth) {
+            float maxDistance = frameWidth > 0 ? (frameWidth * 0.25f) : 160f;
+            return Math.abs(rec.location.centerX() - centerX) < maxDistance;
         }
 
         Rect getCombinedBounds() {

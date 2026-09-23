@@ -88,6 +88,9 @@ public class HazardScanActivity extends AppCompatActivity {
         resultCard = findViewById(R.id.card_scan_result);
         startButton = findViewById(R.id.btn_start_scan);
         previewView = findViewById(R.id.previewView);
+        if (previewView != null) {
+            previewView.setImplementationMode(PreviewView.ImplementationMode.COMPATIBLE);
+        }
         cameraPlaceholder = findViewById(R.id.camera_placeholder);
         captureButton = findViewById(R.id.btn_capture);
         ivCapturedResult = findViewById(R.id.iv_captured_result);

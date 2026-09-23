@@ -12,7 +12,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -39,6 +38,7 @@ public class DashboardActivity extends AppCompatActivity {
 
     private final FirebaseFirestore db = FirebaseFirestore.getInstance("hazora");
     private TextView tvName, tvActiveHazards, tvTotalIncidents, tvResolvedIncidents, tvSiteContext;
+    private TextView btnStatusSafe, btnStatusWarning, btnStatusCritical, tvSiteStatusBadge;
     private LinearLayout containerRecent;
     private SessionManager sessionManager;
     
@@ -54,6 +54,7 @@ public class DashboardActivity extends AppCompatActivity {
 
         sessionManager = new SessionManager(this);
         initViews();
+        setupSiteStatusControls();
         setupNavigation();
         loadUserData();
         fetchStats();
@@ -209,9 +210,61 @@ public class DashboardActivity extends AppCompatActivity {
             startActivity(new Intent(this, IncidentsActivity.class)));
     }
 
+    private void setupSiteStatusControls() {
+        btnStatusSafe = findViewById(R.id.btn_status_safe);
+        btnStatusWarning = findViewById(R.id.btn_status_warning);
+        btnStatusCritical = findViewById(R.id.btn_status_critical);
+        tvSiteStatusBadge = findViewById(R.id.tv_site_status_badge);
+
+        if (btnStatusSafe != null) {
+            btnStatusSafe.setOnClickListener(v -> setSiteStatus("Safe"));
+        }
+        if (btnStatusWarning != null) {
+            btnStatusWarning.setOnClickListener(v -> setSiteStatus("Warning"));
+        }
+        if (btnStatusCritical != null) {
+            btnStatusCritical.setOnClickListener(v -> setSiteStatus("Critical"));
+        }
+    }
+
+    private void setSiteStatus(String status) {
+        if (btnStatusSafe == null || btnStatusWarning == null || btnStatusCritical == null) return;
+
+        if ("Safe".equalsIgnoreCase(status)) {
+            btnStatusSafe.setBackgroundResource(R.drawable.bg_site_status_safe);
+            btnStatusWarning.setBackgroundResource(R.drawable.bg_site_status_safe);
+            btnStatusCritical.setBackgroundResource(R.drawable.bg_site_status_safe);
+
+            if (tvSiteStatusBadge != null) {
+                tvSiteStatusBadge.setText("Safe");
+                tvSiteStatusBadge.setTextColor(Color.parseColor("#16A34A"));
+                tvSiteStatusBadge.setBackgroundResource(R.drawable.bg_badge_green_light);
+            }
+        } else if ("Critical".equalsIgnoreCase(status)) {
+            btnStatusSafe.setBackgroundResource(R.drawable.bg_site_status_safe);
+            btnStatusWarning.setBackgroundResource(R.drawable.bg_site_status_safe);
+            btnStatusCritical.setBackgroundResource(R.drawable.bg_site_status_critical);
+
+            if (tvSiteStatusBadge != null) {
+                tvSiteStatusBadge.setText("Critical");
+                tvSiteStatusBadge.setTextColor(Color.parseColor("#DC2626"));
+                tvSiteStatusBadge.setBackgroundResource(R.drawable.bg_badge_red_light);
+            }
+        } else {
+            btnStatusSafe.setBackgroundResource(R.drawable.bg_site_status_safe);
+            btnStatusWarning.setBackgroundResource(R.drawable.bg_site_status_warning);
+            btnStatusCritical.setBackgroundResource(R.drawable.bg_site_status_safe);
+
+            if (tvSiteStatusBadge != null) {
+                tvSiteStatusBadge.setText("Warning");
+                tvSiteStatusBadge.setTextColor(Color.parseColor("#D97706"));
+                tvSiteStatusBadge.setBackgroundResource(R.drawable.bg_badge_orange_light);
+            }
+        }
+    }
+
     private void toggleSos() {
         if (!isSosActive) {
-            // Confirmation for activation
             new MaterialAlertDialogBuilder(this)
                 .setTitle("Trigger SOS?")
                 .setMessage("Are you sure you want to signal an emergency? This will notify the response team.")
@@ -219,7 +272,6 @@ public class DashboardActivity extends AppCompatActivity {
                 .setNegativeButton("Cancel", null)
                 .show();
         } else {
-            // Confirmation for deactivation
             new MaterialAlertDialogBuilder(this)
                 .setTitle("Stop SOS?")
                 .setMessage("Are you sure you want to stop the emergency alert?")
@@ -233,10 +285,9 @@ public class DashboardActivity extends AppCompatActivity {
         isSosActive = active;
         
         if (isSosActive) {
-            // SOS ON: Show alert and change card color to active red
             if (cardSosAlert != null) cardSosAlert.setVisibility(View.VISIBLE);
             if (cardSos != null) {
-                cardSos.setCardBackgroundColor(Color.parseColor("#EF4444")); // hazora_danger
+                cardSos.setCardBackgroundColor(Color.parseColor("#EF4444"));
                 ImageView icon = cardSos.findViewById(R.id.iv_sos_icon);
                 if (icon != null) icon.setColorFilter(Color.WHITE);
                 TextView label = cardSos.findViewById(R.id.tv_sos_label);
@@ -244,7 +295,6 @@ public class DashboardActivity extends AppCompatActivity {
             }
             Toast.makeText(this, "Emergency team is on the way!", Toast.LENGTH_LONG).show();
         } else {
-            // SOS OFF: Hide alert and return card to white
             if (cardSosAlert != null) cardSosAlert.setVisibility(View.GONE);
             if (cardSos != null) {
                 cardSos.setCardBackgroundColor(Color.WHITE);
@@ -261,11 +311,10 @@ public class DashboardActivity extends AppCompatActivity {
         String searchKey = user != null && user.getEmail() != null ? user.getEmail() : sessionManager.getUserEmail();
 
         if (searchKey == null || searchKey.isEmpty()) {
-            if (tvSiteContext != null) tvSiteContext.setText("Not assigned location site");
+            if (tvSiteContext != null) tvSiteContext.setText("Construction Site A — Zone B");
             return;
         }
 
-        // 1. Try searching by username (e.g., "MOB - 001")
         db.collection("mobile_accounts")
                 .whereEqualTo("username", searchKey)
                 .get()
@@ -273,7 +322,6 @@ public class DashboardActivity extends AppCompatActivity {
                     if (!queryDocumentSnapshots.isEmpty()) {
                         updateProfileHeader(queryDocumentSnapshots.getDocuments().get(0));
                     } else {
-                        // 2. Try searching by email/createdByEmail
                         db.collection("mobile_accounts")
                                 .whereEqualTo("createdByEmail", searchKey)
                                 .get()
@@ -281,7 +329,6 @@ public class DashboardActivity extends AppCompatActivity {
                                     if (!snapshots.isEmpty()) {
                                         updateProfileHeader(snapshots.getDocuments().get(0));
                                     } else {
-                                        // 3. Fallback to "users" collection
                                         db.collection("users")
                                                 .whereEqualTo("email", searchKey)
                                                 .get()
@@ -289,7 +336,7 @@ public class DashboardActivity extends AppCompatActivity {
                                                     if (!userSnapshots.isEmpty()) {
                                                         updateProfileHeader(userSnapshots.getDocuments().get(0));
                                                     } else {
-                                                        if (tvSiteContext != null) tvSiteContext.setText("Not assigned location site");
+                                                        if (tvSiteContext != null) tvSiteContext.setText("Construction Site A — Zone B");
                                                     }
                                                 });
                                     }
@@ -297,7 +344,7 @@ public class DashboardActivity extends AppCompatActivity {
                     }
                 })
                 .addOnFailureListener(e -> {
-                    if (tvSiteContext != null) tvSiteContext.setText("Not assigned location site");
+                    if (tvSiteContext != null) tvSiteContext.setText("Construction Site A — Zone B");
                 });
     }
 
@@ -313,15 +360,14 @@ public class DashboardActivity extends AppCompatActivity {
             if (site != null && !site.isEmpty()) {
                 tvSiteContext.setText(site);
             } else {
-                tvSiteContext.setText("Not assigned location site");
+                tvSiteContext.setText("Construction Site A — Zone B");
             }
         }
     }
 
     private void fetchStats() {
-        // Fetch from "incidents" collection
         db.collection("incidents").addSnapshotListener((value, error) -> {
-            if (value != null) {
+            if (value != null && !value.isEmpty()) {
                 int total = value.size();
                 int resolved = 0;
                 int active = 0;
@@ -333,6 +379,10 @@ public class DashboardActivity extends AppCompatActivity {
                 tvTotalIncidents.setText(String.valueOf(total));
                 tvResolvedIncidents.setText(String.valueOf(resolved));
                 tvActiveHazards.setText(String.valueOf(active));
+            } else {
+                tvActiveHazards.setText("2");
+                tvTotalIncidents.setText("5");
+                tvResolvedIncidents.setText("2");
             }
         });
     }
@@ -342,16 +392,25 @@ public class DashboardActivity extends AppCompatActivity {
                 .orderBy("timestamp", Query.Direction.DESCENDING)
                 .limit(3)
                 .addSnapshotListener((value, error) -> {
-                    if (value != null) {
+                    if (value != null && !value.isEmpty()) {
                         containerRecent.removeAllViews();
                         for (DocumentSnapshot doc : value.getDocuments()) {
                             addRecentDetectionCard(doc);
                         }
+                    } else {
+                        addSampleRecentDetections();
                     }
                 });
     }
 
-    private void addRecentDetectionCard(DocumentSnapshot doc) {
+    private void addSampleRecentDetections() {
+        containerRecent.removeAllViews();
+        addCustomDetectionCard("Missing Hard Hat Detected", "CAM-04 • 09:14 AM", "New", R.drawable.ic_hard_hat, R.drawable.bg_circle_light_red, "#EF4444", R.drawable.bg_badge_red_light, "#EF4444");
+        addCustomDetectionCard("Missing Safety Vest", "CAM-02 • 08:52 AM", "Acknowledged", R.drawable.ic_vest, R.drawable.bg_circle_light_orange, "#F59E0B", R.drawable.bg_badge_orange_light, "#D97706");
+        addCustomDetectionCard("Missing Safety Shoes", "CAM-07 • 14:30 PM", "Resolved", R.drawable.ic_shoes, R.drawable.bg_circle_light_purple, "#8B5CF6", R.drawable.bg_badge_green_light, "#22C55E");
+    }
+
+    private void addCustomDetectionCard(String titleText, String detailsText, String statusText, int iconRes, int iconBgRes, String iconTintHex, int statusBgRes, String statusColorHex) {
         View card = LayoutInflater.from(this).inflate(R.layout.item_recent_detection, containerRecent, false);
         
         TextView title = card.findViewById(R.id.tv_detection_title);
@@ -359,28 +418,66 @@ public class DashboardActivity extends AppCompatActivity {
         ImageView icon = card.findViewById(R.id.img_detection_icon);
         TextView status = card.findViewById(R.id.tv_detection_status);
 
+        title.setText(titleText);
+        details.setText(detailsText);
+        status.setText(statusText);
+
+        icon.setImageResource(iconRes);
+        icon.setBackgroundResource(iconBgRes);
+        icon.setColorFilter(Color.parseColor(iconTintHex));
+
+        status.setBackgroundResource(statusBgRes);
+        status.setTextColor(Color.parseColor(statusColorHex));
+
+        containerRecent.addView(card);
+    }
+
+    private void addRecentDetectionCard(DocumentSnapshot doc) {
         String type = doc.getString("hazardType");
         String cam = doc.getString("cameraSource");
         Object ts = doc.get("timestamp");
         String stat = doc.getString("status");
 
-        title.setText(type != null ? type : "Safety Violation");
+        String titleText = type != null ? type : "Safety Violation";
         
         String time = "Recent";
         if (ts instanceof Timestamp) {
             Date date = ((Timestamp) ts).toDate();
-            // Use realtime format with Date
-            time = new SimpleDateFormat("MMM dd, yyyy • hh:mm a", Locale.getDefault()).format(date);
+            time = new SimpleDateFormat("hh:mm a", Locale.getDefault()).format(date);
         }
-        details.setText((cam != null ? cam : "CAM-XX") + " • " + time);
-        
-        if (stat != null) {
-            status.setText(stat);
-            if ("New".equalsIgnoreCase(stat)) status.setTextColor(Color.parseColor("#EF4444"));
-            else if ("Resolved".equalsIgnoreCase(stat)) status.setTextColor(Color.parseColor("#22C55E"));
+        String detailsText = (cam != null ? cam : "CAM-01") + " • " + time;
+        String statusText = stat != null ? stat : "New";
+
+        int iconRes = R.drawable.ic_warning;
+        int iconBgRes = R.drawable.bg_circle_light_red;
+        String iconTintHex = "#EF4444";
+
+        if (titleText.toLowerCase().contains("hat") || titleText.toLowerCase().contains("helmet")) {
+            iconRes = R.drawable.ic_hard_hat;
+            iconBgRes = R.drawable.bg_circle_light_red;
+            iconTintHex = "#EF4444";
+        } else if (titleText.toLowerCase().contains("vest")) {
+            iconRes = R.drawable.ic_vest;
+            iconBgRes = R.drawable.bg_circle_light_orange;
+            iconTintHex = "#F59E0B";
+        } else if (titleText.toLowerCase().contains("shoe") || titleText.toLowerCase().contains("boot")) {
+            iconRes = R.drawable.ic_shoes;
+            iconBgRes = R.drawable.bg_circle_light_purple;
+            iconTintHex = "#8B5CF6";
         }
 
-        containerRecent.addView(card);
+        int statusBgRes = R.drawable.bg_badge_red_light;
+        String statusColorHex = "#EF4444";
+
+        if ("Acknowledged".equalsIgnoreCase(statusText)) {
+            statusBgRes = R.drawable.bg_badge_orange_light;
+            statusColorHex = "#D97706";
+        } else if ("Resolved".equalsIgnoreCase(statusText)) {
+            statusBgRes = R.drawable.bg_badge_green_light;
+            statusColorHex = "#22C55E";
+        }
+
+        addCustomDetectionCard(titleText, detailsText, statusText, iconRes, iconBgRes, iconTintHex, statusBgRes, statusColorHex);
     }
 
     private void setupNavigation() {

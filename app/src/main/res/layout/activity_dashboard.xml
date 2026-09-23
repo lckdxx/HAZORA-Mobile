@@ -4,12 +4,11 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/hazora_background_light"
+    android:background="#F8FAFC"
     android:clipChildren="false"
     android:clipToPadding="false">
 
     <!-- Scrollable Content -->
-    <!-- Constrained to the top of the nav_area to avoid overlapping Recent Detections -->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scroll"
         android:layout_width="0dp"
@@ -27,26 +26,26 @@
             android:orientation="vertical"
             android:paddingBottom="32dp">
 
-            <!-- Hero Header -->
-            <!-- Height 220dp, PaddingTop 24dp matches earlier successful top-alignment -->
+            <!-- Hero Header (Dark Blue Region) -->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="220dp"
+                android:layout_height="wrap_content"
                 android:background="@drawable/bg_dashboard_header"
-                android:paddingStart="24dp"
-                android:paddingEnd="24dp"
-                android:paddingTop="24dp">
+                android:paddingStart="20dp"
+                android:paddingTop="28dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="52dp">
 
                 <TextView
                     android:id="@+id/tv_greeting"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="WELCOME BACK!"
+                    android:letterSpacing="0.08"
+                    android:text="GOOD MORNING"
                     android:textAllCaps="true"
-                    android:textColor="#B8D4F7"
+                    android:textColor="#8CAEE6"
                     android:textSize="12sp"
                     android:textStyle="bold"
-                    android:letterSpacing="0.1"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -54,10 +53,10 @@
                     android:id="@+id/tv_name"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="User Name"
-                    android:textColor="@color/white"
-                    android:textSize="28sp"
+                    android:layout_marginTop="2dp"
+                    android:text="Earl Johnson"
+                    android:textColor="#FFFFFF"
+                    android:textSize="26sp"
                     android:textStyle="bold"
                     app:layout_constraintEnd_toStartOf="@+id/img_avatar"
                     app:layout_constraintStart_toStartOf="parent"
@@ -67,198 +66,212 @@
                     android:id="@+id/tv_site_context"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Site A • Zone B"
+                    android:layout_marginTop="6dp"
+                    app:drawableStartCompat="@drawable/ic_location"
+                    android:drawablePadding="6dp"
+                    android:gravity="center_vertical"
+                    android:text="Construction Site A — Zone B"
                     android:textColor="#C9DDF7"
-                    android:textSize="14sp"
+                    android:textSize="13sp"
                     app:layout_constraintEnd_toStartOf="@+id/img_avatar"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/tv_name" />
 
                 <ImageView
                     android:id="@+id/img_avatar"
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
                     android:background="@drawable/circle_orange_border"
+                    android:contentDescription="Profile"
                     android:padding="2dp"
                     android:scaleType="centerCrop"
                     android:src="@drawable/ic_person"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="@id/tv_greeting"
-                    app:tint="@color/white"
-                    android:contentDescription="Profile" />
+                    app:tint="@color/white" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <!-- Stats Overlay Section -->
+            <!-- Stats Overlay Section (3 Cards) -->
             <LinearLayout
                 android:id="@+id/layout_stats_summary"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="-50dp"
+                android:layout_marginTop="-36dp"
                 android:orientation="horizontal"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
                 android:weightSum="3">
 
                 <!-- Active Hazards -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="0dp"
-                    android:layout_height="130dp"
-                    android:layout_marginEnd="8dp"
+                    android:layout_height="125dp"
+                    android:layout_marginEnd="6dp"
                     android:layout_weight="1"
+                    app:cardBackgroundColor="#FFFFFF"
                     app:cardCornerRadius="16dp"
-                    app:cardElevation="4dp"
-                    app:cardBackgroundColor="@color/white">
+                    app:cardElevation="2dp"
+                    app:strokeWidth="0dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="12dp">
+                        android:padding="10dp">
 
                         <ImageView
                             android:layout_width="36dp"
                             android:layout_height="36dp"
-                            android:background="@drawable/bg_circle_light_red"
+                            android:background="@drawable/bg_badge_red_light"
+                            android:contentDescription="Active Hazards"
                             android:padding="8dp"
                             android:src="@drawable/ic_warning"
-                            app:tint="#E55353"
-                            android:contentDescription="Active Hazards" />
+                            app:tint="#EF4444" />
 
                         <TextView
                             android:id="@+id/tv_active_hazards"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:text="0"
-                            android:textColor="@color/hazora_text_primary"
+                            android:layout_marginTop="6dp"
+                            android:text="2"
+                            android:textColor="#EF4444"
                             android:textSize="22sp"
                             android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Active"
-                            android:textColor="@color/hazora_text_secondary"
-                            android:textSize="12sp" />
+                            android:layout_marginTop="2dp"
+                            android:text="Active Hazards"
+                            android:textColor="#64748B"
+                            android:textSize="11sp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
                 <!-- Today's Incidents -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="0dp"
-                    android:layout_height="130dp"
-                    android:layout_marginEnd="8dp"
+                    android:layout_height="125dp"
+                    android:layout_marginStart="3dp"
+                    android:layout_marginEnd="3dp"
                     android:layout_weight="1"
+                    app:cardBackgroundColor="#FFFFFF"
                     app:cardCornerRadius="16dp"
-                    app:cardElevation="4dp"
-                    app:cardBackgroundColor="@color/white">
+                    app:cardElevation="2dp"
+                    app:strokeWidth="0dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="12dp">
+                        android:padding="10dp">
 
                         <ImageView
                             android:layout_width="36dp"
                             android:layout_height="36dp"
-                            android:background="@drawable/bg_circle_light_orange"
+                            android:background="@drawable/bg_badge_orange_light"
+                            android:contentDescription="Incidents"
                             android:padding="8dp"
                             android:src="@drawable/ic_pulse"
-                            app:tint="@color/hazora_accent_orange"
-                            android:contentDescription="Incidents" />
+                            app:tint="#F59E0B" />
 
                         <TextView
                             android:id="@+id/tv_total_incidents"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:text="0"
-                            android:textColor="@color/hazora_text_primary"
+                            android:layout_marginTop="6dp"
+                            android:text="5"
+                            android:textColor="#F59E0B"
                             android:textSize="22sp"
                             android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Incidents"
-                            android:textColor="@color/hazora_text_secondary"
-                            android:textSize="12sp" />
+                            android:layout_marginTop="2dp"
+                            android:text="Today's Incidents"
+                            android:textColor="#64748B"
+                            android:textSize="11sp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Resolved -->
+                <!-- Resolved Today -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="0dp"
-                    android:layout_height="130dp"
+                    android:layout_height="125dp"
+                    android:layout_marginStart="6dp"
                     android:layout_weight="1"
+                    app:cardBackgroundColor="#FFFFFF"
                     app:cardCornerRadius="16dp"
-                    app:cardElevation="4dp"
-                    app:cardBackgroundColor="@color/white">
+                    app:cardElevation="2dp"
+                    app:strokeWidth="0dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="12dp">
+                        android:padding="10dp">
 
                         <ImageView
                             android:layout_width="36dp"
                             android:layout_height="36dp"
-                            android:background="@drawable/bg_circle_light_green"
+                            android:background="@drawable/bg_badge_green_light"
+                            android:contentDescription="Resolved"
                             android:padding="8dp"
                             android:src="@drawable/ic_check_circle"
-                            app:tint="#35B66F"
-                            android:contentDescription="Resolved" />
+                            app:tint="#22C55E" />
 
                         <TextView
                             android:id="@+id/tv_resolved_incidents"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:text="0"
-                            android:textColor="@color/hazora_text_primary"
+                            android:layout_marginTop="6dp"
+                            android:text="2"
+                            android:textColor="#22C55E"
                             android:textSize="22sp"
                             android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Resolved"
-                            android:textColor="@color/hazora_text_secondary"
-                            android:textSize="12sp" />
+                            android:layout_marginTop="2dp"
+                            android:text="Resolved Today"
+                            android:textColor="#64748B"
+                            android:textSize="11sp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
             </LinearLayout>
 
-            <!-- Quick Actions Section -->
+            <!-- Main Content Container -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:paddingStart="16dp"
+                android:paddingTop="20dp"
+                android:paddingEnd="16dp">
 
+                <!-- Quick Actions Title -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginBottom="12dp"
                     android:text="Quick Actions"
-                    android:textColor="@color/hazora_text_primary"
+                    android:textColor="#0F172A"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
-                <!-- AI Hazard Scan Main Card -->
+                <!-- AI Hazard Scan Banner Card -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card_ai_scan"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginBottom="14dp"
                     app:cardCornerRadius="20dp"
                     app:cardElevation="2dp"
                     app:strokeWidth="0dp">
@@ -266,56 +279,100 @@
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/bg_login_sign_in"
-                        android:padding="20dp">
+                        android:background="@drawable/bg_ai_scan_card"
+                        android:padding="16dp">
+
+                        <!-- Camera Icon Container -->
+                        <View
+                            android:id="@+id/bg_camera_container"
+                            android:layout_width="52dp"
+                            android:layout_height="52dp"
+                            android:background="@drawable/bg_ai_scan_icon"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
 
                         <ImageView
                             android:id="@+id/iv_scan_icon"
-                            android:layout_width="56dp"
-                            android:layout_height="56dp"
-                            android:background="@drawable/bg_circle_light_blue"
-                            android:padding="14dp"
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:contentDescription="AI Scan"
                             android:src="@drawable/ic_camera"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            app:tint="@color/white"
-                            android:contentDescription="AI Scan" />
+                            app:layout_constraintBottom_toBottomOf="@id/bg_camera_container"
+                            app:layout_constraintEnd_toEndOf="@id/bg_camera_container"
+                            app:layout_constraintStart_toStartOf="@id/bg_camera_container"
+                            app:layout_constraintTop_toTopOf="@id/bg_camera_container"
+                            app:tint="@color/white" />
 
-                        <TextView
-                            android:id="@+id/tv_scan_title"
+                        <!-- Title and Badge -->
+                        <LinearLayout
+                            android:id="@+id/layout_title_badge"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:text="AI Hazard Scan"
-                            android:textColor="@color/white"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            app:layout_constraintEnd_toStartOf="@+id/iv_scan_arrow"
-                            app:layout_constraintStart_toEndOf="@id/iv_scan_icon"
-                            app:layout_constraintTop_toTopOf="@id/iv_scan_icon" />
+                            android:layout_marginStart="14dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            app:layout_constraintEnd_toStartOf="@+id/bg_arrow_container"
+                            app:layout_constraintStart_toEndOf="@id/bg_camera_container"
+                            app:layout_constraintTop_toTopOf="@id/bg_camera_container">
 
+                            <TextView
+                                android:id="@+id/tv_scan_title"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="AI Hazard Scan"
+                                android:textColor="@color/white"
+                                android:textSize="17sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:background="@drawable/bg_badge_new_yellow"
+                                android:paddingStart="8dp"
+                                android:paddingTop="2dp"
+                                android:paddingEnd="8dp"
+                                android:paddingBottom="2dp"
+                                android:text="NEW"
+                                android:textColor="#854D0E"
+                                android:textSize="10sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <!-- Subtitle -->
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="Analyze workplace hazards"
+                            android:text="Capture &amp; analyze workplace hazards instantly"
                             android:textColor="#DCEBFF"
-                            android:textSize="14sp"
-                            app:layout_constraintEnd_toStartOf="@+id/iv_scan_arrow"
-                            app:layout_constraintStart_toStartOf="@id/tv_scan_title"
-                            app:layout_constraintTop_toBottomOf="@id/tv_scan_title" />
+                            android:textSize="13sp"
+                            app:layout_constraintEnd_toStartOf="@+id/bg_arrow_container"
+                            app:layout_constraintStart_toStartOf="@id/layout_title_badge"
+                            app:layout_constraintTop_toBottomOf="@id/layout_title_badge" />
+
+                        <!-- Right Arrow -->
+                        <View
+                            android:id="@+id/bg_arrow_container"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:background="@drawable/bg_ai_scan_arrow"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
 
                         <ImageView
                             android:id="@+id/iv_scan_arrow"
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:contentDescription="Go"
                             android:src="@drawable/ic_chevron_right"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            app:tint="@color/white"
-                            android:contentDescription="Go" />
+                            app:layout_constraintBottom_toBottomOf="@id/bg_arrow_container"
+                            app:layout_constraintEnd_toEndOf="@id/bg_arrow_container"
+                            app:layout_constraintStart_toStartOf="@id/bg_arrow_container"
+                            app:layout_constraintTop_toTopOf="@id/bg_arrow_container"
+                            app:tint="@color/white" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -332,13 +389,14 @@
                         android:id="@+id/card_sos"
                         android:layout_width="0dp"
                         android:layout_height="100dp"
-                        android:layout_marginEnd="8dp"
+                        android:layout_marginEnd="6dp"
                         android:layout_weight="1"
+                        android:clickable="true"
+                        android:focusable="true"
+                        app:cardBackgroundColor="#FFFFFF"
                         app:cardCornerRadius="16dp"
                         app:cardElevation="2dp"
-                        app:cardBackgroundColor="@color/white"
-                        android:clickable="true"
-                        android:focusable="true">
+                        app:strokeWidth="0dp">
 
                         <LinearLayout
                             android:id="@+id/layout_sos_inner"
@@ -351,20 +409,21 @@
                                 android:id="@+id/iv_sos_icon"
                                 android:layout_width="32dp"
                                 android:layout_height="32dp"
-                                android:background="@drawable/bg_circle_light_red"
-                                android:padding="8dp"
+                                android:background="@drawable/bg_badge_red_light"
+                                android:contentDescription="SOS"
+                                android:padding="7dp"
                                 android:src="@drawable/ic_phone"
-                                app:tint="@color/hazora_danger"
-                                android:contentDescription="SOS" />
+                                app:tint="#EF4444" />
 
                             <TextView
                                 android:id="@+id/tv_sos_label"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
-                                android:text="SOS"
-                                android:textColor="@color/hazora_text_primary"
-                                android:textSize="13sp"
+                                android:gravity="center"
+                                android:text="SOS\nEmergency"
+                                android:textColor="#0F172A"
+                                android:textSize="12sp"
                                 android:textStyle="bold" />
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
@@ -374,11 +433,13 @@
                         android:id="@+id/card_messages"
                         android:layout_width="0dp"
                         android:layout_height="100dp"
-                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="3dp"
+                        android:layout_marginEnd="3dp"
                         android:layout_weight="1"
+                        app:cardBackgroundColor="#FFFFFF"
                         app:cardCornerRadius="16dp"
                         app:cardElevation="2dp"
-                        app:cardBackgroundColor="@color/white">
+                        app:strokeWidth="0dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -390,18 +451,19 @@
                                 android:layout_width="32dp"
                                 android:layout_height="32dp"
                                 android:background="@drawable/bg_circle_light_purple"
-                                android:padding="8dp"
+                                android:contentDescription="Messages"
+                                android:padding="7dp"
                                 android:src="@drawable/ic_chat"
-                                app:tint="#6B46C1"
-                                android:contentDescription="Messages" />
+                                app:tint="#8B5CF6" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
+                                android:gravity="center"
                                 android:text="Messages"
-                                android:textColor="@color/hazora_text_primary"
-                                android:textSize="13sp"
+                                android:textColor="#0F172A"
+                                android:textSize="12sp"
                                 android:textStyle="bold" />
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
@@ -411,10 +473,12 @@
                         android:id="@+id/card_incidents_list"
                         android:layout_width="0dp"
                         android:layout_height="100dp"
+                        android:layout_marginStart="6dp"
                         android:layout_weight="1"
+                        app:cardBackgroundColor="#FFFFFF"
                         app:cardCornerRadius="16dp"
                         app:cardElevation="2dp"
-                        app:cardBackgroundColor="@color/white">
+                        app:strokeWidth="0dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -426,35 +490,146 @@
                                 android:layout_width="32dp"
                                 android:layout_height="32dp"
                                 android:background="@drawable/bg_circle_light_blue"
-                                android:padding="8dp"
+                                android:contentDescription="Incidents"
+                                android:padding="7dp"
                                 android:src="@drawable/ic_clipboard"
-                                app:tint="@color/hazora_primary_blue"
-                                android:contentDescription="Incidents" />
+                                app:tint="#2563EB" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
+                                android:gravity="center"
                                 android:text="Incidents"
-                                android:textColor="@color/hazora_text_primary"
-                                android:textSize="13sp"
+                                android:textColor="#0F172A"
+                                android:textSize="12sp"
                                 android:textStyle="bold" />
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
 
+                <!-- Site Status Section -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_site_status"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    app:cardBackgroundColor="#FFFFFF"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="2dp"
+                    app:strokeWidth="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <!-- Site Status Header -->
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:text="Site Status"
+                                android:textColor="#0F172A"
+                                android:textSize="18sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/tv_site_status_badge"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:background="@drawable/bg_badge_orange_light"
+                                android:paddingStart="10dp"
+                                android:paddingTop="4dp"
+                                android:paddingEnd="10dp"
+                                android:paddingBottom="4dp"
+                                android:text="Warning"
+                                android:textColor="#D97706"
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
+                        </RelativeLayout>
+
+                        <!-- Site Status Options Row -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="14dp"
+                            android:orientation="horizontal"
+                            android:weightSum="3">
+
+                            <!-- Safe Button -->
+                            <TextView
+                                android:id="@+id/btn_status_safe"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="6dp"
+                                android:layout_weight="1"
+                                android:background="@drawable/bg_site_status_safe"
+                                android:gravity="center"
+                                android:paddingTop="10dp"
+                                android:paddingBottom="10dp"
+                                android:text="Safe"
+                                android:textColor="#16A34A"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+
+                            <!-- Warning Button (Active) -->
+                            <TextView
+                                android:id="@+id/btn_status_warning"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="3dp"
+                                android:layout_marginEnd="3dp"
+                                android:layout_weight="1"
+                                android:background="@drawable/bg_site_status_warning"
+                                android:gravity="center"
+                                android:paddingTop="10dp"
+                                android:paddingBottom="10dp"
+                                android:text="Warning"
+                                android:textColor="#D97706"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+
+                            <!-- Critical Button -->
+                            <TextView
+                                android:id="@+id/btn_status_critical"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:layout_weight="1"
+                                android:background="@drawable/bg_site_status_critical"
+                                android:gravity="center"
+                                android:paddingTop="10dp"
+                                android:paddingBottom="10dp"
+                                android:text="Critical"
+                                android:textColor="#DC2626"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
                 <!-- Recent Detections Section -->
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp">
+                    android:layout_marginTop="22dp">
 
                     <TextView
                         android:id="@+id/tv_recent_title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Recent Detections"
-                        android:textColor="@color/hazora_text_primary"
+                        android:textColor="#0F172A"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         app:layout_constraintStart_toStartOf="parent"
@@ -465,7 +640,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="See All"
-                        android:textColor="@color/hazora_primary_blue"
+                        android:textColor="#2563EB"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         app:layout_constraintBottom_toBottomOf="@id/tv_recent_title"
@@ -476,7 +651,7 @@
                         android:id="@+id/container_recent_detections"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
+                        android:layout_marginTop="14dp"
                         android:orientation="vertical"
                         app:layout_constraintTop_toBottomOf="@id/tv_recent_title" />
 
@@ -491,18 +666,16 @@
         android:id="@+id/nav_area"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="#FFFFFF"
         android:clipChildren="false"
         android:clipToPadding="false"
-        android:background="@color/white"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <!-- BottomNavigationView height set to 80dp to ensure labels have room above system insets -->
-        <!-- fitsSystemWindows="true" ensures padding is added at the bottom for gesture bars -->
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottom_nav"
             android:layout_width="match_parent"
             android:layout_height="80dp"
-            android:background="@color/white"
+            android:background="#FFFFFF"
             android:fitsSystemWindows="true"
             app:elevation="0dp"
             app:itemIconSize="24dp"
@@ -514,23 +687,22 @@
             app:paddingBottomSystemWindowInsets="true" />
 
         <!-- Floating Camera Button -->
-        <!-- Pins horizontally center and vertically balanced relative to the navigation bar's top edge -->
         <ImageView
             android:id="@+id/dashboard_camera_action_visual"
             android:layout_width="72dp"
             android:layout_height="72dp"
             android:background="@drawable/bg_camera_floating"
+            android:clickable="false"
+            android:contentDescription="Camera Action"
             android:elevation="12dp"
+            android:focusable="false"
             android:padding="18dp"
             android:src="@drawable/ic_camera"
             app:layout_constraintBottom_toTopOf="@id/bottom_nav"
-            app:layout_constraintTop_toTopOf="@id/bottom_nav"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:tint="@color/white"
-            android:contentDescription="Camera Action"
-            android:clickable="false"
-            android:focusable="false" />
+            app:layout_constraintTop_toTopOf="@id/bottom_nav"
+            app:tint="@color/white" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -556,6 +728,7 @@
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
+                android:contentDescription="SOS Warning"
                 android:src="@drawable/ic_warning"
                 app:tint="@color/white" />
 
@@ -576,9 +749,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#D90D1B2A"
-        android:visibility="gone"
         android:clickable="true"
-        android:focusable="true">
+        android:focusable="true"
+        android:visibility="gone">
 
         <!-- Highlight Ring -->
         <View
@@ -596,12 +769,12 @@
             android:id="@+id/card_tutorial_bubble"
             android:layout_width="280dp"
             android:layout_height="wrap_content"
+            android:layout_margin="16dp"
             app:cardCornerRadius="20dp"
             app:cardElevation="8dp"
-            app:strokeWidth="0dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:layout_margin="16dp">
+            app:strokeWidth="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -614,7 +787,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="AI Scan"
-                    android:textColor="@color/hazora_text_primary"
+                    android:textColor="#0F172A"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
@@ -624,7 +797,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
                     android:text="Tap to check PPE compliance."
-                    android:textColor="@color/hazora_text_secondary"
+                    android:textColor="#64748B"
                     android:textSize="14sp" />
 
                 <LinearLayout
@@ -649,8 +822,8 @@
                         android:layout_weight="1.5"
                         android:text="Next"
                         android:textSize="12sp"
-                        app:cornerRadius="8dp"
-                        app:backgroundTint="@color/hazora_primary_blue" />
+                        app:backgroundTint="@color/hazora_primary_blue"
+                        app:cornerRadius="8dp" />
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

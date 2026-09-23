@@ -15,8 +15,13 @@ public class Incident implements Serializable {
     private String severity;
     private String description;
     private String prevention;
+    private String imageUrl;
 
     public Incident(String id, String title, String cameraId, String time, String site, String status, String severity, String description, String prevention) {
+        this(id, title, cameraId, time, site, status, severity, description, prevention, null);
+    }
+
+    public Incident(String id, String title, String cameraId, String time, String site, String status, String severity, String description, String prevention, String imageUrl) {
         this.id = id;
         this.title = title;
         this.cameraId = cameraId;
@@ -26,6 +31,7 @@ public class Incident implements Serializable {
         this.severity = severity;
         this.description = description;
         this.prevention = prevention;
+        this.imageUrl = imageUrl;
     }
 
     public String getId() { return id; }
@@ -38,4 +44,6 @@ public class Incident implements Serializable {
     public String getSeverity() { return severity; }
     public String getDescription() { return description; }
     public String getPrevention() { return prevention; }
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 }

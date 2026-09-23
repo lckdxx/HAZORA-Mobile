@@ -15,13 +15,52 @@ import java.util.Locale;
  */
 public class HazardDetector {
 
+    public enum ScanMode {
+        HELMET_ONLY,  // Headshot / Selfie scan
+        UPPER_BODY,   // Helmet + Vest
+        FULL_BODY     // Helmet + Vest + Shoes
+    }
+
     private final Context context;
     private YOLODetector yoloDetector;
+    private boolean requireHelmet = true;
+    private boolean requireVest = false;
+    private boolean requireShoes = false;
 
     public HazardDetector(Context context) {
         this.context = context;
         setupDetector();
     }
+
+    public void setScanMode(ScanMode mode) {
+        switch (mode) {
+            case HELMET_ONLY:
+                this.requireHelmet = true;
+                this.requireVest = false;
+                this.requireShoes = false;
+                break;
+            case UPPER_BODY:
+                this.requireHelmet = true;
+                this.requireVest = true;
+                this.requireShoes = false;
+                break;
+            case FULL_BODY:
+                this.requireHelmet = true;
+                this.requireVest = true;
+                this.requireShoes = true;
+                break;
+        }
+    }
+
+    public void setRequiredPPE(boolean helmet, boolean vest, boolean shoes) {
+        this.requireHelmet = helmet;
+        this.requireVest = vest;
+        this.requireShoes = shoes;
+    }
+
+    public boolean isRequireHelmet() { return requireHelmet; }
+    public boolean isRequireVest() { return requireVest; }
+    public boolean isRequireShoes() { return requireShoes; }
 
     private void setupDetector() {
         yoloDetector = new YOLODetector(context);
@@ -52,29 +91,44 @@ public class HazardDetector {
 
             for (int i = 0; i < clusters.size(); i++) {
                 PPECluster cluster = clusters.get(i);
-                boolean isSecure = cluster.hasHelmet && cluster.hasVest && cluster.hasShoes;
+                
+                boolean helmetOk = !requireHelmet || cluster.hasHelmet;
+                boolean vestOk = !requireVest || cluster.hasVest;
+                boolean shoesOk = !requireShoes || cluster.hasShoes;
+                boolean isSecure = helmetOk && vestOk && shoesOk;
                 boolean isUncertain = cluster.minConfidence < 0.55f;
                 
                 if (!isSecure) violations++;
 
                 String label;
-                // Detailed Checklist for the description field as requested
-                String checklist = String.format("Helmet: %s | Vest: %s | Shoes: %s", 
-                    cluster.hasHelmet ? "YES" : "NO", 
-                    cluster.hasVest ? "YES" : "NO", 
-                    cluster.hasShoes ? "YES" : "NO");
+                StringBuilder checklist = new StringBuilder();
+                if (requireHelmet) checklist.append(String.format("Helmet: %s", cluster.hasHelmet ? "YES" : "NO"));
+                if (requireVest) {
+                    if (checklist.length() > 0) checklist.append(" | ");
+                    checklist.append(String.format("Vest: %s", cluster.hasVest ? "YES" : "NO"));
+                }
+                if (requireShoes) {
+                    if (checklist.length() > 0) checklist.append(" | ");
+                    checklist.append(String.format("Shoes: %s", cluster.hasShoes ? "YES" : "NO"));
+                }
+                if (checklist.length() == 0) {
+                    checklist.append(String.format("Helmet: %s", cluster.hasHelmet ? "YES" : "NO"));
+                }
 
-                String recommendation = isSecure ? "Worker is safe to proceed." : "Action Required: " + cluster.getMissingAction();
-                String finalDescription = checklist + "\n" + recommendation;
+                String missingRemarks = cluster.getMissingRemarks(requireHelmet, requireVest, requireShoes);
+                String missingAction = cluster.getMissingAction(requireHelmet, requireVest, requireShoes);
+
+                String recommendation = isSecure ? "Worker is safe to proceed." : "Action Required: " + missingAction;
+                String finalDescription = checklist.toString() + "\n" + recommendation;
                 
                 if (isUncertain) {
                     finalDescription = "Note: Detection is uncertain due to low visibility.\n" + finalDescription;
                 }
 
                 if (totalPeople > 1) {
-                    label = "Person " + (i + 1) + ": " + (isSecure ? (isUncertain ? "Likely Secure" : "Secure") : cluster.getMissingRemarks());
+                    label = "Person " + (i + 1) + ": " + (isSecure ? (isUncertain ? "Likely Secure" : "Secure") : missingRemarks);
                 } else {
-                    label = isSecure ? (isUncertain ? "AREA LIKELY SECURE" : "AREA SECURE: Full PPE") : "Violation: No " + cluster.getMissingRemarks();
+                    label = isSecure ? (isUncertain ? "AREA LIKELY SECURE" : "AREA SECURE: Required PPE Verified") : "Violation: No " + missingRemarks;
                 }
 
                 if (isBlurry) finalDescription = "⚠️ Warning: Image is blurry!\n" + finalDescription;
@@ -94,7 +148,8 @@ public class HazardDetector {
             }
         } else {
             String advice = isBlurry ? "Hold the phone steady and move closer." : "Ensure the person is centered in the frame.";
-            results.add(new DetectionResult("Violation: No Helmet, Vest or Safety Shoes", "Action: Equip all required PPE. " + advice, 0.0f, false, fullFrameRect, DetectionType.PERSON, "Critical"));
+            String missingReq = requireHelmet && !requireVest && !requireShoes ? "Helmet" : "Required PPE";
+            results.add(new DetectionResult("Violation: No " + missingReq + " Detected", "Action: Equip all required PPE. " + advice, 0.0f, false, fullFrameRect, DetectionType.PERSON, "Critical"));
         }
         
         return results;
@@ -148,9 +203,15 @@ public class HazardDetector {
         void add(YOLODetector.Recognition rec) {
             detections.add(rec);
             String label = rec.title.toLowerCase();
-            if (label.contains("helmet")) hasHelmet = true;
-            if (label.contains("vest")) hasVest = true;
-            if (label.contains("shoes")) hasShoes = true;
+            if (label.contains("helmet") || label.contains("hard hat") || label.contains("hat") || label.contains("head")) {
+                hasHelmet = true;
+            }
+            if (label.contains("vest") || label.contains("jacket") || label.contains("high-vis")) {
+                hasVest = true;
+            }
+            if (label.contains("shoes") || label.contains("shoe") || label.contains("boot") || label.contains("footwear")) {
+                hasShoes = true;
+            }
             
             minConfidence = Math.min(minConfidence, rec.confidence);
             
@@ -175,19 +236,21 @@ public class HazardDetector {
             return new Rect((int)left, (int)(top - 20), (int)right, (int)(bottom + 50));
         }
 
-        String getMissingRemarks() {
+        String getMissingRemarks(boolean requireHelmet, boolean requireVest, boolean requireShoes) {
             List<String> missing = new ArrayList<>();
-            if (!hasHelmet) missing.add("Helmet");
-            if (!hasVest) missing.add("Vest");
-            if (!hasShoes) missing.add("Shoes");
+            if (requireHelmet && !hasHelmet) missing.add("Helmet");
+            if (requireVest && !hasVest) missing.add("Vest");
+            if (requireShoes && !hasShoes) missing.add("Shoes");
+            if (missing.isEmpty()) return "None";
             return String.join(" & ", missing);
         }
 
-        String getMissingAction() {
+        String getMissingAction(boolean requireHelmet, boolean requireVest, boolean requireShoes) {
             List<String> actions = new ArrayList<>();
-            if (!hasHelmet) actions.add("Wear a safety helmet");
-            if (!hasVest) actions.add("Equip high-vis vest");
-            if (!hasShoes) actions.add("Wear safety shoes");
+            if (requireHelmet && !hasHelmet) actions.add("Wear a safety helmet");
+            if (requireVest && !hasVest) actions.add("Equip high-vis vest");
+            if (requireShoes && !hasShoes) actions.add("Wear safety shoes");
+            if (actions.isEmpty()) return "All required PPE equipped.";
             return String.join(", ", actions) + ".";
         }
     }

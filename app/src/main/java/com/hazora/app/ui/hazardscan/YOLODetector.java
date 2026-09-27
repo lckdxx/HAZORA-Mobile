@@ -31,10 +31,10 @@ public class YOLODetector {
     private final int inputWidth = 640;
     private final int inputHeight = 640;
     private final Context context;
-    // Lower than the web dashboard (0.45): phone snapshots are single frames
-    // (often blurry) and the subject is usually smaller in frame, so raw
-    // confidence runs lower. 0.15 catches real PPE while NMS removes dupes.
-    private final float confidenceThreshold = 0.15f;
+    // The retrained model is highly confident (90%+ on clear PPE), and the
+    // person-crop pipeline enlarges the subject, so we can use a clean 0.4
+    // threshold to cut false positives while still catching real PPE.
+    private final float confidenceThreshold = 0.40f;
     private final float iouThreshold = 0.45f;
     // Some YOLOv8 TFLite exports expect NCHW ([1,3,H,W]) instead of NHWC ([1,H,W,3]).
     // Detected once from the model's declared input shape.

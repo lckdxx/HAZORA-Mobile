@@ -90,6 +90,7 @@ public class IncidentsActivity extends AppCompatActivity {
                             String severity = doc.getString("severity");
                             String description = doc.getString("description");
                             String prevention = doc.getString("prevention");
+                            String imageData = doc.getString("imageData");
                             Object ts = doc.get("timestamp");
                             
                             String time = "Recent";
@@ -113,7 +114,8 @@ public class IncidentsActivity extends AppCompatActivity {
                                     status != null ? status : "New",
                                     severity != null ? severity : "High",
                                     description != null ? description : "AI detected a potential safety violation.",
-                                    prevention != null ? prevention : "Follow safety protocols."
+                                    prevention != null ? prevention : "Follow safety protocols.",
+                                    imageData
                             );
                             
                             allIncidents.add(inc);

@@ -1,15 +1,24 @@
 package com.hazora.app.ui.incidents;
 
+import android.app.Dialog;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Base64;
+import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.hazora.app.R;
+import com.hazora.app.ui.hazardscan.ZoomableImageView;
 
 public class IncidentDetailActivity extends AppCompatActivity {
 
@@ -64,6 +73,8 @@ public class IncidentDetailActivity extends AppCompatActivity {
             if (desc != null) desc.setText(incident.getDescription());
             TextView prev = findViewById(R.id.tv_prevention);
             if (prev != null) prev.setText(incident.getPrevention());
+
+            showCapturedImage(incident.getImageData());
         }
 
         Button ack = findViewById(R.id.btn_acknowledge);
@@ -91,6 +102,55 @@ public class IncidentDetailActivity extends AppCompatActivity {
                 ack.setVisibility(View.GONE);
             }
         }
+    }
+
+    // Decode the captured snapshot (base64) and show it. Handles both the app's
+    // raw base64 and the website's "data:image/jpeg;base64,..." data URLs.
+    private void showCapturedImage(String imageData) {
+        MaterialCardView card = findViewById(R.id.card_image);
+        ImageView img = findViewById(R.id.img_capture);
+        if (card == null || img == null) return;
+
+        Bitmap bitmap = decodeBase64Image(imageData);
+        if (bitmap == null) {
+            card.setVisibility(View.GONE);
+            return;
+        }
+
+        card.setVisibility(View.VISIBLE);
+        img.setImageBitmap(bitmap);
+        img.setOnClickListener(v -> showFullscreenImage(bitmap));
+    }
+
+    private Bitmap decodeBase64Image(String imageData) {
+        if (imageData == null || imageData.trim().isEmpty()) return null;
+        try {
+            String base64 = imageData;
+            int commaIndex = base64.indexOf(',');
+            // Strip a data URL prefix like "data:image/jpeg;base64," if present.
+            if (base64.startsWith("data:") && commaIndex >= 0) {
+                base64 = base64.substring(commaIndex + 1);
+            }
+            byte[] bytes = Base64.decode(base64, Base64.DEFAULT);
+            return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+        } catch (IllegalArgumentException | OutOfMemoryError e) {
+            Log.w("IncidentDetail", "Failed to decode incident image: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private void showFullscreenImage(Bitmap bitmap) {
+        Dialog dialog = new Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_image_fullscreen);
+
+        ZoomableImageView iv = dialog.findViewById(R.id.iv_fullscreen);
+        if (iv != null) iv.setImageBitmap(bitmap);
+
+        View close = dialog.findViewById(R.id.btn_close_fullscreen);
+        if (close != null) close.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
     }
 
     private void applyStatusStyle(TextView statusTv, String status) {

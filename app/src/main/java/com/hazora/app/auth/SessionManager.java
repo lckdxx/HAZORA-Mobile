@@ -3,12 +3,14 @@ package com.hazora.app.auth;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-/** Persists lightweight user session data until token-based authentication is introduced. */
+/** Persists mobile UI session state and verification-email cooldown. */
 public class SessionManager {
 
     private static final String PREFERENCES_NAME = "hazora_session";
     private static final String KEY_IS_LOGGED_IN = "is_logged_in";
     private static final String KEY_USER_EMAIL = "user_email";
+    private static final String KEY_VERIFICATION_SENT_AT = "verification_sent_at";
+    private static final long VERIFICATION_RESEND_INTERVAL_MS = 24L * 60L * 60L * 1000L;
 
     private final SharedPreferences sharedPreferences;
 
@@ -30,6 +32,15 @@ public class SessionManager {
 
     public String getUserEmail() {
         return sharedPreferences.getString(KEY_USER_EMAIL, "");
+    }
+
+    public boolean canSendVerificationEmail() {
+        long lastSent = sharedPreferences.getLong(KEY_VERIFICATION_SENT_AT, 0L);
+        return System.currentTimeMillis() - lastSent >= VERIFICATION_RESEND_INTERVAL_MS;
+    }
+
+    public void recordVerificationEmailSent() {
+        sharedPreferences.edit().putLong(KEY_VERIFICATION_SENT_AT, System.currentTimeMillis()).apply();
     }
 
     public void logout() {

@@ -39,6 +39,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.hazora.app.R;
+import com.hazora.app.notifications.HazardEmailSender;
 import com.hazora.app.ui.incidents.Incident;
 import com.hazora.app.ui.incidents.IncidentDetailActivity;
 
@@ -191,6 +192,21 @@ public class HazardScanActivity extends AppCompatActivity {
         if (userEmail == null || userEmail.isEmpty()) return;
 
         FirebaseFirestore.getInstance("hazora").collection("mobile_accounts")
+                .whereEqualTo("email", userEmail)
+                .get()
+                .addOnSuccessListener(emailSnapshots -> {
+                    if (!emailSnapshots.isEmpty()) {
+                        String site = emailSnapshots.getDocuments().get(0).getString("site");
+                        if (site != null && !site.isEmpty()) userAssignedSite = site;
+                        updateSiteLabel();
+                    } else {
+                        loadUserSiteByLegacyFields(userEmail);
+                    }
+                });
+    }
+
+    private void loadUserSiteByLegacyFields(String userEmail) {
+        FirebaseFirestore.getInstance("hazora").collection("mobile_accounts")
                 .whereEqualTo("username", userEmail)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
@@ -207,19 +223,21 @@ public class HazardScanActivity extends AppCompatActivity {
                                         String site = snapshots.getDocuments().get(0).getString("site");
                                         if (site != null && !site.isEmpty()) userAssignedSite = site;
                                         updateSiteLabel();
-                                    } else {
-                                        FirebaseFirestore.getInstance("hazora").collection("users")
-                                                .whereEqualTo("email", userEmail)
-                                                .get()
-                                                .addOnSuccessListener(userSnapshots -> {
-                                                    if (!userSnapshots.isEmpty()) {
-                                                        String site = userSnapshots.getDocuments().get(0).getString("site");
-                                                        if (site != null && !site.isEmpty()) userAssignedSite = site;
-                                                        updateSiteLabel();
-                                                    }
-                                                });
-                                    }
+                                    } else loadUserSiteFromWebsiteProfile(userEmail);
                                 });
+                    }
+                });
+    }
+
+    private void loadUserSiteFromWebsiteProfile(String userEmail) {
+        FirebaseFirestore.getInstance("hazora").collection("users")
+                .whereEqualTo("email", userEmail)
+                .get()
+                .addOnSuccessListener(userSnapshots -> {
+                    if (!userSnapshots.isEmpty()) {
+                        String site = userSnapshots.getDocuments().get(0).getString("site");
+                        if (site != null && !site.isEmpty()) userAssignedSite = site;
+                        updateSiteLabel();
                     }
                 });
     }
@@ -386,6 +404,12 @@ public class HazardScanActivity extends AppCompatActivity {
                 .add(incident)
                 .addOnSuccessListener(doc -> {
                     Toast.makeText(this, "Incident saved to database", Toast.LENGTH_SHORT).show();
+
+                    FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+                    if (!result.isSecure && currentUser != null && currentUser.isEmailVerified()) {
+                        HazardEmailSender.send(currentUser, result.label, result.severity,
+                                userAssignedSite, "Mobile Capture");
+                    }
                     
                     String time = new SimpleDateFormat("MMM dd, yyyy • hh:mm a", Locale.getDefault()).format(new Date());
                     lastDetectedIncident = new Incident(

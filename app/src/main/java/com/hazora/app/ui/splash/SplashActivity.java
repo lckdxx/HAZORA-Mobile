@@ -10,8 +10,8 @@ import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.hazora.app.R;
-import com.hazora.app.auth.SessionManager;
 import com.hazora.app.ui.dashboard.DashboardActivity;
 import com.hazora.app.ui.welcome.WelcomeActivity;
 
@@ -39,8 +39,8 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void navigateToWelcome() {
-        SessionManager sessionManager = new SessionManager(this);
-        Intent destinationIntent = sessionManager.isLoggedIn()
+        boolean hasAuthenticatedUser = FirebaseAuth.getInstance().getCurrentUser() != null;
+        Intent destinationIntent = hasAuthenticatedUser
                 ? new Intent(this, DashboardActivity.class)
                 : new Intent(this, WelcomeActivity.class);
         startActivity(destinationIntent);

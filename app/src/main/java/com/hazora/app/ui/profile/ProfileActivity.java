@@ -59,7 +59,23 @@ public class ProfileActivity extends AppCompatActivity {
         if (emailValue != null) emailValue.setText(userEmail);
 
         if (userEmail != null && !userEmail.isEmpty()) {
-            // 1. Try searching by username (e.g., "MOB - 001")
+            // Match Firebase Auth email to the provisioned mobile record.
+            db.collection("mobile_accounts")
+                    .whereEqualTo("email", userEmail)
+                    .get()
+                    .addOnSuccessListener(emailSnapshots -> {
+                        if (!emailSnapshots.isEmpty()) {
+                            currentCollection = "mobile_accounts";
+                            currentDoc = emailSnapshots.getDocuments().get(0);
+                            processProfileDoc(currentDoc);
+                        } else loadLegacyMobileProfile(userEmail);
+                    })
+                    .addOnFailureListener(e -> Toast.makeText(this, "Failed to load profile data", Toast.LENGTH_SHORT).show());
+        }
+    }
+
+    private void loadLegacyMobileProfile(String userEmail) {
+            // Legacy records may use the login email as their username.
             db.collection("mobile_accounts")
                     .whereEqualTo("username", userEmail)
                     .get()
@@ -97,7 +113,6 @@ public class ProfileActivity extends AppCompatActivity {
                     .addOnFailureListener(e -> {
                         Toast.makeText(this, "Failed to load profile data", Toast.LENGTH_SHORT).show();
                     });
-        }
     }
 
     private void processProfileDoc(DocumentSnapshot doc) {
@@ -217,6 +232,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void completeLogout() {
+        FirebaseAuth.getInstance().signOut();
         sessionManager.logout();
         Intent intent = new Intent(this, LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

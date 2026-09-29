@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.FirebaseUser;
 import com.hazora.app.R;
 import com.hazora.app.auth.AuthRepository;
 import com.hazora.app.auth.SessionManager;
@@ -58,12 +59,12 @@ public class LoginActivity extends AppCompatActivity {
 
         if (isEmailValid && isPasswordValid) {
             setLoginLoadingState(true);
-            authRepository.loginWithEmail(getInputText(emailEditText), getInputText(passwordEditText),
+            authRepository.loginWithEmail(getInputText(emailEditText), getInputText(passwordEditText), sessionManager,
                     new AuthRepository.AuthenticationCallback() {
                         @Override
-                        public void onSuccess() {
+                        public void onSuccess(FirebaseUser user) {
                             sessionManager.saveLoginState(true);
-                            sessionManager.saveUserEmail(getInputText(emailEditText));
+                            sessionManager.saveUserEmail(user.getEmail() == null ? getInputText(emailEditText) : user.getEmail());
                             openDashboard();
                         }
 

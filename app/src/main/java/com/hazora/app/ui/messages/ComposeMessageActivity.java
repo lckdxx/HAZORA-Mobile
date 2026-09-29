@@ -54,11 +54,18 @@ public class ComposeMessageActivity extends AppCompatActivity {
         Map<String, Object> message = new HashMap<>();
         message.put("message", body);
         message.put("recipient", recipient);
+        message.put("recipientSearch", recipient.trim().toLowerCase(java.util.Locale.ROOT));
         message.put("senderEmail", senderEmail);
         message.put("senderId", senderId);
         message.put("createdAt", Timestamp.now());
         message.put("readAt", null);
-        message.put("recipientType", "email"); // Or search for the user name in database
+        message.put("recipientType", recipient.contains("@") ? "email" : "username_or_id");
+        message.put("source", "mobile");
+        message.put("subject", "Mobile Message");
+        message.put("body", body);
+        message.put("preview", body);
+        message.put("status", "unread");
+        message.put("unread", true);
 
         db.collection("messages").add(message)
                 .addOnSuccessListener(documentReference -> {

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download HAZORA Mobile App</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            padding: 32px;
+            max-width: 420px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        .badge {
+            background-color: #eff6ff;
+            color: #2563eb;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+        h1 {
+            font-size: 24px;
+            margin: 0 0 8px 0;
+            color: #1e293b;
+        }
+        p {
+            font-size: 14px;
+            color: #64748b;
+            margin: 0 0 20px 0;
+            line-height: 1.5;
+        }
+        .qr-container {
+            background: #ffffff;
+            padding: 16px;
+            border-radius: 12px;
+            display: inline-block;
+            border: 2px dashed #cbd5e1;
+            margin-bottom: 20px;
+        }
+        .qr-container img {
+            display: block;
+            width: 200px;
+            height: 200px;
+            border-radius: 8px;
+        }
+        .btn-download {
+            display: block;
+            background-color: #2563eb;
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            transition: background-color 0.2s ease;
+        }
+        .btn-download:hover {
+            background-color: #1d4ed8;
+        }
+        .footer-note {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <span class="badge">HAZORA Android App</span>
+        <h1>Scan to Download App</h1>
+        <p>Scan the QR code below with your smartphone camera to download and install HAZORA.</p>
+
+        <div class="qr-container">
+            <!-- Saved QR Code Image -->
+            <img src="hazora_app_qr.png" alt="Scan QR Code to Download HAZORA App">
+        </div>
+
+        <!-- Download button -->
+        <a href="http://192.168.55.102:8080/app-debug.apk" class="btn-download" target="_blank">
+            Download APK File Directly
+        </a>
+
+        <p class="footer-note">Note: Make sure your phone is connected to the same Wi-Fi network if testing locally.</p>
+    </div>
+
+</body>
+</html>

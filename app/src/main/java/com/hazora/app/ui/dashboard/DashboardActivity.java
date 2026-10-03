@@ -265,31 +265,59 @@ public class DashboardActivity extends AppCompatActivity {
             return;
         }
 
-        // 1. Try searching by username (e.g., "MOB - 001")
+        if (user != null) {
+            db.collection("mobile_accounts")
+                    .whereEqualTo("authUid", user.getUid())
+                    .limit(1)
+                    .get()
+                    .addOnSuccessListener(uidSnapshots -> {
+                        if (!uidSnapshots.isEmpty()) {
+                            updateProfileHeader(uidSnapshots.getDocuments().get(0));
+                        } else {
+                            loadUserDataByLegacyFields(searchKey);
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        if (tvSiteContext != null) tvSiteContext.setText("Not assigned location site");
+                    });
+            return;
+        }
+
+        loadUserDataByLegacyFields(searchKey);
+    }
+
+    private void loadUserDataByLegacyFields(String searchKey) {
         db.collection("mobile_accounts")
-                .whereEqualTo("username", searchKey)
+                .whereEqualTo("email", searchKey)
                 .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    if (!queryDocumentSnapshots.isEmpty()) {
-                        updateProfileHeader(queryDocumentSnapshots.getDocuments().get(0));
+                .addOnSuccessListener(emailSnapshots -> {
+                    if (!emailSnapshots.isEmpty()) {
+                        updateProfileHeader(emailSnapshots.getDocuments().get(0));
                     } else {
-                        // 2. Try searching by email/createdByEmail
                         db.collection("mobile_accounts")
-                                .whereEqualTo("createdByEmail", searchKey)
+                                .whereEqualTo("username", searchKey)
                                 .get()
-                                .addOnSuccessListener(snapshots -> {
-                                    if (!snapshots.isEmpty()) {
-                                        updateProfileHeader(snapshots.getDocuments().get(0));
+                                .addOnSuccessListener(usernameSnapshots -> {
+                                    if (!usernameSnapshots.isEmpty()) {
+                                        updateProfileHeader(usernameSnapshots.getDocuments().get(0));
                                     } else {
-                                        // 3. Fallback to "users" collection
-                                        db.collection("users")
-                                                .whereEqualTo("email", searchKey)
+                                        db.collection("mobile_accounts")
+                                                .whereEqualTo("createdByEmail", searchKey)
                                                 .get()
-                                                .addOnSuccessListener(userSnapshots -> {
-                                                    if (!userSnapshots.isEmpty()) {
-                                                        updateProfileHeader(userSnapshots.getDocuments().get(0));
+                                                .addOnSuccessListener(legacySnapshots -> {
+                                                    if (!legacySnapshots.isEmpty()) {
+                                                        updateProfileHeader(legacySnapshots.getDocuments().get(0));
                                                     } else {
-                                                        if (tvSiteContext != null) tvSiteContext.setText("Not assigned location site");
+                                                        db.collection("users")
+                                                                .whereEqualTo("email", searchKey)
+                                                                .get()
+                                                                .addOnSuccessListener(userSnapshots -> {
+                                                                    if (!userSnapshots.isEmpty()) {
+                                                                        updateProfileHeader(userSnapshots.getDocuments().get(0));
+                                                                    } else if (tvSiteContext != null) {
+                                                                        tvSiteContext.setText("Not assigned location site");
+                                                                    }
+                                                                });
                                                     }
                                                 });
                                     }

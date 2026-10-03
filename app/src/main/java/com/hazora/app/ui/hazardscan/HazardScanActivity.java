@@ -189,20 +189,36 @@ public class HazardScanActivity extends AppCompatActivity {
         if (user == null) return;
 
         String userEmail = user.getEmail();
-        if (userEmail == null || userEmail.isEmpty()) return;
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance("hazora");
+        firestore.collection("mobile_accounts")
+                .whereEqualTo("authUid", user.getUid())
+                .limit(1)
+                .get()
+                .addOnSuccessListener(uidSnapshots -> {
+                    if (!uidSnapshots.isEmpty()) {
+                        applyUserSite(uidSnapshots.getDocuments().get(0).getString("site"));
+                    } else if (userEmail != null && !userEmail.isEmpty()) {
+                        loadUserSiteByEmail(userEmail);
+                    }
+                });
+    }
 
+    private void loadUserSiteByEmail(String userEmail) {
         FirebaseFirestore.getInstance("hazora").collection("mobile_accounts")
                 .whereEqualTo("email", userEmail)
                 .get()
                 .addOnSuccessListener(emailSnapshots -> {
                     if (!emailSnapshots.isEmpty()) {
-                        String site = emailSnapshots.getDocuments().get(0).getString("site");
-                        if (site != null && !site.isEmpty()) userAssignedSite = site;
-                        updateSiteLabel();
+                        applyUserSite(emailSnapshots.getDocuments().get(0).getString("site"));
                     } else {
                         loadUserSiteByLegacyFields(userEmail);
                     }
                 });
+    }
+
+    private void applyUserSite(String site) {
+        if (site != null && !site.isEmpty()) userAssignedSite = site;
+        updateSiteLabel();
     }
 
     private void loadUserSiteByLegacyFields(String userEmail) {
@@ -211,18 +227,14 @@ public class HazardScanActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (!queryDocumentSnapshots.isEmpty()) {
-                        String site = queryDocumentSnapshots.getDocuments().get(0).getString("site");
-                        if (site != null && !site.isEmpty()) userAssignedSite = site;
-                        updateSiteLabel();
+                        applyUserSite(queryDocumentSnapshots.getDocuments().get(0).getString("site"));
                     } else {
                         FirebaseFirestore.getInstance("hazora").collection("mobile_accounts")
                                 .whereEqualTo("createdByEmail", userEmail)
                                 .get()
                                 .addOnSuccessListener(snapshots -> {
                                     if (!snapshots.isEmpty()) {
-                                        String site = snapshots.getDocuments().get(0).getString("site");
-                                        if (site != null && !site.isEmpty()) userAssignedSite = site;
-                                        updateSiteLabel();
+                                        applyUserSite(snapshots.getDocuments().get(0).getString("site"));
                                     } else loadUserSiteFromWebsiteProfile(userEmail);
                                 });
                     }
@@ -235,9 +247,7 @@ public class HazardScanActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(userSnapshots -> {
                     if (!userSnapshots.isEmpty()) {
-                        String site = userSnapshots.getDocuments().get(0).getString("site");
-                        if (site != null && !site.isEmpty()) userAssignedSite = site;
-                        updateSiteLabel();
+                        applyUserSite(userSnapshots.getDocuments().get(0).getString("site"));
                     }
                 });
     }

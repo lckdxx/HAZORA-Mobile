@@ -58,19 +58,23 @@ public class ProfileActivity extends AppCompatActivity {
         TextView emailValue = findViewById(R.id.tv_email_value);
         if (emailValue != null) emailValue.setText(userEmail);
 
-        if (userEmail != null && !userEmail.isEmpty()) {
-            // Match Firebase Auth email to the provisioned mobile record.
+        if (user != null) {
             db.collection("mobile_accounts")
-                    .whereEqualTo("email", userEmail)
+                    .whereEqualTo("authUid", user.getUid())
+                    .limit(1)
                     .get()
-                    .addOnSuccessListener(emailSnapshots -> {
-                        if (!emailSnapshots.isEmpty()) {
+                    .addOnSuccessListener(uidSnapshots -> {
+                        if (!uidSnapshots.isEmpty()) {
                             currentCollection = "mobile_accounts";
-                            currentDoc = emailSnapshots.getDocuments().get(0);
+                            currentDoc = uidSnapshots.getDocuments().get(0);
                             processProfileDoc(currentDoc);
-                        } else loadLegacyMobileProfile(userEmail);
+                        } else if (userEmail != null && !userEmail.isEmpty()) {
+                            loadLegacyMobileProfile(userEmail);
+                        }
                     })
                     .addOnFailureListener(e -> Toast.makeText(this, "Failed to load profile data", Toast.LENGTH_SHORT).show());
+        } else if (userEmail != null && !userEmail.isEmpty()) {
+            loadLegacyMobileProfile(userEmail);
         }
     }
 

@@ -6,12 +6,15 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Toast;
 import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.hazora.app.R;
+import com.hazora.app.auth.AuthRepository;
 import com.hazora.app.ui.dashboard.DashboardActivity;
 import com.hazora.app.ui.welcome.WelcomeActivity;
 
@@ -39,11 +42,36 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void navigateToWelcome() {
-        boolean hasAuthenticatedUser = FirebaseAuth.getInstance().getCurrentUser() != null;
-        Intent destinationIntent = hasAuthenticatedUser
-                ? new Intent(this, DashboardActivity.class)
-                : new Intent(this, WelcomeActivity.class);
-        startActivity(destinationIntent);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            openWelcome();
+            return;
+        }
+        if (!user.isEmailVerified()) {
+            FirebaseAuth.getInstance().signOut();
+            openWelcome();
+            return;
+        }
+
+        new AuthRepository().ensureMobileAccess(user, new AuthRepository.AuthenticationCallback() {
+            @Override
+            public void onSuccess(FirebaseUser verifiedUser) {
+                if (isFinishing()) return;
+                startActivity(new Intent(SplashActivity.this, DashboardActivity.class));
+                finish();
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                if (isFinishing()) return;
+                Toast.makeText(SplashActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                openWelcome();
+            }
+        });
+    }
+
+    private void openWelcome() {
+        startActivity(new Intent(this, WelcomeActivity.class));
         finish();
     }
 

@@ -97,6 +97,14 @@
                 android:textColor="@color/hazora_text_secondary"
                 android:textSize="15sp" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/mobile_access_login_hint"
+                android:textColor="@color/hazora_text_secondary"
+                android:textSize="13sp" />
+
             <!-- Email Field -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/input_layout_email"

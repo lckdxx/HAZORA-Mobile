@@ -5,6 +5,7 @@
     <string name="hero_subtitle">AI-Powered Safety Management</string>
     <string name="welcome_back">Welcome Back</string>
     <string name="login_subtitle">Sign in to your safety dashboard</string>
+    <string name="mobile_access_login_hint">Use the same email and password as your website account. Your administrator must enable mobile access.</string>
     <string name="email_address">EMAIL ADDRESS</string>
     <string name="password">Password</string>
     <string name="password_label">PASSWORD</string>

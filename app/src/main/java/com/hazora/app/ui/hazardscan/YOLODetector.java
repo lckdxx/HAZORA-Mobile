@@ -31,11 +31,8 @@ public class YOLODetector {
     private final int inputWidth = 640;
     private final int inputHeight = 640;
     private final Context context;
-    // The retrained model is highly confident (90%+ on clear PPE), and the
-    // person-crop pipeline enlarges the subject, so we can use a clean 0.4
-    // threshold to cut false positives while still catching real PPE.
-    private final float confidenceThreshold = 0.40f;
-    private final float iouThreshold = 0.45f;
+    private final float confidenceThreshold = 0.77f;
+    private final float iouThreshold = 0.70f;
     // Some YOLOv8 TFLite exports expect NCHW ([1,3,H,W]) instead of NHWC ([1,H,W,3]).
     // Detected once from the model's declared input shape.
     private boolean channelsFirst = false;

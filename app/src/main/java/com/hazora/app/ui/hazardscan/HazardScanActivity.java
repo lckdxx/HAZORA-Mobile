@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -59,10 +58,13 @@ import java.util.concurrent.Executors;
 public class HazardScanActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_PERMISSIONS = 10;
+    private static final int ANALYSIS_FRAME_COUNT = 3;
+    private static final long ANALYSIS_FRAME_INTERVAL_MS = 1500;
     private static final String[] REQUIRED_PERMISSIONS = new String[]{Manifest.permission.CAMERA};
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private View analyzingLayout;
+    private TextView tvAnalysisStatus;
     private View resultCard;
     private Button startButton;
     private PreviewView previewView;
@@ -132,6 +134,7 @@ public class HazardScanActivity extends AppCompatActivity {
         }
 
         analyzingLayout = findViewById(R.id.layout_analyzing);
+        tvAnalysisStatus = findViewById(R.id.tv_analysis_status);
         resultCard = findViewById(R.id.card_scan_result);
         startButton = findViewById(R.id.btn_start_scan);
         previewView = findViewById(R.id.previewView);
@@ -325,35 +328,119 @@ public class HazardScanActivity extends AppCompatActivity {
         }
 
         isScanning = true;
+        captureButton.setEnabled(false);
         analyzingLayout.setVisibility(View.VISIBLE);
         resultCard.setVisibility(View.GONE);
+        captureAnalysisFrame(new ArrayList<>(), 0);
+    }
 
-        cameraExecutor.execute(() -> {
-            // Run Local TFLite/YOLOv8 Detection
-            List<HazardDetector.DetectionResult> detections = hazardDetector.detect(bitmap);
-            
-            runOnUiThread(() -> {
+    private void captureAnalysisFrame(List<Bitmap> frames, int attempt) {
+        if (isFinishing() || isDestroyed() || !isScanning) return;
+
+        Bitmap frame = previewView.getBitmap();
+        if (frame != null) frames.add(frame);
+
+        if (frames.size() >= ANALYSIS_FRAME_COUNT || attempt + 1 >= ANALYSIS_FRAME_COUNT) {
+            if (frames.isEmpty()) {
+                isScanning = false;
                 analyzingLayout.setVisibility(View.GONE);
-                
-                // UNCONDITIONAL: Always show the result card
-                HazardDetector.DetectionResult bestMatch;
+                captureButton.setEnabled(true);
+                Toast.makeText(this, "Failed to capture camera frames. Please try again.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            analyzeCapturedFrames(frames);
+            return;
+        }
+
+        if (tvAnalysisStatus != null) {
+            tvAnalysisStatus.setText(String.format(
+                    Locale.getDefault(), "CAPTURING FRAME %d OF %d...", frames.size() + 1, ANALYSIS_FRAME_COUNT));
+        }
+        handler.postDelayed(
+                () -> captureAnalysisFrame(frames, attempt + 1), ANALYSIS_FRAME_INTERVAL_MS);
+    }
+
+    private void analyzeCapturedFrames(List<Bitmap> frames) {
+        if (tvAnalysisStatus != null) {
+            tvAnalysisStatus.setText(String.format(
+                    Locale.getDefault(), "ANALYZING FRAME 1 OF %d...", frames.size()));
+        }
+        cameraExecutor.execute(() -> {
+            List<HazardDetector.DetectionResult> frameResults = new ArrayList<>(frames.size());
+
+            for (int index = 0; index < frames.size(); index++) {
+                Bitmap frame = frames.get(index);
+                List<HazardDetector.DetectionResult> detections = hazardDetector.detect(frame);
                 if (!detections.isEmpty()) {
-                    bestMatch = detections.get(0);
-                } else {
-                    // Safety Fallback: Should not happen with new Detector logic
-                    bestMatch = new HazardDetector.DetectionResult("Violation: No PPE Detected", "Action: Equip all required PPE.", 0f, false, 
-                        new Rect(0,0,bitmap.getWidth(), bitmap.getHeight()),
-                        HazardDetector.DetectionType.PERSON, "Critical");
+                    frameResults.add(detections.get(0));
                 }
-                showDetectionResult(bestMatch, bitmap);
+
+                int completed = index + 1;
+                runOnUiThread(() -> {
+                    if (tvAnalysisStatus != null) {
+                        tvAnalysisStatus.setText(String.format(
+                                Locale.getDefault(), "ANALYZING FRAME %d OF %d...", completed, frames.size()));
+                    }
+                });
+            }
+
+            if (frameResults.isEmpty()) {
+                runOnUiThread(() -> {
+                    if (isFinishing() || isDestroyed()) return;
+                    isScanning = false;
+                    analyzingLayout.setVisibility(View.GONE);
+                    captureButton.setEnabled(true);
+                    Toast.makeText(this, "AI could not analyze the captured frames. Please try again.", Toast.LENGTH_SHORT).show();
+                });
+                return;
+            }
+
+            HazardDetector.DetectionResult verdict = combineFrameResults(frameResults);
+            Bitmap resultFrame = frames.get(frames.size() / 2);
+            runOnUiThread(() -> {
+                if (isFinishing() || isDestroyed()) return;
+                analyzingLayout.setVisibility(View.GONE);
+                showDetectionResult(verdict, resultFrame);
             });
         });
+    }
+
+    private HazardDetector.DetectionResult combineFrameResults(
+            List<HazardDetector.DetectionResult> frameResults) {
+        int secureFrames = 0;
+        for (HazardDetector.DetectionResult result : frameResults) {
+            if (result.isSecure) secureFrames++;
+        }
+
+        // On a tie, prefer the hazard verdict to avoid overstating safety.
+        boolean isSecure = secureFrames > frameResults.size() / 2;
+        HazardDetector.DetectionResult representative = null;
+        for (HazardDetector.DetectionResult result : frameResults) {
+            if (result.isSecure == isSecure
+                    && (representative == null || result.confidence > representative.confidence)) {
+                representative = result;
+            }
+        }
+
+        int agreeingFrames = isSecure ? secureFrames : frameResults.size() - secureFrames;
+        String description = representative.description + String.format(
+                Locale.getDefault(), "\nAI consensus: %d of %d frames agree.",
+                agreeingFrames, frameResults.size());
+        return new HazardDetector.DetectionResult(
+                representative.label,
+                description,
+                representative.confidence,
+                representative.isSecure,
+                representative.region,
+                representative.type,
+                representative.severity);
     }
 
     private void showDetectionResult(HazardDetector.DetectionResult result, Bitmap bitmap) {
         isScanning = false;
         resultCard.setVisibility(View.VISIBLE);
         captureButton.setVisibility(View.VISIBLE);
+        captureButton.setEnabled(true);
 
         lastCapturedBitmap = bitmap;
         ivCapturedResult.setImageBitmap(bitmap);

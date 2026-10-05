@@ -222,10 +222,11 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
+            android:id="@+id/tv_analysis_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="AI ANALYZING..."
+            android:text="CAPTURING FRAMES..."
             android:textColor="@color/white"
             android:textSize="16sp"
             android:textStyle="bold"

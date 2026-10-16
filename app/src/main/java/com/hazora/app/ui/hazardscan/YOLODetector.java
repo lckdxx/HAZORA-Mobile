@@ -31,7 +31,10 @@ public class YOLODetector {
     private final int inputWidth = 640;
     private final int inputHeight = 640;
     private final Context context;
-    private final float confidenceThreshold = 0.77f;
+    // Harness-style reflective vests are smaller and less uniform than full
+    // jackets. Keep a modest threshold and resolve detections per class.
+    private final float defaultConfidenceThreshold = 0.45f;
+    private final float vestConfidenceThreshold = 0.30f;
     private final float iouThreshold = 0.70f;
     // Some YOLOv8 TFLite exports expect NCHW ([1,3,H,W]) instead of NHWC ([1,H,W,3]).
     // Detected once from the model's declared input shape.
@@ -167,7 +170,7 @@ public class YOLODetector {
                 }
 
                 if (maxClassProb > maxSeenProb) maxSeenProb = maxClassProb;
-                if (maxClassProb <= confidenceThreshold) continue;
+                if (maxClassProb <= confidenceThreshold(classId)) continue;
 
                 detectionsCount++;
                 float xCenter = channelsFirstOutput ? data[0][i] : data[i][0];
@@ -206,6 +209,13 @@ public class YOLODetector {
         }
 
         return nms(recognitions);
+    }
+
+    private float confidenceThreshold(int classId) {
+        String label = labels != null && classId >= 0 && classId < labels.size()
+                ? labels.get(classId).toLowerCase(java.util.Locale.ROOT) : "";
+        return label.contains("vest") || label.contains("high-vis") || label.contains("jacket")
+                ? vestConfidenceThreshold : defaultConfidenceThreshold;
     }
 
     private ByteBuffer convertBitmapToByteBuffer(Bitmap bitmap) {

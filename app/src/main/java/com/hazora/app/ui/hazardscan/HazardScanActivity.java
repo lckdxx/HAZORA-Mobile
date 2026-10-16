@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -63,6 +64,8 @@ public class HazardScanActivity extends AppCompatActivity {
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private View analyzingLayout;
+    private ProgressBar analyzingProgress;
+    private TextView analyzingStatus;
     private View resultCard;
     private Button startButton;
     private PreviewView previewView;
@@ -76,6 +79,9 @@ public class HazardScanActivity extends AppCompatActivity {
     private ExecutorService cameraExecutor;
     private HazardDetector hazardDetector;
     private boolean isScanning = false;
+    private long scanStartedAt;
+    private static final long MIN_ANALYSIS_MS = 60_000L;
+    private static final long MAX_ANALYSIS_MS = 90_000L;
     private String userAssignedSite = "Not assigned location site";
     private TextView tvSiteLocation;
     private Incident lastDetectedIncident;
@@ -132,6 +138,8 @@ public class HazardScanActivity extends AppCompatActivity {
         }
 
         analyzingLayout = findViewById(R.id.layout_analyzing);
+        analyzingProgress = findViewById(R.id.progress_bar);
+        analyzingStatus = findViewById(R.id.tv_analyzing_status);
         resultCard = findViewById(R.id.card_scan_result);
         startButton = findViewById(R.id.btn_start_scan);
         previewView = findViewById(R.id.previewView);
@@ -325,14 +333,17 @@ public class HazardScanActivity extends AppCompatActivity {
         }
 
         isScanning = true;
+        scanStartedAt = System.currentTimeMillis();
         captureButton.setEnabled(false);
         analyzingLayout.setVisibility(View.VISIBLE);
+        if (analyzingProgress != null) analyzingProgress.setProgress(0);
+        setAnalyzingStatus("Preparing image analysis...");
+        updateAnalysisProgress();
         resultCard.setVisibility(View.GONE);
         cameraExecutor.execute(() -> {
             List<HazardDetector.DetectionResult> detections = hazardDetector.detect(bitmap);
             runOnUiThread(() -> {
                 if (isFinishing() || isDestroyed()) return;
-                analyzingLayout.setVisibility(View.GONE);
                 HazardDetector.DetectionResult result = detections.isEmpty()
                         ? new HazardDetector.DetectionResult(
                                 "Violation: No PPE Detected",
@@ -343,10 +354,44 @@ public class HazardScanActivity extends AppCompatActivity {
                                 HazardDetector.DetectionType.PERSON,
                                 "Critical")
                         : detections.get(0);
-                showDetectionResult(result, bitmap);
+                setAnalyzingStatus("Reviewing PPE detections...");
+                long elapsed = System.currentTimeMillis() - scanStartedAt;
+                long delay = Math.max(0L, Math.min(MIN_ANALYSIS_MS - elapsed, MAX_ANALYSIS_MS - elapsed));
+                handler.postDelayed(() -> {
+                    if (isFinishing() || isDestroyed() || !isScanning) return;
+                    handler.removeCallbacks(analysisProgressTick);
+                    if (analyzingProgress != null) analyzingProgress.setProgress(100);
+                    analyzingLayout.setVisibility(View.GONE);
+                    showDetectionResult(result, bitmap);
+                }, delay);
             });
         });
     }
+
+    private void setAnalyzingStatus(String status) {
+        if (analyzingStatus != null) analyzingStatus.setText(status);
+    }
+
+    private void updateAnalysisProgress() {
+        handler.removeCallbacks(analysisProgressTick);
+        handler.post(analysisProgressTick);
+    }
+
+    private final Runnable analysisProgressTick = new Runnable() {
+        @Override
+        public void run() {
+            if (!isScanning || analyzingProgress == null) return;
+            long elapsed = System.currentTimeMillis() - scanStartedAt;
+            int progress = (int) Math.min(95L, elapsed * 100L / MIN_ANALYSIS_MS);
+            analyzingProgress.setProgress(progress);
+            if (elapsed < MIN_ANALYSIS_MS) {
+                setAnalyzingStatus("Analyzing image... " + (elapsed / 1000L) + " sec");
+            } else {
+                setAnalyzingStatus("Finalizing safety assessment...");
+            }
+            handler.postDelayed(this, 500L);
+        }
+    };
 
     private void showDetectionResult(HazardDetector.DetectionResult result, Bitmap bitmap) {
         isScanning = false;

@@ -213,19 +213,25 @@
 
         <ProgressBar
             android:id="@+id/progress_bar"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:indeterminateTint="@color/hazora_primary_blue"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="240dp"
+            android:layout_height="12dp"
+            android:max="100"
+            android:progress="0"
+            android:progressTint="@color/hazora_primary_blue"
+            android:progressBackgroundTint="#66FFFFFF"
+            android:indeterminate="false"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
+            android:id="@+id/tv_analyzing_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="AI ANALYZING..."
+            android:text="Preparing image analysis..."
             android:textColor="@color/white"
             android:textSize="16sp"
             android:textStyle="bold"

@@ -149,7 +149,7 @@ public class HazardDetector {
                 boolean reqVest = requireVest;
                 boolean reqShoes = requireShoes;
                 if (scanMode == ScanMode.AUTO) {
-                    boolean[] req = cluster.inferRequiredPpe(frameHeight);
+                    boolean[] req = cluster.inferRequiredPpe(frameHeight, bitmap.getWidth());
                     reqHelmet = req[0];
                     reqVest = req[1];
                     reqShoes = req[2];
@@ -310,7 +310,7 @@ public class HazardDetector {
          * reach, plus which items were actually detected.
          * Returns [requireHelmet, requireVest, requireShoes].
          */
-        boolean[] inferRequiredPpe(int frameHeight) {
+        boolean[] inferRequiredPpe(int frameHeight, int frameWidth) {
             float lowestBottom = 0;
             for (YOLODetector.Recognition d : detections) {
                 lowestBottom = Math.max(lowestBottom, d.location.bottom);
@@ -321,7 +321,11 @@ public class HazardDetector {
             // Always check helmet. Add vest once the torso region is in view,
             // add shoes only when the body extends near the bottom of the frame.
             boolean reqHelmet = true;
-            boolean reqVest = hasVest || reach >= 0.55f;
+            // A visible upper-body photo can have its torso centered well above
+            // the frame midpoint. Check vest whenever the person occupies a
+            // meaningful portion of the frame, not only once feet are visible.
+            boolean reqVest = hasVest || reach >= 0.30f || detections.stream()
+                    .anyMatch(d -> d.location.width() >= frameWidth * 0.12f);
             boolean reqShoes = hasShoes || reach >= 0.85f;
 
             return new boolean[] { reqHelmet, reqVest, reqShoes };

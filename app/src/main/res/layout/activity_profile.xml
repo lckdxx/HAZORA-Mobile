@@ -366,6 +366,20 @@
 
                 <!-- Sign Out Section -->
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_test_hazard_email"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="12dp"
+                    android:text="SEND TEST HAZARD EMAIL"
+                    android:textColor="@color/hazora_primary_blue"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:backgroundTint="@color/white"
+                    app:cornerRadius="16dp"
+                    app:strokeColor="@color/hazora_primary_blue"
+                    app:strokeWidth="1dp" />
+
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_logout"
                     android:layout_width="match_parent"
                     android:layout_height="60dp"

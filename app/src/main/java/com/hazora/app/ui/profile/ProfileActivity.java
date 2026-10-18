@@ -19,6 +19,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.hazora.app.auth.GoogleSignInHelper;
 import com.hazora.app.auth.SessionManager;
 import com.hazora.app.R;
+import com.hazora.app.notifications.HazardEmailSender;
 import com.hazora.app.ui.login.LoginActivity;
 
 import java.util.HashMap;
@@ -30,6 +31,7 @@ public class ProfileActivity extends AppCompatActivity {
     private final FirebaseFirestore db = FirebaseFirestore.getInstance("hazora");
     private DocumentSnapshot currentDoc;
     private String currentCollection;
+    private boolean emailTestInProgress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +46,7 @@ public class ProfileActivity extends AppCompatActivity {
         loadUserData();
 
         findViewById(R.id.btn_logout).setOnClickListener(v -> showLogoutConfirmation());
+        findViewById(R.id.btn_test_hazard_email).setOnClickListener(v -> sendHazardEmailTest());
         
         View editBtn = findViewById(R.id.btn_edit_profile);
         if (editBtn != null) {
@@ -121,6 +124,41 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void processProfileDoc(DocumentSnapshot doc) {
         updateUI(doc.getString("name"), doc.getString("role"), doc.getString("site"));
+    }
+
+    private void sendHazardEmailTest() {
+        if (emailTestInProgress) return;
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null || !user.isEmailVerified()) {
+            Toast.makeText(this, "Verify your account email before requesting a test.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        emailTestInProgress = true;
+        View testButton = findViewById(R.id.btn_test_hazard_email);
+        testButton.setEnabled(false);
+        HazardEmailSender.sendTest(user, reason -> runOnUiThread(() -> {
+            emailTestInProgress = false;
+            testButton.setEnabled(true);
+            switch (reason) {
+                case "sent":
+                    Toast.makeText(this, "One test email was sent to your account email. Check inbox and spam.", Toast.LENGTH_LONG).show();
+                    break;
+                case "cooldown":
+                    Toast.makeText(this, "A test email was already requested recently. Please wait one minute.", Toast.LENGTH_LONG).show();
+                    break;
+                case "approved_role_required":
+                    Toast.makeText(this, "An approved safety role is required to send hazard email tests.", Toast.LENGTH_LONG).show();
+                    break;
+                case "verified_account_required":
+                    Toast.makeText(this, "Verify your account email before requesting a test.", Toast.LENGTH_LONG).show();
+                    break;
+                default:
+                    Toast.makeText(this, "The test email could not be sent. Please try again later.", Toast.LENGTH_LONG).show();
+                    break;
+            }
+        }));
     }
 
     private void updateUI(String name, String role, String site) {

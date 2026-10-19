@@ -79,9 +79,10 @@ public class HazardScanActivity extends AppCompatActivity {
     private ExecutorService cameraExecutor;
     private HazardDetector hazardDetector;
     private boolean isScanning = false;
+    private int scanRequestId = 0;
     private long scanStartedAt;
-    private static final long MIN_ANALYSIS_MS = 60_000L;
-    private static final long MAX_ANALYSIS_MS = 90_000L;
+    private static final long MIN_ANALYSIS_MS = 10_000L;
+    private static final long MAX_ANALYSIS_MS = 10_000L;
     private String userAssignedSite = "Not assigned location site";
     private TextView tvSiteLocation;
     private Incident lastDetectedIncident;
@@ -149,6 +150,7 @@ public class HazardScanActivity extends AppCompatActivity {
         cameraPlaceholder = findViewById(R.id.camera_placeholder);
         captureButton = findViewById(R.id.btn_capture);
         ivCapturedResult = findViewById(R.id.iv_captured_result);
+        findViewById(R.id.btn_cancel_analysis).setOnClickListener(v -> cancelAnalysis());
 
         startButton.setBackgroundTintList(null);
         captureButton.setBackgroundTintList(null);
@@ -333,6 +335,7 @@ public class HazardScanActivity extends AppCompatActivity {
         }
 
         isScanning = true;
+        int currentScanRequestId = ++scanRequestId;
         scanStartedAt = System.currentTimeMillis();
         captureButton.setEnabled(false);
         analyzingLayout.setVisibility(View.VISIBLE);
@@ -343,7 +346,8 @@ public class HazardScanActivity extends AppCompatActivity {
         cameraExecutor.execute(() -> {
             List<HazardDetector.DetectionResult> detections = hazardDetector.detect(bitmap);
             runOnUiThread(() -> {
-                if (isFinishing() || isDestroyed()) return;
+                if (isFinishing() || isDestroyed() || !isScanning ||
+                        currentScanRequestId != scanRequestId) return;
                 HazardDetector.DetectionResult result = detections.isEmpty()
                         ? new HazardDetector.DetectionResult(
                                 "Violation: No PPE Detected",
@@ -358,7 +362,8 @@ public class HazardScanActivity extends AppCompatActivity {
                 long elapsed = System.currentTimeMillis() - scanStartedAt;
                 long delay = Math.max(0L, Math.min(MIN_ANALYSIS_MS - elapsed, MAX_ANALYSIS_MS - elapsed));
                 handler.postDelayed(() -> {
-                    if (isFinishing() || isDestroyed() || !isScanning) return;
+                    if (isFinishing() || isDestroyed() || !isScanning ||
+                            currentScanRequestId != scanRequestId) return;
                     handler.removeCallbacks(analysisProgressTick);
                     if (analyzingProgress != null) analyzingProgress.setProgress(100);
                     analyzingLayout.setVisibility(View.GONE);
@@ -366,6 +371,18 @@ public class HazardScanActivity extends AppCompatActivity {
                 }, delay);
             });
         });
+    }
+
+    private void cancelAnalysis() {
+        if (!isScanning) return;
+
+        isScanning = false;
+        scanRequestId++;
+        handler.removeCallbacks(analysisProgressTick);
+        analyzingLayout.setVisibility(View.GONE);
+        if (analyzingProgress != null) analyzingProgress.setProgress(0);
+        captureButton.setEnabled(true);
+        Toast.makeText(this, "Scan cancelled. The captured scene was not saved.", Toast.LENGTH_SHORT).show();
     }
 
     private void setAnalyzingStatus(String status) {

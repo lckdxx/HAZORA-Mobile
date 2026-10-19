@@ -240,6 +240,20 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/progress_bar" />
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_cancel_analysis"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginTop="20dp"
+            android:text="CANCEL SCAN"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            app:backgroundTint="@color/hazora_danger"
+            app:cornerRadius="12dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_analyzing_status" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Detection Result Card -->

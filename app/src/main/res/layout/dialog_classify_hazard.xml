@@ -1,0 +1,499 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="16dp"
+    app:cardCornerRadius="24dp"
+    app:cardElevation="12dp"
+    app:cardBackgroundColor="@color/white"
+    app:strokeWidth="0dp">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Top Header with Icon -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_circle_light_blue"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_hard_hat"
+                    app:tint="@color/hazora_primary_blue"
+                    android:contentDescription="Safety Badge" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Classify Hazard"
+                        android:textColor="@color/hazora_text_primary"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Safety Officer AI Dataset Validation"
+                        android:textColor="@color/hazora_text_secondary"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="14dp"
+                android:background="#E2E8F0" />
+
+            <!-- Category Section Header -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="HAZARD CATEGORY"
+                android:textColor="@color/hazora_primary_blue"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.12" />
+
+            <RadioGroup
+                android:id="@+id/rg_hazard_categories"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp">
+
+                <RadioButton
+                    android:id="@+id/rb_cat_no_ppe"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:buttonTint="@color/hazora_primary_blue"
+                    android:checked="true"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:text="PPE Assessment (Missing or Worn)"
+                    android:textColor="@color/hazora_text_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <RadioButton
+                    android:id="@+id/rb_cat_tripping"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:buttonTint="@color/hazora_primary_blue"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:text="Tripping / Protruding Hazard"
+                    android:textColor="@color/hazora_text_primary"
+                    android:textSize="13sp" />
+
+                <RadioButton
+                    android:id="@+id/rb_cat_scaffolding"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:buttonTint="@color/hazora_primary_blue"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:text="Scaffolding Assessment"
+                    android:textColor="@color/hazora_text_primary"
+                    android:textSize="13sp" />
+
+                <RadioButton
+                    android:id="@+id/rb_cat_material"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:buttonTint="@color/hazora_primary_blue"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:text="Unsafe Material Handling"
+                    android:textColor="@color/hazora_text_primary"
+                    android:textSize="13sp" />
+
+                <RadioButton
+                    android:id="@+id/rb_cat_others"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="@color/hazora_primary_blue"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:text="Others (Out of Scope / Custom Hazard)"
+                    android:textColor="@color/hazora_text_primary"
+                    android:textSize="13sp" />
+            </RadioGroup>
+
+            <!-- PPE Sub-Options Container -->
+            <LinearLayout
+                android:id="@+id/layout_sub_ppe"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_card"
+                android:backgroundTint="#F8FAFC"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="#FEE2E2"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="4dp"
+                    android:text="MISSING PPE ITEMS"
+                    android:textColor="#DC2626"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.08" />
+
+                <CheckBox
+                    android:id="@+id/cb_no_helmet"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:buttonTint="#DC2626"
+                    android:text="No Safety Helmet"
+                    android:textColor="@color/hazora_text_primary"
+                    android:textSize="13sp" />
+
+                <CheckBox
+                    android:id="@+id/cb_no_vest"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="#DC2626"
+                    android:text="No Safety Vest"
+                    android:textColor="@color/hazora_text_primary"
+                    android:textSize="13sp" />
+
+                <CheckBox
+                    android:id="@+id/cb_no_shoes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="#DC2626"
+                    android:text="No Safety Shoes"
+                    android:textColor="@color/hazora_text_primary"
+                    android:textSize="13sp" />
+
+                <CheckBox
+                    android:id="@+id/cb_all_ppe"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="#DC2626"
+                    android:text="All PPE Items Missing"
+                    android:textColor="@color/hazora_text_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="10dp"
+                    android:background="#E2E8F0" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="#DCFCE7"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="4dp"
+                    android:text="PPE COMPLIANCE (ITEM WORN)"
+                    android:textColor="#16A34A"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.08" />
+
+                <CheckBox
+                    android:id="@+id/cb_helmet_worn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:buttonTint="#16A34A"
+                    android:text="Safety Helmet Worn"
+                    android:textColor="@color/hazora_text_primary"
+                    android:textSize="13sp" />
+
+                <CheckBox
+                    android:id="@+id/cb_vest_worn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="#16A34A"
+                    android:text="Safety Vest Worn"
+                    android:textColor="@color/hazora_text_primary"
+                    android:textSize="13sp" />
+
+                <CheckBox
+                    android:id="@+id/cb_shoes_worn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="#16A34A"
+                    android:text="Safety Shoes Worn"
+                    android:textColor="@color/hazora_text_primary"
+                    android:textSize="13sp" />
+
+                <CheckBox
+                    android:id="@+id/cb_full_ppe_worn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="#16A34A"
+                    android:text="Full PPE Compliant &amp; Worn"
+                    android:textColor="@color/hazora_text_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Scaffolding Sub-Options Container -->
+            <LinearLayout
+                android:id="@+id/layout_sub_scaffolding"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_card"
+                android:backgroundTint="#F8FAFC"
+                android:orientation="vertical"
+                android:padding="12dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="#FEE2E2"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="4dp"
+                    android:text="SCAFFOLDING DEFICIENCIES"
+                    android:textColor="#DC2626"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.08" />
+
+                <CheckBox
+                    android:id="@+id/cb_no_ledger"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:buttonTint="#DC2626"
+                    android:text="No Horizontal Ledger"
+                    android:textColor="@color/hazora_text_primary"
+                    android:textSize="13sp" />
+
+                <CheckBox
+                    android:id="@+id/cb_no_cross_brace"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="#DC2626"
+                    android:text="No Cross Brace"
+                    android:textColor="@color/hazora_text_primary"
+                    android:textSize="13sp" />
+
+                <CheckBox
+                    android:id="@+id/cb_no_ladder"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="#DC2626"
+                    android:text="No Access Ladder"
+                    android:textColor="@color/hazora_text_primary"
+                    android:textSize="13sp" />
+
+                <CheckBox
+                    android:id="@+id/cb_no_base_plate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="#DC2626"
+                    android:text="No Base Plate"
+                    android:textColor="@color/hazora_text_primary"
+                    android:textSize="13sp" />
+
+                <CheckBox
+                    android:id="@+id/cb_all_scaffolding"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="#DC2626"
+                    android:text="All Scaffolding Deficiencies"
+                    android:textColor="@color/hazora_text_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="10dp"
+                    android:background="#E2E8F0" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="#DCFCE7"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="4dp"
+                    android:text="SCAFFOLDING COMPLIANCE (COMPONENT PRESENT)"
+                    android:textColor="#16A34A"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.08" />
+
+                <CheckBox
+                    android:id="@+id/cb_ledger_present"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:buttonTint="#16A34A"
+                    android:text="Horizontal Ledger Present / Installed"
+                    android:textColor="@color/hazora_text_primary"
+                    android:textSize="13sp" />
+
+                <CheckBox
+                    android:id="@+id/cb_cross_brace_present"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="#16A34A"
+                    android:text="Cross Brace Present / Installed"
+                    android:textColor="@color/hazora_text_primary"
+                    android:textSize="13sp" />
+
+                <CheckBox
+                    android:id="@+id/cb_ladder_present"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="#16A34A"
+                    android:text="Access Ladder Present / Installed"
+                    android:textColor="@color/hazora_text_primary"
+                    android:textSize="13sp" />
+
+                <CheckBox
+                    android:id="@+id/cb_base_plate_present"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="#16A34A"
+                    android:text="Base Plate Present / Installed"
+                    android:textColor="@color/hazora_text_primary"
+                    android:textSize="13sp" />
+
+                <CheckBox
+                    android:id="@+id/cb_scaffolding_compliant"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="#16A34A"
+                    android:text="Scaffolding Fully Compliant &amp; Safe"
+                    android:textColor="@color/hazora_text_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Others Sub-Options Container -->
+            <LinearLayout
+                android:id="@+id/layout_sub_others"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_card"
+                android:backgroundTint="#F8FAFC"
+                android:orientation="vertical"
+                android:padding="12dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="CUSTOM HAZARD LABEL:"
+                    android:textColor="@color/hazora_primary_blue"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.08" />
+
+                <EditText
+                    android:id="@+id/et_custom_hazard_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="72dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_dialog_textfield"
+                    android:gravity="top|start"
+                    android:inputType="textMultiLine"
+                    android:hint="e.g. Electrical Wire Exposure, Chemical Leak..."
+                    android:padding="12dp"
+                    android:textColor="#0F172A"
+                    android:textColorHint="#64748B"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <!-- Safety Officer Notes Input -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="SAFETY OFFICER NOTES"
+                android:textColor="@color/hazora_primary_blue"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.12" />
+
+            <EditText
+                android:id="@+id/et_safety_notes"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/bg_dialog_textfield"
+                android:gravity="top|start"
+                android:hint="Enter specific hazard details or location context..."
+                android:padding="12dp"
+                android:textColor="#0F172A"
+                android:textColorHint="#64748B"
+                android:textSize="13sp" />
+
+            <!-- Action Buttons -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_cancel_classification"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:backgroundTint="#F1F5F9"
+                    android:text="CANCEL"
+                    android:textColor="#475569"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="12dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_submit_classification"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1.6"
+                    android:backgroundTint="@color/hazora_primary_blue"
+                    android:text="SAVE TO DATABASE"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="12dp"
+                    app:elevation="2dp" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+</com.google.android.material.card.MaterialCardView>

@@ -117,12 +117,26 @@
                         android:id="@+id/filter_low"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
                         android:background="@drawable/bg_message_filter_unselected"
                         android:paddingStart="16dp"
                         android:paddingTop="8dp"
                         android:paddingEnd="16dp"
                         android:paddingBottom="8dp"
                         android:text="Low"
+                        android:textColor="@color/primary_blue"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/filter_validation"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_message_filter_unselected"
+                        android:paddingStart="16dp"
+                        android:paddingTop="8dp"
+                        android:paddingEnd="16dp"
+                        android:paddingBottom="8dp"
+                        android:text="Validation"
                         android:textColor="@color/primary_blue"
                         android:textSize="12sp" />
                 </LinearLayout>

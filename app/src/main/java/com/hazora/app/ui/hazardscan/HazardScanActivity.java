@@ -1,20 +1,28 @@
 package com.hazora.app.ui.hazardscan;
 
 import android.Manifest;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -87,6 +95,7 @@ public class HazardScanActivity extends AppCompatActivity {
     private TextView tvSiteLocation;
     private Incident lastDetectedIncident;
     private Bitmap lastCapturedBitmap;
+    private String lastCapturedBase64;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -183,6 +192,7 @@ public class HazardScanActivity extends AppCompatActivity {
 
         findViewById(R.id.btn_view_incident).setOnClickListener(v -> openIncident());
         findViewById(R.id.btn_scan_again).setOnClickListener(v -> resetScan());
+        findViewById(R.id.btn_classify_hazard).setOnClickListener(v -> showClassifyDialog(lastCapturedBase64));
 
         tvSiteLocation = findViewById(R.id.tv_site_location);
         loadUserSite();
@@ -448,9 +458,149 @@ public class HazardScanActivity extends AppCompatActivity {
         resized.compress(Bitmap.CompressFormat.JPEG, 60, baos);
         byte[] imageBytes = baos.toByteArray();
         String base64Image = Base64.encodeToString(imageBytes, Base64.DEFAULT);
+        lastCapturedBase64 = base64Image;
 
         // 2. Save directly to Firestore
         saveIncidentToFirestore(result, base64Image);
+    }
+
+    private void showClassifyDialog(String base64Image) {
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_classify_hazard);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+
+        RadioGroup rgCategory = dialog.findViewById(R.id.rg_hazard_categories);
+        View layoutSubPpe = dialog.findViewById(R.id.layout_sub_ppe);
+        View layoutSubScaffolding = dialog.findViewById(R.id.layout_sub_scaffolding);
+        View layoutSubOthers = dialog.findViewById(R.id.layout_sub_others);
+
+        CheckBox cbNoHelmet = dialog.findViewById(R.id.cb_no_helmet);
+        CheckBox cbNoVest = dialog.findViewById(R.id.cb_no_vest);
+        CheckBox cbNoShoes = dialog.findViewById(R.id.cb_no_shoes);
+        CheckBox cbAllPpe = dialog.findViewById(R.id.cb_all_ppe);
+
+        CheckBox cbHelmetWorn = dialog.findViewById(R.id.cb_helmet_worn);
+        CheckBox cbVestWorn = dialog.findViewById(R.id.cb_vest_worn);
+        CheckBox cbShoesWorn = dialog.findViewById(R.id.cb_shoes_worn);
+        CheckBox cbFullPpeWorn = dialog.findViewById(R.id.cb_full_ppe_worn);
+
+        CheckBox cbNoLedger = dialog.findViewById(R.id.cb_no_ledger);
+        CheckBox cbNoCrossBrace = dialog.findViewById(R.id.cb_no_cross_brace);
+        CheckBox cbNoLadder = dialog.findViewById(R.id.cb_no_ladder);
+        CheckBox cbNoBasePlate = dialog.findViewById(R.id.cb_no_base_plate);
+        CheckBox cbAllScaffolding = dialog.findViewById(R.id.cb_all_scaffolding);
+
+        CheckBox cbLedgerPresent = dialog.findViewById(R.id.cb_ledger_present);
+        CheckBox cbCrossBracePresent = dialog.findViewById(R.id.cb_cross_brace_present);
+        CheckBox cbLadderPresent = dialog.findViewById(R.id.cb_ladder_present);
+        CheckBox cbBasePlatePresent = dialog.findViewById(R.id.cb_base_plate_present);
+        CheckBox cbScaffoldingCompliant = dialog.findViewById(R.id.cb_scaffolding_compliant);
+
+        EditText etCustomLabel = dialog.findViewById(R.id.et_custom_hazard_label);
+        EditText etNotes = dialog.findViewById(R.id.et_safety_notes);
+
+        if (rgCategory != null) {
+            rgCategory.setOnCheckedChangeListener((group, checkedId) -> {
+                if (layoutSubPpe != null) layoutSubPpe.setVisibility(checkedId == R.id.rb_cat_no_ppe ? View.VISIBLE : View.GONE);
+                if (layoutSubScaffolding != null) layoutSubScaffolding.setVisibility(checkedId == R.id.rb_cat_scaffolding ? View.VISIBLE : View.GONE);
+                if (layoutSubOthers != null) layoutSubOthers.setVisibility(checkedId == R.id.rb_cat_others ? View.VISIBLE : View.GONE);
+            });
+        }
+
+        View cancel = dialog.findViewById(R.id.btn_cancel_classification);
+        if (cancel != null) cancel.setOnClickListener(v -> dialog.dismiss());
+
+        View submit = dialog.findViewById(R.id.btn_submit_classification);
+        if (submit != null) {
+            submit.setOnClickListener(v -> {
+                String selectedCategory = "PPE Assessment";
+                int checkedId = rgCategory != null ? rgCategory.getCheckedRadioButtonId() : R.id.rb_cat_no_ppe;
+                List<String> subTypes = new ArrayList<>();
+
+                if (checkedId == R.id.rb_cat_no_ppe) {
+                    selectedCategory = "PPE Assessment";
+                    if (cbFullPpeWorn != null && cbFullPpeWorn.isChecked()) {
+                        subTypes.add("Full PPE Compliant & Worn");
+                    } else if (cbAllPpe != null && cbAllPpe.isChecked()) {
+                        subTypes.add("All PPE Items Missing");
+                    } else {
+                        if (cbNoHelmet != null && cbNoHelmet.isChecked()) subTypes.add("No Safety Helmet");
+                        if (cbNoVest != null && cbNoVest.isChecked()) subTypes.add("No Safety Vest");
+                        if (cbNoShoes != null && cbNoShoes.isChecked()) subTypes.add("No Safety Shoes");
+                        if (cbHelmetWorn != null && cbHelmetWorn.isChecked()) subTypes.add("Safety Helmet Worn");
+                        if (cbVestWorn != null && cbVestWorn.isChecked()) subTypes.add("Safety Vest Worn");
+                        if (cbShoesWorn != null && cbShoesWorn.isChecked()) subTypes.add("Safety Shoes Worn");
+                    }
+                } else if (checkedId == R.id.rb_cat_tripping) {
+                    selectedCategory = "Tripping / Protruding Hazard";
+                } else if (checkedId == R.id.rb_cat_scaffolding) {
+                    selectedCategory = "Scaffolding Assessment";
+                    if (cbScaffoldingCompliant != null && cbScaffoldingCompliant.isChecked()) {
+                        subTypes.add("Scaffolding Fully Compliant & Safe");
+                    } else if (cbAllScaffolding != null && cbAllScaffolding.isChecked()) {
+                        subTypes.add("All Scaffolding Deficiencies");
+                    } else {
+                        if (cbNoLedger != null && cbNoLedger.isChecked()) subTypes.add("No Horizontal Ledger");
+                        if (cbNoCrossBrace != null && cbNoCrossBrace.isChecked()) subTypes.add("No Cross Brace");
+                        if (cbNoLadder != null && cbNoLadder.isChecked()) subTypes.add("No Access Ladder");
+                        if (cbNoBasePlate != null && cbNoBasePlate.isChecked()) subTypes.add("No Base Plate");
+                        if (cbLedgerPresent != null && cbLedgerPresent.isChecked()) subTypes.add("Horizontal Ledger Present");
+                        if (cbCrossBracePresent != null && cbCrossBracePresent.isChecked()) subTypes.add("Cross Brace Present");
+                        if (cbLadderPresent != null && cbLadderPresent.isChecked()) subTypes.add("Access Ladder Present");
+                        if (cbBasePlatePresent != null && cbBasePlatePresent.isChecked()) subTypes.add("Base Plate Present");
+                    }
+                } else if (checkedId == R.id.rb_cat_material) {
+                    selectedCategory = "Unsafe Material Handling";
+                } else if (checkedId == R.id.rb_cat_others) {
+                    String customLabel = etCustomLabel != null ? etCustomLabel.getText().toString().trim() : "";
+                    selectedCategory = customLabel.isEmpty() ? "Others (Custom Hazard)" : customLabel;
+                }
+
+                String notes = etNotes != null ? etNotes.getText().toString().trim() : "";
+                String userEmail = FirebaseAuth.getInstance().getCurrentUser() != null ?
+                        FirebaseAuth.getInstance().getCurrentUser().getEmail() : "Safety Officer";
+
+                saveClassificationToFirestore(selectedCategory, subTypes, notes, userEmail, base64Image);
+                dialog.dismiss();
+            });
+        }
+
+        dialog.show();
+    }
+
+    private void saveClassificationToFirestore(String category, List<String> subTypes, String notes, String userEmail, String base64Data) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance("hazora");
+
+        Map<String, Object> incident = new HashMap<>();
+        incident.put("userId", FirebaseAuth.getInstance().getCurrentUser() != null ? FirebaseAuth.getInstance().getCurrentUser().getUid() : "SafetyOfficer");
+        incident.put("hazardType", category + (subTypes.isEmpty() ? "" : " (" + String.join(", ", subTypes) + ")"));
+        incident.put("hazardCategory", category);
+        incident.put("subTypes", subTypes);
+        incident.put("confidence", 1.0f);
+        if (base64Data != null) incident.put("imageData", base64Data);
+        incident.put("timestamp", Timestamp.now());
+        incident.put("status", "New");
+        incident.put("validationStatus", "Pending Validation");
+        incident.put("severity", "High");
+        incident.put("location", userAssignedSite);
+        incident.put("cameraSource", "Manual Safety Classification");
+        incident.put("description", "Classified by Safety Officer: " + (notes.isEmpty() ? "No additional notes" : notes));
+        incident.put("prevention", "Resolve identified hazard and verify safety compliance.");
+        incident.put("classifiedBy", userEmail);
+        incident.put("isTrainingDatasetCandidate", true);
+
+        db.collection("incidents")
+                .add(incident)
+                .addOnSuccessListener(doc -> {
+                    Toast.makeText(this, "Classification saved to database for validation & AI training!", Toast.LENGTH_LONG).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Error saving classification: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void saveIncidentToFirestore(HazardDetector.DetectionResult result, String base64Data) {
@@ -550,7 +700,7 @@ public class HazardScanActivity extends AppCompatActivity {
 
     /** Shows the captured image full screen with pinch/double-tap zoom. */
     private void showFullscreenImage(Bitmap bitmap) {
-        android.app.Dialog dialog = new android.app.Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+        Dialog dialog = new Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
         dialog.setContentView(R.layout.dialog_image_fullscreen);
 
         ZoomableImageView iv = dialog.findViewById(R.id.iv_fullscreen);

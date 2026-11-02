@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.util.Base64;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -85,16 +87,20 @@ public class HazardGalleryActivity extends AppCompatActivity {
         TextView filterCritical = findViewById(R.id.filter_critical);
         TextView filterHigh = findViewById(R.id.filter_high);
         TextView filterLow = findViewById(R.id.filter_low);
+        TextView filterValidation = findViewById(R.id.filter_validation);
 
         View.OnClickListener filterClickListener = v -> {
             filterAll.setBackgroundResource(R.drawable.bg_message_filter_unselected);
             filterCritical.setBackgroundResource(R.drawable.bg_message_filter_unselected);
             filterHigh.setBackgroundResource(R.drawable.bg_message_filter_unselected);
             filterLow.setBackgroundResource(R.drawable.bg_message_filter_unselected);
+            if (filterValidation != null) filterValidation.setBackgroundResource(R.drawable.bg_message_filter_unselected);
+
             filterAll.setTextColor(ContextCompat.getColor(this, R.color.primary_blue));
             filterCritical.setTextColor(ContextCompat.getColor(this, R.color.primary_blue));
             filterHigh.setTextColor(ContextCompat.getColor(this, R.color.primary_blue));
             filterLow.setTextColor(ContextCompat.getColor(this, R.color.primary_blue));
+            if (filterValidation != null) filterValidation.setTextColor(ContextCompat.getColor(this, R.color.primary_blue));
 
             v.setBackgroundResource(R.drawable.bg_message_filter_selected);
             ((TextView) v).setTextColor(ContextCompat.getColor(this, R.color.white));
@@ -107,6 +113,7 @@ public class HazardGalleryActivity extends AppCompatActivity {
         filterCritical.setOnClickListener(filterClickListener);
         filterHigh.setOnClickListener(filterClickListener);
         filterLow.setOnClickListener(filterClickListener);
+        if (filterValidation != null) filterValidation.setOnClickListener(filterClickListener);
     }
 
     private void applyFilters() {
@@ -121,7 +128,14 @@ public class HazardGalleryActivity extends AppCompatActivity {
             }
 
             boolean matchesSeverity = true;
-            if (!currentSeverityFilter.equalsIgnoreCase("All")) {
+            if ("Validation".equalsIgnoreCase(currentSeverityFilter)) {
+                String valStatus = (String) item.get("validationStatus");
+                Boolean isCandidate = (Boolean) item.get("isTrainingDatasetCandidate");
+                String camSource = (String) item.get("cameraSource");
+                matchesSeverity = (valStatus != null && !valStatus.isEmpty()) || 
+                                  (isCandidate != null && isCandidate) || 
+                                  "Manual Safety Classification".equalsIgnoreCase(camSource);
+            } else if (!currentSeverityFilter.equalsIgnoreCase("All")) {
                 String severity = (String) item.get("severity");
                 matchesSeverity = currentSeverityFilter.equalsIgnoreCase(severity);
             }
@@ -201,6 +215,26 @@ public class HazardGalleryActivity extends AppCompatActivity {
                         .into(holder.ivHazard);
             }
 
+            // Validation Badge
+            String valStatus = (String) item.get("validationStatus");
+            if (valStatus != null && !valStatus.isEmpty() && holder.tvValidationBadge != null) {
+                holder.tvValidationBadge.setVisibility(View.VISIBLE);
+                GradientDrawable gd = new GradientDrawable();
+                gd.setCornerRadius(16f);
+                if ("Validated".equalsIgnoreCase(valStatus)) {
+                    holder.tvValidationBadge.setText("✓ Validated");
+                    gd.setColor(Color.parseColor("#DCFCE7"));
+                    holder.tvValidationBadge.setTextColor(Color.parseColor("#15803D"));
+                } else {
+                    holder.tvValidationBadge.setText("⏳ Pending Validation");
+                    gd.setColor(Color.parseColor("#FFF7ED"));
+                    holder.tvValidationBadge.setTextColor(Color.parseColor("#D97706"));
+                }
+                holder.tvValidationBadge.setBackground(gd);
+            } else if (holder.tvValidationBadge != null) {
+                holder.tvValidationBadge.setVisibility(View.GONE);
+            }
+
             final String finalTime = timeStr;
             holder.itemView.setOnClickListener(v -> {
                 Context context = v.getContext();
@@ -215,7 +249,8 @@ public class HazardGalleryActivity extends AppCompatActivity {
                     (String) item.get("status"),
                     (String) item.get("severity"),
                     (String) item.get("description"),
-                    (String) item.get("prevention")
+                    (String) item.get("prevention"),
+                    base64Data
                 );
                 intent.putExtra("incident_data", inc);
                 context.startActivity(intent);
@@ -229,13 +264,14 @@ public class HazardGalleryActivity extends AppCompatActivity {
 
         static class ViewHolder extends RecyclerView.ViewHolder {
             ImageView ivHazard;
-            TextView tvType, tvTimestamp;
+            TextView tvType, tvTimestamp, tvValidationBadge;
 
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
                 ivHazard = itemView.findViewById(R.id.iv_hazard);
                 tvType = itemView.findViewById(R.id.tv_type);
                 tvTimestamp = itemView.findViewById(R.id.tv_timestamp);
+                tvValidationBadge = itemView.findViewById(R.id.tv_validation_badge);
             }
         }
     }

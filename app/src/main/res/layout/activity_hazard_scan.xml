@@ -376,6 +376,23 @@
                     app:strokeWidth="1dp" />
             </LinearLayout>
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_classify_hazard"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="10dp"
+                android:backgroundTint="#F59E0B"
+                android:text="CLASSIFY HAZARD (SAFETY OFFICER)"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                app:icon="@drawable/ic_edit"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp"
+                app:iconTint="@color/white"
+                app:cornerRadius="12dp"
+                app:elevation="2dp" />
+
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 

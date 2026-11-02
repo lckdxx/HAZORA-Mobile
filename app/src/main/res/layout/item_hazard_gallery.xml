@@ -38,6 +38,20 @@
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
+            <TextView
+                android:id="@+id/tv_validation_badge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:background="#FEF3C7"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="3dp"
+                android:text="Pending Validation"
+                android:textColor="#D97706"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

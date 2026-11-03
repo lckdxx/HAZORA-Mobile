@@ -271,13 +271,17 @@ public class HazardDetector {
         void add(YOLODetector.Recognition rec) {
             detections.add(rec);
             String label = rec.title.toLowerCase();
-            if (label.contains("helmet") || label.contains("hard hat") || label.contains("hat") || label.contains("head")) {
+            boolean missingPpe = label.startsWith("no ");
+            if (!missingPpe && (label.contains("helmet") || label.contains("hard hat")
+                    || label.contains("hat") || label.contains("head"))) {
                 hasHelmet = true;
             }
-            if (label.contains("vest") || label.contains("jacket") || label.contains("high-vis")) {
+            if (!missingPpe && (label.contains("vest") || label.contains("jacket")
+                    || label.contains("high-vis"))) {
                 hasVest = true;
             }
-            if (label.contains("shoes") || label.contains("shoe") || label.contains("boot") || label.contains("footwear")) {
+            if (!missingPpe && (label.contains("shoes") || label.contains("shoe")
+                    || label.contains("boot") || label.contains("footwear"))) {
                 hasShoes = true;
             }
             

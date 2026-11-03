@@ -4,9 +4,14 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /** Firebase email/password authentication for mobile users. */
@@ -34,6 +39,71 @@ public class AuthRepository {
                     ensureMobileAccess(user, callback);
                 })
                 .addOnFailureListener(error -> callback.onError("Sign-in failed. Check your email and password."));
+    }
+
+    public void registerWithEmail(String email, String password, String fullName, String phone,
+                                  SessionManager sessionManager,
+                                  RegistrationCallback callback) {
+        firebaseAuth.createUserWithEmailAndPassword(email, password)
+                .addOnSuccessListener(result -> {
+                    FirebaseUser user = result.getUser();
+                    if (user == null) {
+                        firebaseAuth.signOut();
+                        callback.onError("Your account could not be created. Please try again.");
+                        return;
+                    }
+
+                    Map<String, Object> profile = new HashMap<>();
+                    profile.put("fullName", fullName.trim());
+                    profile.put("email", email.trim().toLowerCase(Locale.ROOT));
+                    profile.put("phone", phone.trim());
+                    profile.put("role", null);
+                    profile.put("approvalStatus", "pending");
+                    profile.put("cameraIP", null);
+                    profile.put("cameras", Arrays.asList("", "", "", "", ""));
+                    profile.put("createdAt", FieldValue.serverTimestamp());
+                    profile.put("lastLogin", FieldValue.serverTimestamp());
+                    profile.put("registrationSource", "mobile");
+
+                    firestore.collection("users").document(user.getUid()).set(profile)
+                            .addOnSuccessListener(unused -> sendRegistrationVerification(
+                                    user, sessionManager, callback))
+                            .addOnFailureListener(error -> user.delete().addOnCompleteListener(deleteTask -> {
+                                firebaseAuth.signOut();
+                                callback.onError(deleteTask.isSuccessful()
+                                        ? "Could not submit your registration for admin review. Please try again."
+                                        : "Your account was created, but its registration could not be saved. "
+                                                + "Please contact an administrator before trying again.");
+                            }));
+                })
+                .addOnFailureListener(error -> {
+                    if (error instanceof FirebaseAuthUserCollisionException) {
+                        callback.onError("An account already exists for this email. Please sign in instead.");
+                    } else if (error instanceof FirebaseAuthWeakPasswordException) {
+                        callback.onError("Choose a stronger password with at least 8 characters.");
+                    } else if (error instanceof FirebaseAuthInvalidCredentialsException) {
+                        callback.onError("Enter a valid email address and try again.");
+                    } else {
+                        callback.onError("Account registration failed. Check your connection and try again.");
+                    }
+                });
+    }
+
+    private void sendRegistrationVerification(FirebaseUser user, SessionManager sessionManager,
+                                              RegistrationCallback callback) {
+        user.sendEmailVerification().addOnCompleteListener(task -> {
+            firebaseAuth.signOut();
+            if (task.isSuccessful()) {
+                sessionManager.recordVerificationEmailSent();
+                callback.onVerificationEmailSent();
+                return;
+            }
+
+            callback.onError(
+                    "Your registration was sent for admin review, but the verification email could not be sent. "
+                            + "Please sign in to request another verification link."
+            );
+        });
     }
 
     public void ensureMobileAccess(FirebaseUser user, AuthenticationCallback callback) {
@@ -135,6 +205,12 @@ public class AuthRepository {
 
     public interface AuthenticationCallback {
         void onSuccess(FirebaseUser user);
+
+        void onError(String errorMessage);
+    }
+
+    public interface RegistrationCallback {
+        void onVerificationEmailSent();
 
         void onError(String errorMessage);
     }

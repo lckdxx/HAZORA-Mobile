@@ -43,7 +43,6 @@ public class YOLODetector {
     public YOLODetector(Context context) {
         this.context = context;
         try {
-            // Loading the model trained from ppe.ndjson
             if (assetExists("ppe_model.tflite")) {
                 tflite = new Interpreter(loadModelFile("ppe_model.tflite"));
                 int[] inputShape = tflite.getInputTensor(0).shape();
@@ -59,7 +58,14 @@ public class YOLODetector {
                 // Fallback so class names always map correctly even if the label
                 // asset is missing or fails to load.
                 if (labels == null || labels.isEmpty()) {
-                    labels = Arrays.asList("Safety Helmet", "Safety Vest", "Safety Shoes");
+                    labels = Arrays.asList(
+                            "Person",
+                            "Safety Helmet",
+                            "No Safety Helmet",
+                            "Safety Vest",
+                            "No Safety Vest",
+                            "Safety Shoes",
+                            "No Safety Shoes");
                 }
                 Log.d("AI_DEBUG", "Labels loaded: " + labels);
             } else {

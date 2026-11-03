@@ -16,6 +16,7 @@ import com.hazora.app.auth.AuthRepository;
 import com.hazora.app.auth.SessionManager;
 import com.hazora.app.ui.dashboard.DashboardActivity;
 import com.hazora.app.ui.forgotpassword.ForgotPasswordActivity;
+import com.hazora.app.ui.register.RegisterActivity;
 
 /** Coordinates login UI with the reusable authentication layer. */
 public class LoginActivity extends AppCompatActivity {
@@ -51,6 +52,8 @@ public class LoginActivity extends AppCompatActivity {
         loginButton.setOnClickListener(view -> attemptLogin());
         findViewById(R.id.text_forgot_password).setOnClickListener(view ->
                 startActivity(new Intent(this, ForgotPasswordActivity.class)));
+        findViewById(R.id.text_create_account).setOnClickListener(view ->
+                startActivity(new Intent(this, RegisterActivity.class)));
     }
 
     private void attemptLogin() {

@@ -44,6 +44,15 @@
     <string name="error_passwords_do_not_match">Passwords do not match.</string>
     <string name="registration_backend_message">Registration backend will be implemented later.</string>
     <string name="already_have_an_account">Already have an account?</string>
+    <string name="already_have_an_account_sign_in">Already have an account? Sign in</string>
+    <string name="new_to_hazora_create_account">New to HAZORA? Create an account</string>
+    <string name="registration_access_notice">Verify your email first. Mobile access may require administrator approval.</string>
+    <string name="phone_number_hint">Philippine mobile number (e.g. 09XXXXXXXXX)</string>
+    <string name="error_phone_required">Phone number is required.</string>
+    <string name="error_phone_invalid">Enter a valid Philippine mobile number.</string>
+    <string name="creating_account">Creating account…</string>
+    <string name="verify_email_title">Verify your email</string>
+    <string name="verify_email_message">We sent a verification link to %1$s. Verify your email, then sign in. An administrator must enable your mobile access before you can enter the app.</string>
     <string name="email_icon_description">Email address</string>
     <string name="password_icon_description">Password</string>
     <string name="error_email_required">Email is required.</string>

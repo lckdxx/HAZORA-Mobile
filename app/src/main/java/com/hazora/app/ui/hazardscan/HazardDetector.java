@@ -14,6 +14,17 @@ import java.util.Locale;
  * Uses YOLOv8 TFLite model for object detection and spatial grouping for body analysis.
  */
 public class HazardDetector {
+    private static final List<String> PROTRUDING_LABELS =
+            java.util.Arrays.asList("Safety Cap", "Potruding Hazard");
+    private static final List<String> MATERIAL_HANDLING_LABELS =
+            java.util.Arrays.asList("Organized", "Messy");
+    private static final List<String> SCAFFOLDING_LABELS = java.util.Arrays.asList(
+            "Standard Scaffolding Base",
+            "Diagonal Ridger Brace",
+            "Scaffolding",
+            "CrossRidge Brace",
+            "Standard Scaffolding Ladder",
+            "No Base");
 
     public enum ScanMode {
         AUTO,         // Adaptive: required PPE inferred from how much of the body is visible
@@ -24,6 +35,9 @@ public class HazardDetector {
 
     private final Context context;
     private YOLODetector yoloDetector;
+    private YOLODetector protrudingDetector;
+    private YOLODetector materialHandlingDetector;
+    private YOLODetector scaffoldingDetector;
     private PersonDetector personDetector;
     private ScanMode scanMode = ScanMode.AUTO;
     private boolean requireHelmet = true;
@@ -76,6 +90,12 @@ public class HazardDetector {
 
     private void setupDetector() {
         yoloDetector = new YOLODetector(context);
+        protrudingDetector = new YOLODetector(
+                context, "potruding.tflite", "potruding_labels.txt", PROTRUDING_LABELS, 0.25f);
+        materialHandlingDetector = new YOLODetector(
+                context, "material.tflite", "material_labels.txt", MATERIAL_HANDLING_LABELS, 0.25f);
+        scaffoldingDetector = new YOLODetector(
+                context, "scaffolding1.tflite", "scaffolding_labels.txt", SCAFFOLDING_LABELS, 0.35f);
         personDetector = new PersonDetector(context);
     }
 
@@ -219,8 +239,112 @@ public class HazardDetector {
             }
             results.add(new DetectionResult("Violation: No " + missingReq + " Detected", "Action: Equip all required PPE. " + advice, 0.0f, false, fullFrameRect, DetectionType.PERSON, "Critical"));
         }
+
+        DetectionResult ppeResult = results.get(0);
+        List<DetectionResult> additionalResults = new ArrayList<>();
+        boolean hasProtrudingHazard = false;
+        boolean hasMessyMaterial = false;
+        boolean hasScaffoldingHazard = false;
+        float highestConfidence = ppeResult.confidence;
+
+        if (protrudingDetector.isReady()) {
+            for (YOLODetector.Recognition recognition : protrudingDetector.detect(analysisBitmap)) {
+                boolean isSafetyCap = recognition.title.equalsIgnoreCase("Safety Cap");
+                hasProtrudingHazard |= !isSafetyCap;
+                highestConfidence = Math.max(highestConfidence, recognition.confidence);
+                additionalResults.add(new DetectionResult(
+                        recognition.title,
+                        isSafetyCap
+                                ? "Protective cap detected on protruding material."
+                                : "Protruding hazard detected. Keep clear and have the exposed material secured.",
+                        recognition.confidence,
+                        isSafetyCap,
+                        toRegion(recognition),
+                        DetectionType.HAZARD,
+                        isSafetyCap ? "Low" : "High"));
+            }
+        }
+
+        if (materialHandlingDetector.isReady()) {
+            for (YOLODetector.Recognition recognition : materialHandlingDetector.detect(analysisBitmap)) {
+                boolean isOrganized = recognition.title.equalsIgnoreCase("Organized");
+                hasMessyMaterial |= !isOrganized;
+                highestConfidence = Math.max(highestConfidence, recognition.confidence);
+                additionalResults.add(new DetectionResult(
+                        "Material Handling: " + recognition.title,
+                        isOrganized
+                                ? "Materials appear organized in the detected area."
+                                : "Materials appear messy. Organize and secure materials to keep walkways clear.",
+                        recognition.confidence,
+                        isOrganized,
+                        toRegion(recognition),
+                        DetectionType.HAZARD,
+                        isOrganized ? "Low" : "Medium"));
+            }
+        }
+
+        if (scaffoldingDetector.isReady()) {
+            for (YOLODetector.Recognition recognition : scaffoldingDetector.detect(analysisBitmap)) {
+                boolean isMissingBase = recognition.title.equalsIgnoreCase("No Base");
+                hasScaffoldingHazard |= isMissingBase;
+                highestConfidence = Math.max(highestConfidence, recognition.confidence);
+                additionalResults.add(new DetectionResult(
+                        "Scaffolding: " + recognition.title,
+                        isMissingBase
+                                ? "Scaffolding base is missing. Do not use the scaffold until a proper base is installed and inspected."
+                                : "Scaffolding component detected: " + recognition.title + ".",
+                        recognition.confidence,
+                        !isMissingBase,
+                        toRegion(recognition),
+                        DetectionType.HAZARD,
+                        isMissingBase ? "High" : "Low"));
+            }
+        }
+
+        if (!additionalResults.isEmpty()) {
+            StringBuilder details = new StringBuilder(ppeResult.description);
+            details.append("\n\nAdditional hazard scan:");
+            for (DetectionResult additionalResult : additionalResults) {
+                details.append("\n")
+                        .append(additionalResult.label)
+                        .append(" detected (")
+                        .append(Math.round(additionalResult.confidence * 100))
+                        .append("%). ")
+                        .append(additionalResult.description);
+            }
+
+            List<String> detectedHazards = new ArrayList<>();
+            if (hasProtrudingHazard) detectedHazards.add("Potruding Hazard");
+            if (hasMessyMaterial) detectedHazards.add("Messy Material Handling");
+            if (hasScaffoldingHazard) detectedHazards.add("Scaffolding Missing Base");
+            String summaryLabel = detectedHazards.isEmpty()
+                    ? ppeResult.label
+                    : "Hazards detected: " + String.join(", ", detectedHazards);
+            boolean isSecure = ppeResult.isSecure && detectedHazards.isEmpty();
+            String severity = hasProtrudingHazard || hasScaffoldingHazard
+                    ? "High"
+                    : hasMessyMaterial ? "Medium" : ppeResult.severity;
+            DetectionResult summary = new DetectionResult(
+                    summaryLabel,
+                    details.toString(),
+                    highestConfidence,
+                    isSecure,
+                    new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight()),
+                    DetectionType.PERSON,
+                    severity);
+            results.addAll(1, additionalResults);
+            results.set(0, summary);
+        }
         
         return results;
+    }
+
+    private Rect toRegion(YOLODetector.Recognition recognition) {
+        return new Rect(
+                (int) recognition.location.left,
+                (int) recognition.location.top,
+                (int) recognition.location.right,
+                (int) recognition.location.bottom);
     }
 
     private boolean isImageBlurry(Bitmap bitmap) {
@@ -391,7 +515,7 @@ public class HazardDetector {
         return output;
     }
 
-    public enum DetectionType { PERSON, FACE, HELMET }
+    public enum DetectionType { PERSON, FACE, HELMET, HAZARD }
 
     public static class DetectionResult {
         public final String label;

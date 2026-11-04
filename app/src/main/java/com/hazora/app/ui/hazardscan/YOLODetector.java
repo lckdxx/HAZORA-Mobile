@@ -31,9 +31,11 @@ public class YOLODetector {
     private final int inputWidth = 640;
     private final int inputHeight = 640;
     private final Context context;
+    private final String modelName;
+    private final String labelsAsset;
     // Harness-style reflective vests are smaller and less uniform than full
     // jackets. Keep a modest threshold and resolve detections per class.
-    private final float defaultConfidenceThreshold = 0.45f;
+    private final float defaultConfidenceThreshold;
     private final float vestConfidenceThreshold = 0.30f;
     private final float iouThreshold = 0.70f;
     // Some YOLOv8 TFLite exports expect NCHW ([1,3,H,W]) instead of NHWC ([1,H,W,3]).
@@ -41,35 +43,43 @@ public class YOLODetector {
     private boolean channelsFirst = false;
 
     public YOLODetector(Context context) {
+        this(context, "ppe_model.tflite", "yolo_labels.txt", Arrays.asList(
+                "Person",
+                "Safety Helmet",
+                "No Safety Helmet",
+                "Safety Vest",
+                "No Safety Vest",
+                "Safety Shoes",
+                "No Safety Shoes"), 0.45f);
+    }
+
+    public YOLODetector(Context context, String modelName, String labelsAsset,
+                        List<String> fallbackLabels, float confidenceThreshold) {
         this.context = context;
+        this.modelName = modelName;
+        this.labelsAsset = labelsAsset;
+        this.defaultConfidenceThreshold = confidenceThreshold;
         try {
-            if (assetExists("ppe_model.tflite")) {
-                tflite = new Interpreter(loadModelFile("ppe_model.tflite"));
+            if (assetExists(modelName)) {
+                tflite = new Interpreter(loadModelFile(modelName));
                 int[] inputShape = tflite.getInputTensor(0).shape();
                 // NCHW looks like [1, 3, 640, 640]; NHWC looks like [1, 640, 640, 3].
                 channelsFirst = inputShape.length == 4 && inputShape[1] == 3;
-                Log.d("YOLODetector", "ppe_model.tflite loaded successfully. Input shape: "
+                Log.d("YOLODetector", modelName + " loaded successfully. Input shape: "
                         + Arrays.toString(inputShape)
                         + " (channelsFirst=" + channelsFirst + ")"
                         + ", Output shape: " + Arrays.toString(tflite.getOutputTensor(0).shape()));
-                if (assetExists("yolo_labels.txt")) {
-                    labels = FileUtil.loadLabels(context, "yolo_labels.txt");
+                if (assetExists(labelsAsset)) {
+                    labels = FileUtil.loadLabels(context, labelsAsset);
                 }
                 // Fallback so class names always map correctly even if the label
                 // asset is missing or fails to load.
                 if (labels == null || labels.isEmpty()) {
-                    labels = Arrays.asList(
-                            "Person",
-                            "Safety Helmet",
-                            "No Safety Helmet",
-                            "Safety Vest",
-                            "No Safety Vest",
-                            "Safety Shoes",
-                            "No Safety Shoes");
+                    labels = fallbackLabels;
                 }
                 Log.d("AI_DEBUG", "Labels loaded: " + labels);
             } else {
-                Log.e("YOLODetector", "ppe_model.tflite asset not found!");
+                Log.e("YOLODetector", modelName + " asset not found!");
             }
         } catch (Exception e) {
             Log.e("YOLODetector", "Error initializing TFLite Interpreter", e);
@@ -215,6 +225,10 @@ public class YOLODetector {
         }
 
         return nms(recognitions);
+    }
+
+    public boolean isReady() {
+        return tflite != null;
     }
 
     private float confidenceThreshold(int classId) {

@@ -54,8 +54,9 @@ public class DetectionOverlayView extends View {
 
         boolean personOrFaceDetected = false;
         for (HazardDetector.DetectionResult result : results) {
-            if (result.type == HazardDetector.DetectionType.PERSON || 
-                result.type == HazardDetector.DetectionType.FACE) {
+            if (result.type == HazardDetector.DetectionType.PERSON ||
+                    result.type == HazardDetector.DetectionType.FACE ||
+                    result.type == HazardDetector.DetectionType.HAZARD) {
                 personOrFaceDetected = true;
                 break;
             }
@@ -76,6 +77,9 @@ public class DetectionOverlayView extends View {
             if (result.type == HazardDetector.DetectionType.PERSON) {
                 boxPaint.setColor(Color.CYAN);
                 boxPaint.setStrokeWidth(4f);
+            } else if (result.type == HazardDetector.DetectionType.HAZARD) {
+                boxPaint.setColor(result.isSecure ? Color.GREEN : Color.RED);
+                boxPaint.setStrokeWidth(8f);
             } else if (result.isSecure) {
                 boxPaint.setColor(Color.GREEN);
                 boxPaint.setStrokeWidth(8f);

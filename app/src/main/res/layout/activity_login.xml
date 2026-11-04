@@ -192,6 +192,28 @@
                 app:backgroundTint="@color/hazora_primary_blue" />
 
             <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:gravity="center"
+                android:text="@string/or_continue_with"
+                android:textColor="@color/hazora_text_secondary"
+                android:textSize="13sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_google_sign_in"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="12dp"
+                android:backgroundTint="@color/white"
+                android:text="@string/sign_in_with_google"
+                android:textColor="@color/hazora_text_primary"
+                android:textSize="15sp"
+                app:cornerRadius="16dp"
+                app:strokeColor="@color/hazora_text_secondary"
+                app:strokeWidth="1dp" />
+
+            <TextView
                 android:id="@+id/text_create_account"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

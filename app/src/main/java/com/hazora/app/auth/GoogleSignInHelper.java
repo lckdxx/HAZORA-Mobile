@@ -8,11 +8,16 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.hazora.app.R;
 
-/** Encapsulates Google Sign-In setup and result handling for authentication screens. */
+/**
+ * Encapsulates Google Sign-In setup and result handling for authentication
+ * screens.
+ */
 public class GoogleSignInHelper {
 
     public static final int GOOGLE_SIGN_IN_REQUEST_CODE = 401;
@@ -22,6 +27,7 @@ public class GoogleSignInHelper {
     public GoogleSignInHelper(Context context) {
         GoogleSignInOptions signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
+                .requestIdToken(context.getString(R.string.default_web_client_id))
                 .build();
         googleSignInClient = GoogleSignIn.getClient(context, signInOptions);
     }
@@ -32,6 +38,10 @@ public class GoogleSignInHelper {
     }
 
     public void handleResult(Intent data, GoogleSignInCallback callback) {
+        if (data == null) {
+            callback.onError(GoogleSignInStatusCodes.SIGN_IN_FAILED);
+            return;
+        }
         Task<GoogleSignInAccount> signInTask = GoogleSignIn.getSignedInAccountFromIntent(data);
         try {
             GoogleSignInAccount account = signInTask.getResult(ApiException.class);

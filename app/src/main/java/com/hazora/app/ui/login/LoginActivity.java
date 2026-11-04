@@ -7,12 +7,14 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseUser;
 import com.hazora.app.R;
 import com.hazora.app.auth.AuthRepository;
+import com.hazora.app.auth.GoogleSignInHelper;
 import com.hazora.app.auth.SessionManager;
 import com.hazora.app.ui.dashboard.DashboardActivity;
 import com.hazora.app.ui.forgotpassword.ForgotPasswordActivity;
@@ -26,7 +28,9 @@ public class LoginActivity extends AppCompatActivity {
     private TextInputEditText emailEditText;
     private TextInputEditText passwordEditText;
     private MaterialButton loginButton;
+    private MaterialButton googleSignInButton;
     private AuthRepository authRepository;
+    private GoogleSignInHelper googleSignInHelper;
     private SessionManager sessionManager;
 
     @Override
@@ -44,12 +48,15 @@ public class LoginActivity extends AppCompatActivity {
         emailEditText = findViewById(R.id.edit_text_email);
         passwordEditText = findViewById(R.id.edit_text_password);
         loginButton = findViewById(R.id.button_login);
+        googleSignInButton = findViewById(R.id.button_google_sign_in);
         authRepository = new AuthRepository();
+        googleSignInHelper = new GoogleSignInHelper(this);
         sessionManager = new SessionManager(this);
     }
 
     private void configureActions() {
         loginButton.setOnClickListener(view -> attemptLogin());
+        googleSignInButton.setOnClickListener(view -> googleSignInHelper.signIn(this));
         findViewById(R.id.text_forgot_password).setOnClickListener(view ->
                 startActivity(new Intent(this, ForgotPasswordActivity.class)));
         findViewById(R.id.text_create_account).setOnClickListener(view ->
@@ -83,6 +90,43 @@ public class LoginActivity extends AppCompatActivity {
     private void setLoginLoadingState(boolean isLoading) {
         loginButton.setEnabled(!isLoading);
         loginButton.setText(isLoading ? R.string.signing_in : R.string.sign_in);
+        googleSignInButton.setEnabled(!isLoading);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode != GoogleSignInHelper.GOOGLE_SIGN_IN_REQUEST_CODE) return;
+
+        googleSignInHelper.handleResult(data, new GoogleSignInHelper.GoogleSignInCallback() {
+            @Override
+            public void onSuccess(GoogleSignInAccount account) {
+                if (account.getIdToken() == null) {
+                    Toast.makeText(LoginActivity.this, R.string.google_sign_in_failed, Toast.LENGTH_LONG).show();
+                    return;
+                }
+                setLoginLoadingState(true);
+                authRepository.loginWithGoogle(account.getIdToken(), new AuthRepository.AuthenticationCallback() {
+                    @Override
+                    public void onSuccess(FirebaseUser user) {
+                        sessionManager.saveLoginState(true);
+                        sessionManager.saveUserEmail(user.getEmail() == null ? "" : user.getEmail());
+                        openDashboard();
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+                        setLoginLoadingState(false);
+                        Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onError(int statusCode) {
+                Toast.makeText(LoginActivity.this, R.string.google_sign_in_failed, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private boolean validateEmail() {

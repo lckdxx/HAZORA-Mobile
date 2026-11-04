@@ -8,6 +8,8 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.GoogleAuthProvider;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -39,6 +41,116 @@ public class AuthRepository {
                     ensureMobileAccess(user, callback);
                 })
                 .addOnFailureListener(error -> callback.onError("Sign-in failed. Check your email and password."));
+    }
+
+    public void loginWithGoogle(String idToken, AuthenticationCallback callback) {
+        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
+        firebaseAuth.signInWithCredential(credential)
+                .addOnSuccessListener(result -> {
+                    FirebaseUser user = result.getUser();
+                    if (user == null || !user.isEmailVerified()) {
+                        firebaseAuth.signOut();
+                        callback.onError("Could not verify the Google account. Please try again.");
+                        return;
+                    }
+
+                    firestore.collection("users").document(user.getUid()).get()
+                            .addOnSuccessListener(profile -> {
+                                if (profile.exists()) {
+                                    ensureMobileAccess(user, callback);
+                                    return;
+                                }
+                                checkExistingMobileAccount(user, callback);
+                            })
+                            .addOnFailureListener(error -> failGoogleSignIn(
+                                    callback,
+                                    "Could not load your account. Check your connection and try again."
+                            ));
+                })
+                .addOnFailureListener(error -> callback.onError(
+                        "Google sign-in failed. Check your connection and try again."
+                ));
+    }
+
+    private void checkExistingMobileAccount(FirebaseUser user, AuthenticationCallback callback) {
+        firestore.collection("mobile_accounts")
+                .whereEqualTo("authUid", user.getUid())
+                .limit(1)
+                .get()
+                .addOnSuccessListener(uidMatches -> {
+                    if (!uidMatches.isEmpty()) {
+                        ensureMobileAccess(user, callback);
+                        return;
+                    }
+
+                    String email = user.getEmail();
+                    if (email == null || email.isEmpty()) {
+                        createGooglePendingProfile(user, callback);
+                        return;
+                    }
+                    firestore.collection("mobile_accounts")
+                            .whereEqualTo("email", email)
+                            .limit(1)
+                            .get()
+                            .addOnSuccessListener(emailMatches -> {
+                                if (!emailMatches.isEmpty()) {
+                                    ensureMobileAccess(user, callback);
+                                } else {
+                                    createGooglePendingProfile(user, callback);
+                                }
+                            })
+                            .addOnFailureListener(error -> failGoogleSignIn(
+                                    callback,
+                                    "Could not verify mobile access. Check your connection and try again."
+                            ));
+                })
+                .addOnFailureListener(error -> failGoogleSignIn(
+                        callback,
+                        "Could not verify mobile access. Check your connection and try again."
+                ));
+    }
+
+    private void createGooglePendingProfile(FirebaseUser user, AuthenticationCallback callback) {
+        String email = user.getEmail();
+        String displayName = user.getDisplayName();
+        if (displayName == null || displayName.trim().isEmpty()) {
+            if (email == null) {
+                displayName = "Google user";
+            } else {
+                int emailSeparator = email.indexOf('@');
+                displayName = emailSeparator > 0 ? email.substring(0, emailSeparator) : email;
+            }
+        }
+
+        Map<String, Object> profile = new HashMap<>();
+        profile.put("fullName", displayName.trim());
+        profile.put("email", email == null ? "" : email.trim().toLowerCase(Locale.ROOT));
+        profile.put("phone", "");
+        profile.put("role", null);
+        profile.put("approvalStatus", "pending");
+        profile.put("cameraIP", null);
+        profile.put("cameras", Arrays.asList("", "", "", "", ""));
+        profile.put("createdAt", FieldValue.serverTimestamp());
+        profile.put("lastLogin", FieldValue.serverTimestamp());
+        profile.put("registrationSource", "mobile");
+
+        firestore.collection("users").document(user.getUid()).set(profile)
+                .addOnSuccessListener(unused -> {
+                    firebaseAuth.signOut();
+                    callback.onError(
+                            "Your Google account was submitted for admin approval. "
+                                    + "You can sign in after mobile access is enabled."
+                    );
+                })
+                .addOnFailureListener(error -> failGoogleSignIn(
+                        callback,
+                        "Could not submit your account for admin approval. Please try again."
+                ));
+    }
+
+    private void failGoogleSignIn(AuthenticationCallback callback, String message) {
+        firebaseAuth.signOut();
+        callback.onError(message);
     }
 
     public void registerWithEmail(String email, String password, String fullName, String phone,

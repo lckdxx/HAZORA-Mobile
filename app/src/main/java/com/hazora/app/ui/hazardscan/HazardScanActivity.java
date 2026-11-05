@@ -369,13 +369,13 @@ public class HazardScanActivity extends AppCompatActivity {
                         currentScanRequestId != scanRequestId) return;
                 HazardDetector.DetectionResult result = detections.isEmpty()
                         ? new HazardDetector.DetectionResult(
-                                "Violation: No PPE Detected",
-                                "Action: Equip all required PPE.",
+                                "No person or supported hazard detected",
+                                "Try capturing a clearer, closer image of a person or a supported hazard.",
                                 0f,
                                 false,
                                 new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight()),
-                                HazardDetector.DetectionType.PERSON,
-                                "Critical")
+                                HazardDetector.DetectionType.NONE,
+                                "Info")
                         : detections.get(0);
                 if (analyzingProgress != null) {
                     analyzingProgress.setIndeterminate(false);
@@ -410,6 +410,8 @@ public class HazardScanActivity extends AppCompatActivity {
         resultCard.setVisibility(View.VISIBLE);
         captureButton.setVisibility(View.VISIBLE);
         captureButton.setEnabled(true);
+        findViewById(R.id.btn_view_incident).setVisibility(
+                result.type == HazardDetector.DetectionType.NONE ? View.GONE : View.VISIBLE);
 
         lastCapturedBitmap = bitmap;
         ivCapturedResult.setImageBitmap(bitmap);
@@ -426,7 +428,17 @@ public class HazardScanActivity extends AppCompatActivity {
         }
 
         if (statusText != null && statusDot != null) {
-            if (result.isSecure) {
+            if (result.type == HazardDetector.DetectionType.NONE) {
+                statusText.setText("NO TARGET DETECTED");
+                statusText.setTextColor(ContextCompat.getColor(this, R.color.hazora_text_secondary));
+                statusDot.setBackgroundTintList(ColorStateList.valueOf(
+                        ContextCompat.getColor(this, R.color.hazora_text_secondary)));
+            } else if (result.type == HazardDetector.DetectionType.HAZARD && result.isSecure) {
+                statusText.setText("SCAN COMPLETE");
+                statusText.setTextColor(ContextCompat.getColor(this, R.color.hazora_primary_blue));
+                statusDot.setBackgroundTintList(ColorStateList.valueOf(
+                        ContextCompat.getColor(this, R.color.hazora_primary_blue)));
+            } else if (result.isSecure) {
                 statusText.setText("AREA SECURE");
                 statusText.setTextColor(ContextCompat.getColor(this, R.color.hazora_success));
                 statusDot.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.hazora_success)));
@@ -446,7 +458,11 @@ public class HazardScanActivity extends AppCompatActivity {
         lastCapturedBase64 = base64Image;
 
         // 2. Save directly to Firestore
-        saveIncidentToFirestore(result, base64Image);
+        if (result.type != HazardDetector.DetectionType.NONE) {
+            saveIncidentToFirestore(result, base64Image);
+        } else {
+            lastDetectedIncident = null;
+        }
     }
 
     private void showClassifyDialog(String base64Image) {

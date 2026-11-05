@@ -152,7 +152,7 @@ public class HazardDetector {
             }
         }
 
-        if (people.isEmpty() || !hasPpeRecognition(yoloRecognitions)) {
+        if (!people.isEmpty() && !hasPpeRecognition(yoloRecognitions)) {
             // Fall back to the full frame when person detection fails or PPE is
             // not found in the person crops, since crop bounds can omit PPE.
             yoloRecognitions = yoloDetector.detect(analysisBitmap);
@@ -235,7 +235,7 @@ public class HazardDetector {
                 String summary = String.format(Locale.getDefault(), "%d People: %d Secure, %d Violations", totalPeople, (totalPeople - violations), violations);
                 results.add(0, new DetectionResult(summary, "Please review individual assessments below.", 1.0f, violations == 0, fullFrameRect, DetectionType.PERSON, violations > 0 ? "High" : "Low"));
             }
-        } else {
+        } else if (!people.isEmpty()) {
             String advice = isBlurry ? "Hold the phone steady and move closer." : "Ensure the person is centered in the frame.";
             String missingReq;
             if (scanMode == ScanMode.AUTO) {
@@ -246,12 +246,12 @@ public class HazardDetector {
             results.add(new DetectionResult("Violation: No " + missingReq + " Detected", "Action: Equip all required PPE. " + advice, 0.0f, false, fullFrameRect, DetectionType.PERSON, "Critical"));
         }
 
-        DetectionResult ppeResult = results.get(0);
+        DetectionResult ppeResult = results.isEmpty() ? null : results.get(0);
         List<DetectionResult> additionalResults = new ArrayList<>();
         boolean hasProtrudingHazard = false;
         boolean hasMessyMaterial = false;
         boolean hasScaffoldingHazard = false;
-        float highestConfidence = ppeResult.confidence;
+        float highestConfidence = ppeResult == null ? 0f : ppeResult.confidence;
 
         if (protrudingDetector.isReady()) {
             for (YOLODetector.Recognition recognition : protrudingDetector.detect(analysisBitmap)) {
@@ -308,8 +308,11 @@ public class HazardDetector {
         }
 
         if (!additionalResults.isEmpty()) {
-            StringBuilder details = new StringBuilder(ppeResult.description);
-            details.append("\n\nAdditional hazard scan:");
+            StringBuilder details = new StringBuilder();
+            if (ppeResult != null) {
+                details.append(ppeResult.description).append("\n\n");
+            }
+            details.append("Additional hazard scan:");
             for (DetectionResult additionalResult : additionalResults) {
                 details.append("\n")
                         .append(additionalResult.label)
@@ -324,22 +327,30 @@ public class HazardDetector {
             if (hasMessyMaterial) detectedHazards.add("Messy Material Handling");
             if (hasScaffoldingHazard) detectedHazards.add("Scaffolding Missing Base");
             String summaryLabel = detectedHazards.isEmpty()
-                    ? ppeResult.label
+                    ? ppeResult != null ? ppeResult.label : additionalResults.get(0).label
                     : "Hazards detected: " + String.join(", ", detectedHazards);
-            boolean isSecure = ppeResult.isSecure && detectedHazards.isEmpty();
+            boolean isSecure = (ppeResult == null || ppeResult.isSecure)
+                    && detectedHazards.isEmpty()
+                    && additionalResults.stream().allMatch(result -> result.isSecure);
             String severity = hasProtrudingHazard || hasScaffoldingHazard
                     ? "High"
-                    : hasMessyMaterial ? "Medium" : ppeResult.severity;
+                    : hasMessyMaterial ? "Medium" : ppeResult == null ? "Low" : ppeResult.severity;
             DetectionResult summary = new DetectionResult(
                     summaryLabel,
                     details.toString(),
                     highestConfidence,
                     isSecure,
                     new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight()),
-                    DetectionType.PERSON,
+                    ppeResult == null ? DetectionType.HAZARD : DetectionType.PERSON,
                     severity);
-            results.addAll(1, additionalResults);
-            results.set(0, summary);
+            if (ppeResult == null) {
+                results.clear();
+                results.add(summary);
+                results.addAll(additionalResults);
+            } else {
+                results.addAll(1, additionalResults);
+                results.set(0, summary);
+            }
         }
         
         return results;
@@ -533,7 +544,7 @@ public class HazardDetector {
         return output;
     }
 
-    public enum DetectionType { PERSON, FACE, HELMET, HAZARD }
+    public enum DetectionType { NONE, PERSON, FACE, HELMET, HAZARD }
 
     public static class DetectionResult {
         public final String label;

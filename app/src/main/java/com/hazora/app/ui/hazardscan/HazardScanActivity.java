@@ -88,8 +88,8 @@ public class HazardScanActivity extends AppCompatActivity {
     private boolean isScanning = false;
     private int scanRequestId = 0;
     private long scanStartedAt;
-    private static final long MIN_ANALYSIS_MS = 2_000L;
-    private static final long MAX_ANALYSIS_MS = 2_000L;
+    private static final long MIN_ANALYSIS_MS = 1_000L;
+    private static final long MAX_ANALYSIS_MS = 1_000L;
     private String userAssignedSite = "Not assigned location site";
     private TextView tvSiteLocation;
     private Incident lastDetectedIncident;

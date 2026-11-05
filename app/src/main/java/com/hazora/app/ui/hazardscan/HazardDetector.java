@@ -101,6 +101,9 @@ public class HazardDetector {
 
     /** Analyzes image for multiple people and their PPE compliance using YOLO AI. */
     public List<DetectionResult> detect(Bitmap bitmap) {
+        if (yoloDetector == null || !yoloDetector.isReady()) {
+            throw new IllegalStateException("PPE detection model is not available.");
+        }
         List<DetectionResult> results = new ArrayList<>();
         
         // 1. Image Quality Check: Detect if the image is too blurry for AI
@@ -147,8 +150,11 @@ public class HazardDetector {
                     yoloRecognitions.add(new YOLODetector.Recognition(rec.title, rec.confidence, r));
                 }
             }
-        } else {
-            // Fallback: no person found, run YOLO on the whole frame.
+        }
+
+        if (people.isEmpty() || !hasPpeRecognition(yoloRecognitions)) {
+            // Fall back to the full frame when person detection fails or PPE is
+            // not found in the person crops, since crop bounds can omit PPE.
             yoloRecognitions = yoloDetector.detect(analysisBitmap);
         }
 
@@ -345,6 +351,18 @@ public class HazardDetector {
                 (int) recognition.location.top,
                 (int) recognition.location.right,
                 (int) recognition.location.bottom);
+    }
+
+    private boolean hasPpeRecognition(List<YOLODetector.Recognition> recognitions) {
+        for (YOLODetector.Recognition recognition : recognitions) {
+            String label = recognition.title.toLowerCase(Locale.ROOT);
+            if (label.contains("helmet") || label.contains("hard hat")
+                    || label.contains("vest") || label.contains("shoes")
+                    || label.contains("shoe")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean isImageBlurry(Bitmap bitmap) {

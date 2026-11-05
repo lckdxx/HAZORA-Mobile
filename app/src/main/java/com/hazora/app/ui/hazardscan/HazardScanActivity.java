@@ -87,9 +87,6 @@ public class HazardScanActivity extends AppCompatActivity {
     private HazardDetector hazardDetector;
     private boolean isScanning = false;
     private int scanRequestId = 0;
-    private long scanStartedAt;
-    private static final long MIN_ANALYSIS_MS = 1_000L;
-    private static final long MAX_ANALYSIS_MS = 1_000L;
     private String userAssignedSite = "Not assigned location site";
     private TextView tvSiteLocation;
     private Incident lastDetectedIncident;
@@ -345,15 +342,28 @@ public class HazardScanActivity extends AppCompatActivity {
 
         isScanning = true;
         int currentScanRequestId = ++scanRequestId;
-        scanStartedAt = System.currentTimeMillis();
         captureButton.setEnabled(false);
         analyzingLayout.setVisibility(View.VISIBLE);
-        if (analyzingProgress != null) analyzingProgress.setProgress(0);
-        setAnalyzingStatus("Preparing image analysis...");
-        updateAnalysisProgress();
+        if (analyzingProgress != null) analyzingProgress.setIndeterminate(true);
+        setAnalyzingStatus("Analyzing image...");
         resultCard.setVisibility(View.GONE);
         cameraExecutor.execute(() -> {
-            List<HazardDetector.DetectionResult> detections = hazardDetector.detect(bitmap);
+            List<HazardDetector.DetectionResult> detections;
+            try {
+                detections = hazardDetector.detect(bitmap);
+            } catch (RuntimeException error) {
+                Log.e("HazardScan", "Image analysis failed", error);
+                runOnUiThread(() -> {
+                    if (isFinishing() || isDestroyed() || !isScanning ||
+                            currentScanRequestId != scanRequestId) return;
+                    isScanning = false;
+                    analyzingLayout.setVisibility(View.GONE);
+                    if (analyzingProgress != null) analyzingProgress.setIndeterminate(false);
+                    captureButton.setEnabled(true);
+                    Toast.makeText(this, "Image analysis failed. Please try again.", Toast.LENGTH_LONG).show();
+                });
+                return;
+            }
             runOnUiThread(() -> {
                 if (isFinishing() || isDestroyed() || !isScanning ||
                         currentScanRequestId != scanRequestId) return;
@@ -367,17 +377,12 @@ public class HazardScanActivity extends AppCompatActivity {
                                 HazardDetector.DetectionType.PERSON,
                                 "Critical")
                         : detections.get(0);
-                setAnalyzingStatus("Reviewing PPE detections...");
-                long elapsed = System.currentTimeMillis() - scanStartedAt;
-                long delay = Math.max(0L, Math.min(MIN_ANALYSIS_MS - elapsed, MAX_ANALYSIS_MS - elapsed));
-                handler.postDelayed(() -> {
-                    if (isFinishing() || isDestroyed() || !isScanning ||
-                            currentScanRequestId != scanRequestId) return;
-                    handler.removeCallbacks(analysisProgressTick);
-                    if (analyzingProgress != null) analyzingProgress.setProgress(100);
-                    analyzingLayout.setVisibility(View.GONE);
-                    showDetectionResult(result, bitmap);
-                }, delay);
+                if (analyzingProgress != null) {
+                    analyzingProgress.setIndeterminate(false);
+                    analyzingProgress.setProgress(100);
+                }
+                analyzingLayout.setVisibility(View.GONE);
+                showDetectionResult(result, bitmap);
             });
         });
     }
@@ -387,9 +392,11 @@ public class HazardScanActivity extends AppCompatActivity {
 
         isScanning = false;
         scanRequestId++;
-        handler.removeCallbacks(analysisProgressTick);
         analyzingLayout.setVisibility(View.GONE);
-        if (analyzingProgress != null) analyzingProgress.setProgress(0);
+        if (analyzingProgress != null) {
+            analyzingProgress.setIndeterminate(false);
+            analyzingProgress.setProgress(0);
+        }
         captureButton.setEnabled(true);
         Toast.makeText(this, "Scan cancelled. The captured scene was not saved.", Toast.LENGTH_SHORT).show();
     }
@@ -397,27 +404,6 @@ public class HazardScanActivity extends AppCompatActivity {
     private void setAnalyzingStatus(String status) {
         if (analyzingStatus != null) analyzingStatus.setText(status);
     }
-
-    private void updateAnalysisProgress() {
-        handler.removeCallbacks(analysisProgressTick);
-        handler.post(analysisProgressTick);
-    }
-
-    private final Runnable analysisProgressTick = new Runnable() {
-        @Override
-        public void run() {
-            if (!isScanning || analyzingProgress == null) return;
-            long elapsed = System.currentTimeMillis() - scanStartedAt;
-            int progress = (int) Math.min(95L, elapsed * 100L / MIN_ANALYSIS_MS);
-            analyzingProgress.setProgress(progress);
-            if (elapsed < MIN_ANALYSIS_MS) {
-                setAnalyzingStatus("Analyzing image... " + (elapsed / 1000L) + " sec");
-            } else {
-                setAnalyzingStatus("Finalizing safety assessment...");
-            }
-            handler.postDelayed(this, 500L);
-        }
-    };
 
     private void showDetectionResult(HazardDetector.DetectionResult result, Bitmap bitmap) {
         isScanning = false;

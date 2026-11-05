@@ -48,7 +48,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.hazora.app.R;
-import com.hazora.app.notifications.HazardEmailSender;
 import com.hazora.app.ui.incidents.Incident;
 import com.hazora.app.ui.incidents.IncidentDetailActivity;
 
@@ -626,12 +625,6 @@ public class HazardScanActivity extends AppCompatActivity {
                 .addOnSuccessListener(doc -> {
                     Toast.makeText(this, "Incident saved to database", Toast.LENGTH_SHORT).show();
 
-                    FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-                    if (!result.isSecure && currentUser != null && currentUser.isEmailVerified()) {
-                        HazardEmailSender.send(currentUser, result.label, result.severity,
-                                userAssignedSite, "Mobile Capture");
-                    }
-                    
                     String time = new SimpleDateFormat("MMM dd, yyyy • hh:mm a", Locale.getDefault()).format(new Date());
                     lastDetectedIncident = new Incident(
                             doc.getId(),
